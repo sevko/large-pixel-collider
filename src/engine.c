@@ -1,11 +1,18 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "engine.h"
 #include "screen.h"
+#include "utils.h"
+
+void testRasterizeLine(){
+	drawLine(0, 0, IMAGE_HEIGHT - 1, IMAGE_WIDTH - 1);
+}
 
 int main(){
 	configureScreen();
-	drawPixel(10, 10, 0x00FF0000);
+	testRasterizeLine();
 	renderScreen();
 	quitScreen();
 	return EXIT_SUCCESS;
