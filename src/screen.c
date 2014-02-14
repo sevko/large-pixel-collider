@@ -34,6 +34,10 @@ void renderScreen(){
 	SDL_Flip(screen);
 }
 
+void clearScreen(){
+	SDL_FillRect(screen, NULL, 0x000000);
+}
+
 // close screen, perform memory cleanup
 void quitScreen(){
 	SDL_Delay(QUIT_DELAY);
