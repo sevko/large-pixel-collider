@@ -1,4 +1,6 @@
 #include <math.h>
+#include <SDL/SDL.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -8,7 +10,7 @@
 int points[NUM_MAX_POINTS][NUM_POINT_VARS], numPoints = 0;
 
 // Bresenham rasterize line with endpoints (x1, y1) and (x2, y2)
-void drawLine(int x1, int y1, int x2, int y2){
+void drawLine(int x1, int y1, int x2, int y2, Uint32 color){
 	int width = x2 - x1, height = y2 - y1;
 	int dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0;
 
@@ -22,6 +24,7 @@ void drawLine(int x1, int y1, int x2, int y2){
 	else if(height > 0)
 		dy1 = 1;
 
+	// unsigned arithmetic is faster
 	unsigned int longDist = abs(width);
 	unsigned int shortDist = abs(height);
 
@@ -39,7 +42,7 @@ void drawLine(int x1, int y1, int x2, int y2){
 
 	unsigned int numerator = longDist >> 1, pixel;
 	for(pixel = 0; pixel <= longDist; pixel++){
-		drawPixel(x1, y1, 0x00FF0000);
+		drawPixel(x1, y1, color);
 		numerator += shortDist;
 		if(numerator >= longDist){
 			numerator -= longDist;
@@ -56,7 +59,6 @@ void drawLine(int x1, int y1, int x2, int y2){
 // draw a polygon with numSides sides, a radius of radius pixels, centered on
 // (xOffset, yOffset)
 void drawPolygon(int numSides, int radius, int xOffset, int yOffset, int inclineAngle){
-
 	double angle = (PI * 2) / numSides;
 	double incline = (180 / PI) * inclineAngle;
 
@@ -69,7 +71,7 @@ void drawPolygon(int numSides, int radius, int xOffset, int yOffset, int incline
 		int y2 = yOffset + radius * sin(currAngle + angle);
 		currAngle += angle;
 
-		drawLine(x1, y1, x2, y2);
+		drawLine(x1, y1, x2, y2, TEST_COLOR);
 	}
 }
 
@@ -78,7 +80,7 @@ void drawPointsLines(){
 	int pair;
 	for(pair = 0; pair < numPoints; pair += 2)
 		drawLine(points[pair][0], points[pair][1],
-			points[pair + 1][0], points[pair + 1][1]);
+			points[pair + 1][0], points[pair + 1][1], TEST_COLOR);
 }
 
 // add point array with values (x, y, z, 1) to points matrix
