@@ -7,7 +7,12 @@
 #include "utils.h"
 
 void testRasterizeLine(){
-	drawLine(0, 0, IMAGE_HEIGHT - 1, IMAGE_WIDTH - 1);
+	int round, numRounds = 3000;
+	for(round = 0; round < numRounds; round++){
+		int line;
+		for(line = 0; line < IMAGE_HEIGHT; line++)
+			drawLine(0, line, IMAGE_WIDTH - 1, line);
+	}
 }
 
 int main(){
