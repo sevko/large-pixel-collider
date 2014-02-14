@@ -18,11 +18,11 @@ void drawLine(int x1, int y1, int x2, int y2){
 	else if(height > 0)
 		dy1 = 1;
 
-	int longDist = abs(width);
-	int shortDist = abs(height);
+	unsigned int longDist = abs(width);
+	unsigned int shortDist = abs(height);
 
 	if(longDist < shortDist){
-		int tempDist = longDist;
+		unsigned int tempDist = longDist;
 		longDist = shortDist;
 		shortDist = tempDist;
 
@@ -33,12 +33,11 @@ void drawLine(int x1, int y1, int x2, int y2){
 		dx2 = 0;
 	}
 
-	int numerator = longDist >> 1;
-	int pixel;
+	unsigned int numerator = longDist >> 1, pixel;
 	for(pixel = 0; pixel <= longDist; pixel++){
 		drawPixel(x1, y1, 0x00FF0000);
 		numerator += shortDist;
-		if(!(numerator < longDist)){
+		if(numerator >= longDist){
 			numerator -= longDist;
 			x1 += dx1;
 			y1 += dy1;
