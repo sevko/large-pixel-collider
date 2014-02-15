@@ -1,4 +1,4 @@
-FLAGS = -Ofast -Wall -Wextra -I .
+FLAGS = -O0 -g -Wall -Wextra -I .
 CC = gcc $(FLAGS)
 LIBS = -lSDL -lm
 

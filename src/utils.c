@@ -7,8 +7,6 @@
 #include "utils.h"
 #include "screen.h"
 
-int points[NUM_MAX_POINTS][NUM_POINT_VARS], numPoints = 0;
-
 // Bresenham rasterize line with endpoints (x1, y1) and (x2, y2)
 void drawLine(int x1, int y1, int x2, int y2, Uint32 color){
 	int width = x2 - x1, height = y2 - y1;
@@ -73,20 +71,4 @@ void drawPolygon(int numSides, int radius, int xOffset, int yOffset, int incline
 
 		drawLine(x1, y1, x2, y2, TEST_COLOR);
 	}
-}
-
-// draw lines using pairs of points in points matrix
-void drawPointsLines(){
-	int pair;
-	for(pair = 0; pair < numPoints; pair += 2)
-		drawLine(points[pair][0], points[pair][1],
-			points[pair + 1][0], points[pair + 1][1], TEST_COLOR);
-}
-
-// add point array with values (x, y, z, 1) to points matrix
-void addPoint(int x, int y, int z){
-	points[numPoints][0] = x;
-	points[numPoints][1] = y;
-	points[numPoints][2] = z;
-	points[numPoints++][3] = 1;
 }

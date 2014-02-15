@@ -4,11 +4,14 @@
 #include <unistd.h>
 
 #include "engine.h"
+#include "matrix.h"
 #include "screen.h"
 #include "utils.h"
 
+
 // function to test drawPolygon() and drawLine() functionality
 void testRasterizeLine(){
+	configureScreen();
 	int round;
 	for(round = 0; round < 100; round++){
 		clearScreen();
@@ -19,11 +22,33 @@ void testRasterizeLine(){
 			drawPolygon(3 + polygon, 10 + polygon * 10, xOffset, yOffset, round * 0.4);
 		renderScreen();
 	}
+
+	quitScreen();
+}
+
+void testMatrix(){
+	configureScreen();
+
+	Matrix_t * matrix = createMatrix();
+	printMatrix(matrix);
+
+	addPoint(matrix, 0, 0, 0);
+	addPoint(matrix, 100, 20, 0);
+	addPoint(matrix, 100, 20, 0);
+	addPoint(matrix, 50, 60, 0);
+	addPoint(matrix, 50, 60, 0);
+	addPoint(matrix, 0, 0, 0);
+
+	printMatrix(matrix);
+	drawMatrixLines(matrix);
+	freeMatrix(matrix);
+
+	renderScreen();
+	quitScreen();
 }
 
 int main(){
-	configureScreen();
+	testMatrix();
 	testRasterizeLine();
-	quitScreen();
 	return EXIT_SUCCESS;
 }
