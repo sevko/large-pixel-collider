@@ -1,3 +1,8 @@
+/*
+ *  engine.c is the graphic engine's main file; contains functions for testing
+ *  functionality and startup.
+*/
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,8 +13,8 @@
 #include "screen.h"
 #include "utils.h"
 
-
-// function to test drawPolygon() and drawLine() functionality
+// function to test drawPolygon() and drawLine() functionality; renders
+// concentric, rotating polygons with increasing radii and number of sides.
 void testRasterizeLine(){
 	configureScreen();
 	int round;
@@ -26,6 +31,7 @@ void testRasterizeLine(){
 	quitScreen();
 }
 
+// function to test matrix.c functions
 void testMatrix(){
 	configureScreen();
 
@@ -36,8 +42,7 @@ void testMatrix(){
 	addPoint(matrix, 100, 20, 0);
 	addPoint(matrix, 100, 20, 0);
 	addPoint(matrix, 50, 60, 0);
-	addPoint(matrix, 50, 60, 0);
-	addPoint(matrix, 0, 0, 0);
+	addEdge(matrix, 50, 60, 0, 0, 0, 0);
 
 	printMatrix(matrix);
 	drawMatrixLines(matrix);

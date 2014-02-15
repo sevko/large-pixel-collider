@@ -1,9 +1,14 @@
+/*
+ *  matrix.c contains functions for creating and manipulating Matrix_t structs.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "matrix.h"
 #include "utils.h"
 
+// alloc memory for Matrix_t, set all internal pointers
 Matrix_t * createMatrix(){
 	Matrix_t * matrix = malloc(sizeof(Matrix_t));
 	matrix->numPoints = 0;
@@ -13,6 +18,7 @@ Matrix_t * createMatrix(){
 	return matrix;
 }
 
+// free alloc'd Matrix_t and all internal pointers
 void freeMatrix(Matrix_t * matrix){
 	int varPtr;
 	for(varPtr = 0; varPtr < NUM_POINT_VARS; varPtr++)
@@ -20,6 +26,7 @@ void freeMatrix(Matrix_t * matrix){
 	free(matrix);
 }
 
+// expand each of a Matrix_t's points rows by 1
 void expandMatrix(Matrix_t * matrix){
 	matrix->numPoints++;
 	int varPtr;
@@ -28,6 +35,7 @@ void expandMatrix(Matrix_t * matrix){
 			sizeof(double) * matrix->numPoints);
 }
 
+// expand a Matrix_t, and add a point (x, y, z, 1) to its last column
 void addPoint(Matrix_t * matrix, int x, int y, int z){
 	expandMatrix(matrix);
 	matrix->points[0][matrix->numPoints - 1] = x;
@@ -36,11 +44,13 @@ void addPoint(Matrix_t * matrix, int x, int y, int z){
 	matrix->points[3][matrix->numPoints - 1] = 0;
 }
 
+// add two points (x1, y1, z1) and (x2, y2, z2) to a Matrix_t
 void addEdge(Matrix_t * matrix, int x1, int y1, int z1, int x2, int y2, int z2){
 	addPoint(matrix, x1, y1, z1);
 	addPoint(matrix, x2, y2, z2);
 }
 
+// iterate over a Matrix_t's points, and draw lines with adjacent pairs of points
 void drawMatrixLines(Matrix_t * matrix){
 	if(matrix->numPoints < 2)
 		return;
@@ -51,6 +61,7 @@ void drawMatrixLines(Matrix_t * matrix){
 			matrix->points[0][ptPair + 1], matrix->points[1][ptPair + 1], TEST_COLOR);
 }
 
+// print the values of each of a Matrix_t's points
 void printMatrix(Matrix_t * matrix){
 	int point;
 	for(point = 0; point < matrix->numPoints; point++)

@@ -1,3 +1,7 @@
+/*
+ *  utils.c contains processing functions to render lines and shapes.
+*/
+
 #include <math.h>
 #include <SDL/SDL.h>
 
