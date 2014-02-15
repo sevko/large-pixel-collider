@@ -1,6 +1,6 @@
 FLAGS = -O0 -g -Wall -Wextra -I .
 CC = gcc $(FLAGS)
-LIBS = -lSDL -lm
+LIBS = -lm $(shell sdl-config --libs)
 
 all: bin bin/engine
 
