@@ -18,17 +18,17 @@ void drawLine(int x1, int y1, int x2, int y2, Uint32 color){
 
 	if(width < 0)
 		dx1 = dx2 = -1;
-	else if(width > 0)
+	else
 		dx1 = dx2 = 1;
 
 	if(height < 0)
 		dy1 = -1;
-	else if(height > 0)
+	else
 		dy1 = 1;
 
 	// unsigned arithmetic is faster
-	unsigned int longDist = abs(width);
-	unsigned int shortDist = abs(height);
+	unsigned int longDist = ABS(width);
+	unsigned int shortDist = ABS(height);
 
 	if(longDist < shortDist){
 		unsigned int tempDist = longDist;
@@ -37,7 +37,7 @@ void drawLine(int x1, int y1, int x2, int y2, Uint32 color){
 
 		if(height < 0)
 			dy2 = -1;
-		else if(height > 0)
+		else
 			dy2 = 1;
 		dx2 = 0;
 	}
