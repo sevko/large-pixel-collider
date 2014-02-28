@@ -103,12 +103,32 @@ double dotProduct(Matrix_t * const m1, int row, Matrix_t * const m2, int col){
 		m1->points[row][3] * m2->points[3][col];
 }
 
-// Matrix_t * createIdentity(){
-// }
-// Matrix_t * createTranslation(double dx, double dy, double dz){
-// }
-// Matrix_t * createScale(double dx, double dy, double dz){
-// }
+Matrix_t * createIdentity(){
+	Matrix_t * identity = createMatrix();
+	addTransformPoint(identity, 1, 0, 0, 0);
+	addTransformPoint(identity, 0, 1, 0, 0);
+	addTransformPoint(identity, 0, 0, 1, 0);
+	addTransformPoint(identity, 0, 0, 0, 1);
+	return identity;
+}
+
+Matrix_t * createTranslation(double dx, double dy, double dz){
+	Matrix_t * translation = createIdentity();
+	translation->points[0][3] = dx;
+	translation->points[0][3] = dy;
+	translation->points[0][3] = dz;
+	return translation;
+}
+
+Matrix_t * createScale(double dx, double dy, double dz){
+	Matrix_t * scale = createMatrix();
+	addTransformPoint(scale, dx, 0, 0, 0);
+	addTransformPoint(scale, 0, dy, 0, 0);
+	addTransformPoint(scale, 0, 0, dz, 0);
+	addTransformPoint(scale, 0, 0, 0, 1);
+	return scale;
+}
+
 // Matrix_t * createRotation(int axis, double angle){
 // }
 
