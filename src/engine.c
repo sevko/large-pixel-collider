@@ -33,27 +33,24 @@ void testRasterizeLine(){
 
 // function to test matrix.c functions
 void testMatrix(){
-	configureScreen();
+	Matrix_t * m1 = createMatrix();
+	addTransformPoint(m1, 11, 12, 13, 92);
+	addTransformPoint(m1, 41, 12, 63, 12);
+	addTransformPoint(m1, 18, 52, 93, 58);
+	addTransformPoint(m1, 71, 22, 13, 94);
 
-	Matrix_t * matrix = createMatrix();
-	printMatrix(matrix);
+	Matrix_t * m2 = createMatrix();
+	addTransformPoint(m2, 11, 12, 13, 92);
+	addTransformPoint(m2, 18, 52, 93, 58);
+	addTransformPoint(m2, 71, 22, 13, 94);
+	addTransformPoint(m2, 41, 12, 63, 12);
 
-	addPoint(matrix, 0, 0, 0);
-	addPoint(matrix, 100, 20, 0);
-	addPoint(matrix, 100, 20, 0);
-	addPoint(matrix, 50, 60, 0);
-	addEdge(matrix, 50, 60, 0, 0, 0, 0);
-
-	printMatrix(matrix);
-	drawMatrixLines(matrix);
-	freeMatrix(matrix);
-
-	renderScreen();
-	quitScreen();
+	multiplyMatrix(m1, m2);
+	printMatrix(m2);
 }
 
 int main(){
 	testMatrix();
-	testRasterizeLine();
+	// testRasterizeLine();
 	return EXIT_SUCCESS;
 }
