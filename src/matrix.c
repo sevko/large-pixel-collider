@@ -35,17 +35,30 @@ void expandMatrix(Matrix_t * const matrix){
 			sizeof(double) * matrix->numPoints);
 }
 
-// expand a Matrix_t, and add a point (x, y, z, 1) to its last column
-void addPoint(Matrix_t * const matrix, int x, int y, int z){
+// expand a Matrix_t, and add a point (x, y, z, 1) to its last column;
+// used to add coordinate points to a matrix, which have a default w value of 1.
+void addPoint(Matrix_t * const matrix, double x, double y, double z){
 	expandMatrix(matrix);
 	matrix->points[0][matrix->numPoints - 1] = x;
 	matrix->points[1][matrix->numPoints - 1] = y;
 	matrix->points[2][matrix->numPoints - 1] = z;
-	matrix->points[3][matrix->numPoints - 1] = 0;
+	matrix->points[3][matrix->numPoints - 1] = 1;
+}
+
+// expand a Matrix_t, and add a point (x, y, z, w) to its last column;
+// used to add values to a transformation matrix, which has a variable w value.
+void addTransformPoint(Matrix_t * const matrix, double x, double y, double z,
+	double w){
+	expandMatrix(matrix);
+	matrix->points[0][matrix->numPoints - 1] = x;
+	matrix->points[1][matrix->numPoints - 1] = y;
+	matrix->points[2][matrix->numPoints - 1] = z;
+	matrix->points[3][matrix->numPoints - 1] = w;
 }
 
 // add two points (x1, y1, z1) and (x2, y2, z2) to a Matrix_t
-void addEdge(Matrix_t * const matrix, int x1, int y1, int z1, int x2, int y2, int z2){
+void addEdge(Matrix_t * const matrix, double x1, double y1, double z1,
+	double x2, double y2, double z2){;
 	addPoint(matrix, x1, y1, z1);
 	addPoint(matrix, x2, y2, z2);
 }

@@ -8,7 +8,18 @@ typedef struct {
 Matrix_t * createMatrix();
 void freeMatrix(Matrix_t * const matrix);
 void expandMatrix(Matrix_t * const matrix);
-void addPoint(Matrix_t * const matrix, int x, int y, int z);
-void addEdge(Matrix_t * const matrix, int x1, int y1, int z1, int x2, int y2, int z2);
+
+void addPoint(Matrix_t * const matrix, double x, double y, double z);
+void addTransformPoint(Matrix_t * const matrix, double x, double y, double z,
+	double w);
+void addEdge(Matrix_t * const matrix, double x1, double y1, double z1,
+	double x2, double y2, double z2);
 void drawMatrixLines(const Matrix_t * const matrix);
 void printMatrix(const Matrix_t * const matrix);
+
+void multiplyScalar(double scalar, Matrix_t * const matrix);
+void multiplyMatrix(Matrix_t * const m1, Matrix_t * const matrix);
+Matrix_t * createIdentity();
+Matrix_t * createTranslation(double dx, double dy, double dz);
+Matrix_t * createScale(double dx, double dy, double dz);
+Matrix_t * createRotation(int axis, double angle);

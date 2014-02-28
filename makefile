@@ -1,4 +1,4 @@
-FLAGS = -Ofast -Wall -Wextra -I .
+FLAGS = -Ofast -Wall -Wextra -Wunreachable-code -I .
 CC = gcc $(FLAGS)
 LIBS = -lm $(shell sdl-config --libs)
 
