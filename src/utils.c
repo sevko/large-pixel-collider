@@ -4,7 +4,7 @@
 
 #include <math.h>
 #include <SDL/SDL.h>
-
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -75,4 +75,13 @@ void drawPolygon(int numSides, int radius, int xOffset, int yOffset, int incline
 
 		drawLine(x1, y1, x2, y2, TEST_COLOR);
 	}
+}
+
+void setup(){
+	signal(SIGINT, sig_handler);
+}
+
+void sig_handler(int sig){
+	(void)sig;
+	exit(EXIT_SUCCESS);
 }

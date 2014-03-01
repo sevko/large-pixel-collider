@@ -77,14 +77,25 @@ void testMatrix(){
 	addPoint(m1, 130, 100, 0);
 	addPoint(m1, 130, 100, 30);
 
-	multiplyMatrix(createScale(1.5, 1.5, 1.5), m1);
+	Matrix_t * scale = createScale(1.5, 1.5, 1.5);
+	multiplyMatrix(scale, m1);
+	freeMatrix(scale);
+
 	int tick;
 	for(tick = 0; tick < 400; tick++){
 		clearScreen();
-		multiplyMatrix(createRotation(Y_AXIS, 0.2), m1);
-		multiplyMatrix(createRotation(Z_AXIS, 0.2), m1);
-		multiplyMatrix(createRotation(X_AXIS, 0.2), m1);
+		Matrix_t * xRot = createRotation(X_AXIS, 0.2);
+		Matrix_t * yRot = createRotation(Y_AXIS, 0.2);
+		Matrix_t * zRot = createRotation(Z_AXIS, 0.2);
+		multiplyMatrix(xRot, zRot);
+		multiplyMatrix(yRot, zRot);
+		multiplyMatrix(zRot, m1);
 		drawMatrixLines(m1);
+
+		freeMatrix(xRot);
+		freeMatrix(yRot);
+		freeMatrix(zRot);
+
 		renderScreen();
 		usleep(1e6 / 200);
 	}
@@ -94,7 +105,8 @@ void testMatrix(){
 }
 
 int main(){
+	setup();
 	testMatrix();
-	// testRasterizeLine();
+	testRasterizeLine();
 	return EXIT_SUCCESS;
 }
