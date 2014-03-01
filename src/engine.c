@@ -24,7 +24,8 @@ void testRasterizeLine(){
 		int xOffset = IMAGE_WIDTH / 2, yOffset = IMAGE_HEIGHT / 2;
 		int polygon, numPolygons = 20;
 		for(polygon = 0; polygon < numPolygons; polygon++)
-			drawPolygon(3 + polygon, 10 + polygon * 10, xOffset, yOffset, round * 0.4);
+			drawPolygon(3 + polygon, 10 + polygon * 10, xOffset, yOffset,
+				round * 0.4);
 		renderScreen();
 	}
 
@@ -38,48 +39,31 @@ void testMatrix(){
 	Matrix_t * m1 = createMatrix();
 	addPoint(m1, 100, 100, 0);
 	addPoint(m1, 100, 130, 0);
-
 	addPoint(m1, 100, 130, 0);
 	addPoint(m1, 130, 130, 0);
-
 	addPoint(m1, 130, 130, 0);
 	addPoint(m1, 130, 100, 0);
-
 	addPoint(m1, 130, 100, 0);
 	addPoint(m1, 100, 100, 0);
-
-
-
 	addPoint(m1, 100, 100, 30);
 	addPoint(m1, 100, 130, 30);
-
 	addPoint(m1, 100, 130, 30);
 	addPoint(m1, 130, 130, 30);
-
 	addPoint(m1, 130, 130, 30);
 	addPoint(m1, 130, 100, 30);
-
 	addPoint(m1, 130, 100, 30);
 	addPoint(m1, 100, 100, 30);
-
-
-
-
 	addPoint(m1, 100, 100, 0);
 	addPoint(m1, 100, 100, 30);
-
 	addPoint(m1, 100, 130, 0);
 	addPoint(m1, 100, 130, 30);
-
 	addPoint(m1, 130, 130, 0);
 	addPoint(m1, 130, 130, 30);
-
 	addPoint(m1, 130, 100, 0);
 	addPoint(m1, 130, 100, 30);
 
 	Matrix_t * scale = createScale(1.5, 1.5, 1.5);
 	multiplyMatrix(scale, m1);
-	freeMatrix(scale);
 
 	int tick;
 	for(tick = 0; tick < 400; tick++){
@@ -87,26 +71,23 @@ void testMatrix(){
 		Matrix_t * xRot = createRotation(X_AXIS, 0.2);
 		Matrix_t * yRot = createRotation(Y_AXIS, 0.2);
 		Matrix_t * zRot = createRotation(Z_AXIS, 0.2);
-		multiplyMatrix(xRot, zRot);
-		multiplyMatrix(yRot, zRot);
-		multiplyMatrix(zRot, m1);
+		multiplyMatrices(4, xRot, yRot, zRot, m1);
 		drawMatrixLines(m1);
 
-		freeMatrix(xRot);
-		freeMatrix(yRot);
-		freeMatrix(zRot);
+		freeMatrices(3, xRot, yRot, zRot);
 
 		renderScreen();
 		usleep(1e6 / 200);
 	}
 
-	freeMatrix(m1);
+
+	freeMatrices(2, m1, scale);
 	quitScreen();
 }
 
 int main(){
 	setup();
 	testMatrix();
-	testRasterizeLine();
+	// testRasterizeLine();
 	return EXIT_SUCCESS;
 }

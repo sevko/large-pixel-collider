@@ -4,6 +4,7 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 
 #include "matrix.h"
@@ -19,16 +20,28 @@ Matrix_t * createMatrix(){
 	Matrix_t * const matrix = malloc(sizeof(Matrix_t));
 	matrix->numPoints = 0;
 
-	matrix->points[0] = matrix->points[1] = matrix->points[2] = matrix->points[3] = NULL;
+	matrix->points[0] = matrix->points[1] = NULL;
+	matrix->points[2] = matrix->points[3] = NULL;
 
 	return matrix;
 }
 
 // free alloc'd Matrix_t and all internal pointers
-void freeMatrix(Matrix_t * const matrix){
-	int varPtr;
-	for(varPtr = 0; varPtr < NUM_POINT_VARS; varPtr++)
-		free(matrix->points[varPtr]);
+void freeMatrices(int numArgs, ...){
+	va_list matrices;
+	va_start(matrices, numArgs);
+
+	int arg;
+	for(arg = 0; arg < numArgs; arg++)
+		freeMatrix(va_arg(matrices, Matrix_t *));
+	va_end(matrices);
+}
+
+void freeMatrix(Matrix_t * matrix){
+	free(matrix->points[0]);
+	free(matrix->points[1]);
+	free(matrix->points[2]);
+	free(matrix->points[3]);
 	free(matrix);
 }
 
@@ -60,7 +73,7 @@ void addEdge(Matrix_t * const matrix, double x1, double y1, double z1,
 	addPoint(matrix, x2, y2, z2);
 }
 
-// iterate over a Matrix_t's points, and draw lines with adjacent pairs of points
+// iterate over a Matrix_t's points, and draw lines with adjacent point pairs
 void drawMatrixLines(const Matrix_t * const matrix){
 	if(matrix->numPoints < 2)
 		return;
@@ -68,7 +81,8 @@ void drawMatrixLines(const Matrix_t * const matrix){
 	int ptPair;
 	for(ptPair = 0; ptPair < matrix->numPoints; ptPair += 2)
 		drawLine(matrix->points[0][ptPair], matrix->points[1][ptPair],
-			matrix->points[0][ptPair + 1], matrix->points[1][ptPair + 1], TEST_COLOR);
+			matrix->points[0][ptPair + 1], matrix->points[1][ptPair + 1],
+				TEST_COLOR);
 }
 
 void multiplyScalar(double scalar, Matrix_t * const matrix){
@@ -76,6 +90,20 @@ void multiplyScalar(double scalar, Matrix_t * const matrix){
 	for(row = 0; row < 4; row++)
 		for(col = 0; col < matrix->numPoints; col++)
 			matrix->points[row][col] *= scalar;
+}
+
+void multiplyMatrices(int numArgs, ...){
+	va_list matrices;
+	va_start(matrices, numArgs);
+
+	int arg;
+	Matrix_t * prevMatrix = va_arg(matrices, Matrix_t *);
+	for(arg = 0; arg < numArgs - 1; arg++){
+		Matrix_t * newMatrix = va_arg(matrices, Matrix_t *);
+		multiplyMatrix(prevMatrix, newMatrix);
+		prevMatrix = newMatrix;
+	}
+	va_end(matrices);
 }
 
 void multiplyMatrix(Matrix_t * const m1, Matrix_t * const m2){
