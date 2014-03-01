@@ -36,16 +36,57 @@ void testMatrix(){
 	configureScreen();
 
 	Matrix_t * m1 = createMatrix();
-	addPoint(m1, 10, 10, 20);
-	addPoint(m1, 10, 90, 20);
+	addPoint(m1, 100, 100, 0);
+	addPoint(m1, 100, 130, 0);
 
+	addPoint(m1, 100, 130, 0);
+	addPoint(m1, 130, 130, 0);
+
+	addPoint(m1, 130, 130, 0);
+	addPoint(m1, 130, 100, 0);
+
+	addPoint(m1, 130, 100, 0);
+	addPoint(m1, 100, 100, 0);
+
+
+
+	addPoint(m1, 100, 100, 30);
+	addPoint(m1, 100, 130, 30);
+
+	addPoint(m1, 100, 130, 30);
+	addPoint(m1, 130, 130, 30);
+
+	addPoint(m1, 130, 130, 30);
+	addPoint(m1, 130, 100, 30);
+
+	addPoint(m1, 130, 100, 30);
+	addPoint(m1, 100, 100, 30);
+
+
+
+
+	addPoint(m1, 100, 100, 0);
+	addPoint(m1, 100, 100, 30);
+
+	addPoint(m1, 100, 130, 0);
+	addPoint(m1, 100, 130, 30);
+
+	addPoint(m1, 130, 130, 0);
+	addPoint(m1, 130, 130, 30);
+
+	addPoint(m1, 130, 100, 0);
+	addPoint(m1, 130, 100, 30);
+
+	multiplyMatrix(createScale(1.5, 1.5, 1.5), m1);
 	int tick;
-	for(tick = 0; tick < 100; tick++){
+	for(tick = 0; tick < 400; tick++){
 		clearScreen();
-		multiplyMatrix(createTranslation(0, 2, 2), m1);
+		multiplyMatrix(createRotation(Y_AXIS, 0.2), m1);
+		multiplyMatrix(createRotation(Z_AXIS, 0.2), m1);
+		multiplyMatrix(createRotation(X_AXIS, 0.2), m1);
 		drawMatrixLines(m1);
 		renderScreen();
-		usleep(1e6 / 60);
+		usleep(1e6 / 200);
 	}
 
 	freeMatrix(m1);

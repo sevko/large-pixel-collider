@@ -1,8 +1,6 @@
 #include <SDL/SDL.h>
 
-#define PI 3.14159265359
 #define TEST_COLOR (Uint32)0x00FF0000
-
 #define ABS(val) (val > 0?val:-val)
 
 void drawLine(int x1, int y1, int x2, int y2, Uint32 color);

@@ -24,6 +24,9 @@ void configureScreen(){
 
 // plot pixel to screen
 void drawPixel(int x, int y, Uint32 pixel) {
+	if(x < 0 || IMAGE_WIDTH - 1 < x || y < 0 || IMAGE_HEIGHT - 1 < y)
+		return;
+
 	Uint8 * pixelAddress = (Uint8 * )screen->pixels + y * screen->pitch +
 		x * screen->format->BytesPerPixel;
 	*(Uint32 *)pixelAddress = pixel;

@@ -2,6 +2,7 @@
  *  matrix.c contains functions for creating and manipulating Matrix_t structs.
 */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -115,8 +116,8 @@ Matrix_t * createIdentity(){
 Matrix_t * createTranslation(double dx, double dy, double dz){
 	Matrix_t * translation = createIdentity();
 	translation->points[0][3] = dx;
-	translation->points[0][3] = dy;
-	translation->points[0][3] = dz;
+	translation->points[1][3] = dy;
+	translation->points[2][3] = dz;
 	return translation;
 }
 
@@ -129,8 +130,32 @@ Matrix_t * createScale(double dx, double dy, double dz){
 	return scale;
 }
 
-// Matrix_t * createRotation(int axis, double angle){
-// }
+Matrix_t * createRotation(int axis, double angle){
+	Matrix_t * rotation = createMatrix();
+
+	double radAngle = angle * RAD;
+	double sinA = sin(radAngle), cosA = cos(radAngle);
+	if(axis == X_AXIS){
+		addTransformPoint(rotation, 1, 0, 0, 0);
+		addTransformPoint(rotation, 0, cosA, sinA, 0);
+		addTransformPoint(rotation, 0, -sinA, cosA, 0);
+	}
+
+	else if(axis == Y_AXIS){
+		addTransformPoint(rotation, cosA, 0, sinA, 0);
+		addTransformPoint(rotation, 0, 1, 0, 0);
+		addTransformPoint(rotation, -sinA, 0, cosA, 0);
+	}
+
+	else if(axis == Z_AXIS){
+		addTransformPoint(rotation, cosA, sinA, 0, 0);
+		addTransformPoint(rotation, -sinA, cosA, 0, 0);
+		addTransformPoint(rotation, 0, 0, 1, 0);
+	}
+
+	addTransformPoint(rotation, 0, 0, 0, 1);
+	return rotation;
+}
 
 // print the formatted values of each of a Matrix_t's points
 void printPointMatrix(const Matrix_t * const matrix){

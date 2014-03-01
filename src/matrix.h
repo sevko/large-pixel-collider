@@ -1,4 +1,8 @@
 #define NUM_POINT_VARS 4
+#define X_AXIS 0
+#define Y_AXIS 1
+#define Z_AXIS 2
+#define RAD (M_PI / 180)
 
 typedef struct {
 	double * points[NUM_POINT_VARS];

@@ -61,11 +61,11 @@ void drawLine(int x1, int y1, int x2, int y2, Uint32 color){
 // draw a polygon with numSides sides, a radius of radius pixels, centered on
 // (xOffset, yOffset)
 void drawPolygon(int numSides, int radius, int xOffset, int yOffset, int inclineAngle){
-	double angle = (PI * 2) / numSides;
-	double incline = (180 / PI) * inclineAngle;
+	double angle = (M_PI * 2) / numSides;
+	double incline = (180 / M_PI) * inclineAngle;
 
 	int side;
-	double currAngle = PI * 0.5 - angle / 2 - incline;
+	double currAngle = M_PI * 0.5 - angle / 2 - incline;
 	for(side = 0; side < numSides; side++){
 		int x1 = xOffset + radius * cos(currAngle);
 		int x2 = xOffset + radius * cos(currAngle + angle);
