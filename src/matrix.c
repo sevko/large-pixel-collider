@@ -9,6 +9,11 @@
 #include "matrix.h"
 #include "utils.h"
 
+static void expandMatrix(Matrix_t * const matrix);
+static double dotProduct(Matrix_t * const m1, int row, Matrix_t * const m2,
+	int col);
+static Matrix_t * createIdentity();
+
 // alloc memory for Matrix_t, set all internal pointers
 Matrix_t * createMatrix(){
 	Matrix_t * const matrix = malloc(sizeof(Matrix_t));
@@ -25,15 +30,6 @@ void freeMatrix(Matrix_t * const matrix){
 	for(varPtr = 0; varPtr < NUM_POINT_VARS; varPtr++)
 		free(matrix->points[varPtr]);
 	free(matrix);
-}
-
-// expand each of a Matrix_t's points rows by 1
-void expandMatrix(Matrix_t * const matrix){
-	matrix->numPoints++;
-	int varPtr;
-	for(varPtr = 0; varPtr < NUM_POINT_VARS; varPtr++)
-		matrix->points[varPtr] = realloc(matrix->points[varPtr],
-			sizeof(double) * matrix->numPoints);
 }
 
 // expand a Matrix_t, and add a point (x, y, z, 1) to its last column;
@@ -95,22 +91,6 @@ void multiplyMatrix(Matrix_t * const m1, Matrix_t * const m2){
 		m2->points[2][col] = dot2;
 		m2->points[3][col] = dot3;
 	}
-}
-
-double dotProduct(Matrix_t * const m1, int row, Matrix_t * const m2, int col){
-	return m1->points[row][0] * m2->points[0][col] +
-		m1->points[row][1] * m2->points[1][col] +
-		m1->points[row][2] * m2->points[2][col] +
-		m1->points[row][3] * m2->points[3][col];
-}
-
-Matrix_t * createIdentity(){
-	Matrix_t * identity = createMatrix();
-	addTransformPoint(identity, 1, 0, 0, 0);
-	addTransformPoint(identity, 0, 1, 0, 0);
-	addTransformPoint(identity, 0, 0, 1, 0);
-	addTransformPoint(identity, 0, 0, 0, 1);
-	return identity;
 }
 
 Matrix_t * createTranslation(double dx, double dy, double dz){
@@ -179,4 +159,30 @@ void printMatrix(const Matrix_t * const matrix){
 			printf("\t%d,", (int)matrix->points[row][col]);
 		puts("\t|");
 	}
+}
+
+// expand each of a Matrix_t's points rows by 1
+static void expandMatrix(Matrix_t * const matrix){
+	matrix->numPoints++;
+	int varPtr;
+	for(varPtr = 0; varPtr < NUM_POINT_VARS; varPtr++)
+		matrix->points[varPtr] = realloc(matrix->points[varPtr],
+			sizeof(double) * matrix->numPoints);
+}
+
+static double dotProduct(Matrix_t * const m1, int row, Matrix_t * const m2,
+	int col){
+	return m1->points[row][0] * m2->points[0][col] +
+		m1->points[row][1] * m2->points[1][col] +
+		m1->points[row][2] * m2->points[2][col] +
+		m1->points[row][3] * m2->points[3][col];
+}
+
+static Matrix_t * createIdentity(){
+	Matrix_t * identity = createMatrix();
+	addTransformPoint(identity, 1, 0, 0, 0);
+	addTransformPoint(identity, 0, 1, 0, 0);
+	addTransformPoint(identity, 0, 0, 1, 0);
+	addTransformPoint(identity, 0, 0, 0, 1);
+	return identity;
 }

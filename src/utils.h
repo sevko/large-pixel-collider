@@ -6,4 +6,3 @@
 void drawLine(int x1, int y1, int x2, int y2, Uint32 color);
 void drawPolygon(int numSides, int radius, int xOffset, int yOffset, int inclineAngle);
 void setup();
-void sig_handler(int sig);

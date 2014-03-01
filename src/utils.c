@@ -11,6 +11,8 @@
 #include "utils.h"
 #include "screen.h"
 
+static void sig_handler(int sig);
+
 // Bresenham rasterize line with endpoints (x1, y1) and (x2, y2)
 void drawLine(int x1, int y1, int x2, int y2, Uint32 color){
 	int width = x2 - x1, height = y2 - y1;
@@ -77,11 +79,11 @@ void drawPolygon(int numSides, int radius, int xOffset, int yOffset, int incline
 	}
 }
 
-void setup(){
-	signal(SIGINT, sig_handler);
-}
-
-void sig_handler(int sig){
+static void sig_handler(int sig){
 	(void)sig;
 	exit(EXIT_SUCCESS);
+}
+
+void setup(){
+	signal(SIGINT, sig_handler);
 }
