@@ -10,6 +10,13 @@
 #include "matrix.h"
 #include "utils.h"
 
+#define RAD (M_PI / 180)
+
+struct Matrix {
+	double * points[4];
+	int numPoints;
+};
+
 static void expandMatrix(Matrix_t * const matrix);
 static double dotProduct(Matrix_t * const m1, int row, Matrix_t * const m2,
 	int col);
@@ -193,7 +200,7 @@ void printMatrix(const Matrix_t * const matrix){
 static void expandMatrix(Matrix_t * const matrix){
 	matrix->numPoints++;
 	int varPtr;
-	for(varPtr = 0; varPtr < NUM_POINT_VARS; varPtr++)
+	for(varPtr = 0; varPtr < 4; varPtr++)
 		matrix->points[varPtr] = realloc(matrix->points[varPtr],
 			sizeof(double) * matrix->numPoints);
 }

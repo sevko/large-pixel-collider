@@ -1,18 +1,12 @@
-#define NUM_POINT_VARS 4
 #define X_AXIS 0
 #define Y_AXIS 1
 #define Z_AXIS 2
-#define RAD (M_PI / 180)
 
-typedef struct {
-	double * points[NUM_POINT_VARS];
-	int numPoints;
-} Matrix_t;
+typedef struct Matrix Matrix_t;
 
 Matrix_t * createMatrix();
 void freeMatrices(int numArgs, ...);
 void freeMatrix(Matrix_t * matrix);
-void expandMatrix(Matrix_t * const matrix);
 void addPoint(Matrix_t * const matrix, double x, double y, double z);
 void addTransformPoint(Matrix_t * const matrix, double x, double y, double z,
 	double w);

@@ -11,6 +11,8 @@
 #include "utils.h"
 #include "screen.h"
 
+#define ABS(val) (val > 0?val:-val)
+
 static void sig_handler(int sig);
 
 // Bresenham rasterize line with endpoints (x1, y1) and (x2, y2)
