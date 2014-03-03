@@ -20,7 +20,6 @@ struct Matrix {
 static void expandMatrix(Matrix_t * const matrix);
 static double dotProduct(Matrix_t * const m1, int row, Matrix_t * const m2,
 	int col);
-static Matrix_t * createIdentity();
 
 // alloc memory for Matrix_t, set all internal pointers
 Matrix_t * createMatrix(){
@@ -128,6 +127,15 @@ void multiplyMatrix(Matrix_t * const m1, Matrix_t * const m2){
 	}
 }
 
+Matrix_t * createIdentity(){
+	Matrix_t * identity = createMatrix();
+	addTransformPoint(identity, 1, 0, 0, 0);
+	addTransformPoint(identity, 0, 1, 0, 0);
+	addTransformPoint(identity, 0, 0, 1, 0);
+	addTransformPoint(identity, 0, 0, 0, 1);
+	return identity;
+}
+
 Matrix_t * createTranslation(double dx, double dy, double dz){
 	Matrix_t * translation = createIdentity();
 	translation->points[0][3] = dx;
@@ -211,13 +219,4 @@ static double dotProduct(Matrix_t * const m1, int row, Matrix_t * const m2,
 		m1->points[row][1] * m2->points[1][col] +
 		m1->points[row][2] * m2->points[2][col] +
 		m1->points[row][3] * m2->points[3][col];
-}
-
-static Matrix_t * createIdentity(){
-	Matrix_t * identity = createMatrix();
-	addTransformPoint(identity, 1, 0, 0, 0);
-	addTransformPoint(identity, 0, 1, 0, 0);
-	addTransformPoint(identity, 0, 0, 1, 0);
-	addTransformPoint(identity, 0, 0, 0, 1);
-	return identity;
 }

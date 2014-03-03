@@ -16,6 +16,7 @@ void drawMatrixLines(const Matrix_t * const matrix);
 void multiplyScalar(double scalar, Matrix_t * const matrix);
 void multiplyMatrices(int numArgs, ...);
 void multiplyMatrix(Matrix_t * const m1, Matrix_t * const matrix);
+Matrix_t * createIdentity();
 Matrix_t * createTranslation(double dx, double dy, double dz);
 Matrix_t * createScale(double dx, double dy, double dz);
 Matrix_t * createRotation(int axis, double angle);
