@@ -10,7 +10,7 @@ run: all
 clean:
 	if [ -d "bin" ]; then rm -rf bin; fi
 
-bin/engine: bin/engine.o bin/utils.o bin/screen.o bin/matrix.o
+bin/engine: bin/engine.o bin/utils.o bin/matrix.o bin/screen.o bin/parser.o
 	$(CC) -o $@ $^ $(LIBS)
 
 bin/engine.o: src/engine.c
@@ -23,6 +23,9 @@ bin/matrix.o: src/matrix.c
 	$(CC) -o $@ -c $^
 
 bin/screen.o: src/screen.c
+	$(CC) -o $@ -c $^
+
+bin/parser.o: src/parser.c
 	$(CC) -o $@ -c $^
 
 bin:
