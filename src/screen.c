@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "engine.h"
+#include "globals.h"
 #include "screen.h"
 
 SDL_Surface * screen;
@@ -45,4 +45,8 @@ void clearScreen(){
 void quitScreen(){
 	SDL_Delay(QUIT_DELAY);
 	SDL_Quit();
+}
+
+int writeScreen(const char * const filename){
+	return SDL_SaveBMP(screen, filename);
 }

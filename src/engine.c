@@ -8,8 +8,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "engine.h"
+#include "globals.h"
 #include "matrix.h"
+#include "parser.h"
 #include "screen.h"
 #include "utils.h"
 
@@ -80,14 +81,11 @@ void testMatrix(){
 		usleep(1e6 / 200);
 	}
 
-
 	freeMatrices(2, m1, scale);
 	quitScreen();
 }
 
 int main(){
-	setup();
-	testMatrix();
-	// testRasterizeLine();
+	evaluateScript(readScriptFile("scripts/script.gsc"));
 	return EXIT_SUCCESS;
 }

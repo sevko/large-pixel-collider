@@ -7,10 +7,13 @@
 #include "screen.h"
 
 #define MAX_SCRIPT_LINE_LENGTH 100      // hard-coded, but a reasonable limit
+
+// status of evaluation of a single command
 #define VALID_EVAL 0
 #define INVALID_CMD 1
 #define INVALID_ARGS 2
 
+// chars indicating commands in a script file
 #define COMMENT_CHAR '#'
 #define ADD_LINE 'l'
 #define SET_IDENTITY 'i'
@@ -25,15 +28,15 @@
 
 // read, and return the contents of filePath in a char **
 Script_t * readScriptFile(char * filePath){
-	char ** fileBuffer = malloc(sizeof(char *));
-	fileBuffer[0] = NULL;
-	int line = 0;
-
 	FILE * file = fopen(filePath, "r");
 	if(file == NULL){
 		ERROR("Failed to open file \"%s\"", filePath);
 		exit(EXIT_FAILURE);
 	}
+
+	char ** fileBuffer = malloc(sizeof(char *));
+	fileBuffer[0] = NULL;
+	int line = 0;
 
 	char * lineBuffer = malloc(MAX_SCRIPT_LINE_LENGTH);
 	while(fgets(lineBuffer, MAX_SCRIPT_LINE_LENGTH, file) != NULL){
@@ -52,8 +55,9 @@ Script_t * readScriptFile(char * filePath){
 	return script;
 }
 
+// evaluate each of the commands in the Script_t
 void evaluateScript(Script_t * script){
-	// configureScreen();
+	configureScreen();
 	Matrix_t * points = createMatrix(), * transform = createIdentity();
 
 	int line;
@@ -80,9 +84,13 @@ void evaluateScript(Script_t * script){
 	}
 
 	freeScript(script);
-	// quitScreen();
+	freeMatrices(2, points, transform);
+	quitScreen();
 }
 
+// evaluate the command located at command[0], accounting for the arguments,
+// if any are required, at command[1], and manipulate the Matrix_ts points and
+// transform accordingly; report back status of command evaluation.
 int evaluateCommand(char ** command, Matrix_t * points, Matrix_t ** transform){
 	if(2 < strlen(command[0]))
 		return INVALID_CMD;
@@ -98,7 +106,7 @@ int evaluateCommand(char ** command, Matrix_t * points, Matrix_t ** transform){
 	}
 
 	else if(cmdChar == SET_IDENTITY){
-		free(*transform);
+		freeMatrix(*transform);
 		*transform = createIdentity();
 	}
 
@@ -143,7 +151,7 @@ int evaluateCommand(char ** command, Matrix_t * points, Matrix_t ** transform){
 		}
 
 		multiplyMatrix(rotation, *transform);
-		free(rotation);
+		freeMatrix(rotation);
 	}
 
 	else if(cmdChar == APPLY_TRANSFORM){
@@ -156,9 +164,16 @@ int evaluateCommand(char ** command, Matrix_t * points, Matrix_t ** transform){
 		renderScreen();
 	}
 
-	// else if(cmdChar == SAVE_FRAME){
-
-	// }
+	else if(cmdChar == SAVE_FRAME){
+		clearScreen();
+		drawMatrixLines(points);
+		renderScreen();
+		command[1][strlen(command[1]) - 1] = '\0';  // remove newline
+		if(writeScreen(command[1]) == -1){
+			ERROR("Failed to write file: %s.", command[1]);
+			return INVALID_ARGS;
+		}
+	}
 
 	else
 		return INVALID_CMD;
@@ -166,11 +181,14 @@ int evaluateCommand(char ** command, Matrix_t * points, Matrix_t ** transform){
 	return VALID_EVAL;
 }
 
+// indicate whether or not a char's corresponding command requires arguments
 int argsRequired(char cmd){
 	return cmd == ADD_LINE || cmd == CREATE_SCALE ||
 		cmd == CREATE_TRANSLATION || cmd == CREATE_ROT_X ||
 		cmd == CREATE_ROT_Y || cmd == CREATE_ROT_Z || cmd == SAVE_FRAME;
 }
+
+// deallocate a Script_t and all internal pointers
 void freeScript(Script_t * script){
 	int line;
 	for(line = 0; line < script->numLines; line++)
