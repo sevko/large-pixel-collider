@@ -40,10 +40,11 @@ Script_t * readScriptFile(char * filePath){
 
 	char * lineBuffer = malloc(MAX_SCRIPT_LINE_LENGTH);
 	while(fgets(lineBuffer, MAX_SCRIPT_LINE_LENGTH, file) != NULL){
-		if(lineBuffer[0] != COMMENT_CHAR)
-		fileBuffer[line++] = lineBuffer;
-		fileBuffer = realloc(fileBuffer, (line + 1) * sizeof(char *));
-		lineBuffer = malloc(MAX_SCRIPT_LINE_LENGTH);
+		if(!(lineBuffer[0] == COMMENT_CHAR || lineBuffer[0] == '\n')){
+			fileBuffer[line++] = lineBuffer;
+			fileBuffer = realloc(fileBuffer, (line + 1) * sizeof(char *));
+			lineBuffer = malloc(MAX_SCRIPT_LINE_LENGTH);
+		}
 	}
 	free(lineBuffer);
 
@@ -169,6 +170,7 @@ int evaluateCommand(char ** command, Matrix_t * points, Matrix_t ** transform){
 		drawMatrixLines(points);
 		renderScreen();
 		command[1][strlen(command[1]) - 1] = '\0';  // remove newline
+
 		if(writeScreen(command[1]) == -1){
 			ERROR("Failed to write file: %s.", command[1]);
 			return INVALID_ARGS;

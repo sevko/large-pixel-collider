@@ -85,7 +85,14 @@ void testMatrix(){
 	quitScreen();
 }
 
-int main(){
-	evaluateScript(readScriptFile("scripts/script.gsc"));
+int main(int argc, char * argv[]){
+	setup();
+	if(1 < argc){
+		evaluateScript(readScriptFile(argv[1]));
+	}
+	else {
+		testMatrix();
+	}
+
 	return EXIT_SUCCESS;
 }
