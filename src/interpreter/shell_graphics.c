@@ -1,17 +1,27 @@
 #include <stdio.h>
 
 #include "lib/xterm_control/xterm_control.h"
+#include "src/interpreter/shell_graphics.h"
 
-static void clearScreen();
+#define COLOR(color, string)(color string XT_CH_NORMAL)
+#define LEFT_PADDING 0
 
-void render(char ** buffer, int numlines){
-	clearScreen();
+extern int g_enteringCommand, g_curX, g_curY;
+extern char ** g_buffer;
+
+static void clearShellScreen();
+
+void renderShell(){
+	clearShellScreen();
+
 	int line;
-	for(line = 0; line < numlines; line++)
-		printf("\t%s\n", buffer[line]);
+	for(line = 0; line <= g_curY; line++){
+		printf("%s\n", g_buffer[line]);
+	}
+	xt_par2(XT_SET_ROW_COL_POS, g_curY + 1, g_curX + LEFT_PADDING + 1);
 }
 
-static void clearScreen(){
+static void clearShellScreen(){
 	xt_par2(XT_SET_ROW_COL_POS, 0, 0);
 	xt_par0(XT_CLEAR_SCREEN);
 }

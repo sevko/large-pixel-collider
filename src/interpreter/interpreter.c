@@ -8,15 +8,16 @@
 
 // chars indicating commands in a script file
 #define ADD_LINE 'l'
-#define SET_IDENTITY 'i'
+#define APPLY_TRANSFORM 'a'
 #define CREATE_SCALE 's'
 #define CREATE_TRANSLATION 't'
 #define CREATE_ROT_X 'x'
 #define CREATE_ROT_Y 'y'
 #define CREATE_ROT_Z 'z'
-#define APPLY_TRANSFORM 'a'
 #define DRAW_FRAME 'v'
+#define EXIT 'e'
 #define SAVE_FRAME 'g'
+#define SET_IDENTITY 'i'
 
 // evaluate the command located at command[0], accounting for the arguments,
 // if any are required, at command[1], and manipulate the Matrix_ts points and
@@ -105,6 +106,9 @@ int evaluateCommand(char ** command, Matrix_t * points, Matrix_t ** transform){
 			return INVALID_ARGS;
 		}
 	}
+
+	else if(cmdChar == EXIT)
+		exit(EXIT_SUCCESS);
 
 	else
 		return INVALID_CMD;
