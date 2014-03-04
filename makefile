@@ -10,7 +10,9 @@ run: all
 clean:
 	if [ -d "bin" ]; then rm -rf bin; fi
 
-bin/engine: bin/engine.o bin/utils.o bin/matrix.o bin/screen.o bin/interpreter.o bin/file_parser.o
+bin/engine: bin/engine.o bin/utils.o bin/matrix.o bin/screen.o \
+	bin/interpreter.o bin/file_parser.o bin/shell.o bin/shell_graphics.o \
+	bin/xterm_control.o bin/keyboard.o
 	$(CC) -o $@ $^ $(LIBS)
 
 bin/engine.o: src/engine.c
@@ -29,6 +31,18 @@ bin/interpreter.o: src/interpreter/interpreter.c
 	$(CC) -o $@ -c $^
 
 bin/file_parser.o: src/interpreter/file_parser.c
+	$(CC) -o $@ -c $^
+
+bin/shell.o: src/interpreter/shell.c
+	$(CC) -o $@ -c $^
+
+bin/shell_graphics.o: src/interpreter/shell_graphics.c
+	$(CC) -o $@ -c $^
+
+bin/xterm_control.o: lib/xterm_control/xterm_control.c
+	$(CC) -o $@ -c $^
+
+bin/keyboard.o: lib/keyboard/keyboard.c
 	$(CC) -o $@ -c $^
 
 bin:
