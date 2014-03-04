@@ -1,4 +1,4 @@
-FLAGS = -Ofast -Wall -Wextra -Wunreachable-code -I .
+FLAGS = -Ofast -Wall -Wextra -Wunreachable-code -I ./
 CC = gcc $(FLAGS)
 LIBS = -lm $(shell sdl-config --libs)
 
@@ -10,7 +10,7 @@ run: all
 clean:
 	if [ -d "bin" ]; then rm -rf bin; fi
 
-bin/engine: bin/engine.o bin/utils.o bin/matrix.o bin/screen.o bin/parser.o
+bin/engine: bin/engine.o bin/utils.o bin/matrix.o bin/screen.o bin/interpreter.o bin/file_parser.o
 	$(CC) -o $@ $^ $(LIBS)
 
 bin/engine.o: src/engine.c
@@ -25,7 +25,10 @@ bin/matrix.o: src/matrix.c
 bin/screen.o: src/screen.c
 	$(CC) -o $@ -c $^
 
-bin/parser.o: src/parser.c
+bin/interpreter.o: src/interpreter/interpreter.c
+	$(CC) -o $@ -c $^
+
+bin/file_parser.o: src/interpreter/file_parser.c
 	$(CC) -o $@ -c $^
 
 bin:

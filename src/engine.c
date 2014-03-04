@@ -8,11 +8,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "globals.h"
-#include "matrix.h"
-#include "parser.h"
-#include "screen.h"
-#include "utils.h"
+#include "src/globals.h"
+#include "src/matrix.h"
+#include "src/interpreter/file_parser.h"
+#include "src/screen.h"
+#include "src/utils.h"
 
 // function to test drawPolygon() and drawLine() functionality; renders
 // concentric, rotating polygons with increasing radii and number of sides.

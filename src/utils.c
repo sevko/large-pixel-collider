@@ -8,8 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "utils.h"
-#include "screen.h"
+#include "src/utils.h"
+#include "src/screen.h"
 
 #define ABS(val) (val > 0?val:-val)
 

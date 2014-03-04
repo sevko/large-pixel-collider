@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "globals.h"
-#include "screen.h"
+#include "src/globals.h"
+#include "src/screen.h"
 
 SDL_Surface * screen;
 
