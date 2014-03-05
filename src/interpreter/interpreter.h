@@ -7,5 +7,6 @@
 #define INVALID_CMD 1
 #define INVALID_ARGS 2
 
-int evaluateCommand(char ** command, Matrix_t * points, Matrix_t ** transform);
+int evaluateCommand(char ** const command, Matrix_t * const points,
+	Matrix_t ** transform);
 int argsRequired(char cmd);

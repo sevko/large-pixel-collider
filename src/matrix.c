@@ -18,8 +18,8 @@ struct Matrix {
 };
 
 static void expandMatrix(Matrix_t * const matrix);
-static double dotProduct(Matrix_t * const m1, int row, Matrix_t * const m2,
-	int col);
+static double dotProduct(const Matrix_t * const m1, int row,
+	const Matrix_t * const m2, int col);
 
 // alloc memory for Matrix_t, set all internal pointers
 Matrix_t * createMatrix(){
@@ -220,8 +220,8 @@ static void expandMatrix(Matrix_t * const matrix){
 }
 
 // return the dot-product of a row in Matrix_t m1 and a column in Matrix_t m2
-static double dotProduct(Matrix_t * const m1, int row, Matrix_t * const m2,
-	int col){
+static double dotProduct(const Matrix_t * const m1, int row,
+	const Matrix_t * const m2, int col){
 	return m1->points[row][0] * m2->points[0][col] +
 		m1->points[row][1] * m2->points[1][col] +
 		m1->points[row][2] * m2->points[2][col] +

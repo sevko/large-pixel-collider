@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "src/globals.h"
 #include "src/matrix.h"
@@ -26,7 +27,8 @@
 // evaluate the command located at command[0], accounting for the arguments,
 // if any are required, at command[1], and manipulate the Matrix_ts points and
 // transform accordingly; report back status of command evaluation.
-int evaluateCommand(char ** command, Matrix_t * points, Matrix_t ** transform){
+int evaluateCommand(char ** const command, Matrix_t * const points,
+	Matrix_t ** transform){
 	if(2 < strlen(command[0]))
 		return INVALID_CMD;
 

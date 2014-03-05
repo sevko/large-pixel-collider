@@ -18,11 +18,11 @@ typedef struct {
 	int numLines;
 } Script_t;
 
-static void freeScript(Script_t * script);
-static void evaluateScript(Script_t * script);
+static void evaluateScript(const Script_t * const script);
+static void freeScript(Script_t * const script);
 
 // read, and evaluate the contents of filePath in a char **
-void readScriptFile(char * filePath){
+void readScriptFile(const char * const filePath){
 	FILE * file = fopen(filePath, "r");
 	if(file == NULL){
 		ERROR("Failed to open file \"%s\"", filePath);
@@ -54,7 +54,7 @@ void readScriptFile(char * filePath){
 }
 
 // evaluate each of the commands in the Script_t
-static void evaluateScript(Script_t * script){
+static void evaluateScript(const Script_t * const script){
 	configureScreen();
 	Matrix_t * points = createMatrix(), * transform = createIdentity();
 
@@ -86,7 +86,7 @@ static void evaluateScript(Script_t * script){
 }
 
 // deallocate a Script_t and all internal pointers
-static void freeScript(Script_t * script){
+static void freeScript(Script_t * const script){
 	int line;
 	for(line = 0; line < script->numLines; line++)
 		free(script->script[line]);
