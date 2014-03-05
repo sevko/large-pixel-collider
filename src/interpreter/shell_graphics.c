@@ -6,10 +6,10 @@
 #define COLOR(color, string)(color string XT_CH_NORMAL)
 #define LEFT_PADDING 0
 
+static void clearShellScreen();
+
 extern int g_enteringCommand, g_curX, g_curY;
 extern char ** g_buffer;
-
-static void clearShellScreen();
 
 void renderShell(){
 	clearShellScreen();
