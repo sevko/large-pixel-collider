@@ -32,6 +32,7 @@ static int g_running,   // indicates whether shell is still running
 	g_enteringCommand;  // whether user is entering a command, or arguments
 
 static int g_virtualY;  // when scrolling, line number of line last accessed
+static char * g_tempCurrLine;   // store current (last) line when scrolling
 
 static Matrix_t * points, * transform;
 
@@ -95,6 +96,7 @@ static void configureShell(){
 	g_buffer = malloc(sizeof(char *));
 	g_buffer[0] = malloc(1);
 	g_buffer[0][0] = '\0';
+	g_tempCurrLine = NULL;
 
 	points = createMatrix();
 	transform = createIdentity();
@@ -107,6 +109,8 @@ static void freeShell(){
 	for(line = 0; line <= g_curY; line++)
 		free(g_buffer[line]);
 	free(g_buffer);
+	if(g_virtualY != -1)
+		free(g_tempCurrLine);
 	freeMatrices(2, points, transform);
 	// quitScreen();
 }
@@ -134,7 +138,7 @@ static void deleteChar(){
 	int len = strlen(g_buffer[g_curY]);
 
 	int ind;
-	for(ind = g_curX; ind <= len; ind++)
+	for(ind = g_curX; ind < len; ind++)
 		g_buffer[g_curY][ind] = g_buffer[g_curY][ind + 1];
 }
 
@@ -157,11 +161,13 @@ static void evaluateNewline(){
 				case INVALID_CMD:
 					ERROR("Error, invalid command: %c.",
 						g_buffer[lnWithCmd][0]);
+					exit(EXIT_FAILURE);
 					break;
 
 				case INVALID_ARGS:
 					ERROR("Error, invalid arguments: %s",
 						g_buffer[g_curY]);
+					exit(EXIT_FAILURE);
 					break;
 			}
 			ERROR("Exiting.");
@@ -172,6 +178,11 @@ static void evaluateNewline(){
 
 	g_curY++;
 	g_curX = 0;
+	if(g_virtualY != -1){
+		g_virtualY = -1;
+		free(g_tempCurrLine);
+		g_tempCurrLine = NULL;
+	}
 	g_buffer = realloc(g_buffer, (g_curY + 1) * sizeof(char *));
 	g_buffer[g_curY] = malloc(1);
 	g_buffer[g_curY][0] = '\0';
@@ -182,7 +193,8 @@ static void scrollUp(){
 	// if the user hasn't scrolled yet
 	if(g_virtualY == -1){
 		g_virtualY = g_curY;
-		return;
+		g_tempCurrLine = malloc(strlen(g_buffer[g_curY]) + 2);
+		strcpy(g_tempCurrLine, g_buffer[g_curY]);
 	}
 
 	if(g_virtualY <= 0)
@@ -198,19 +210,29 @@ static void scrollUp(){
 // scroll forward through the shell's command history
 static void scrollDown(){
 	// if the user hasn't scrolled yet
-	if(g_virtualY == -1){
-		g_virtualY = g_curY;
+	if(g_virtualY == -1)
 		return;
-	}
 
 	if(g_curY <= g_virtualY)
 		return;
 
 	g_virtualY++;
-	int virtualLen = strlen(g_buffer[g_virtualY]);
-	g_curX = virtualLen;
-	g_buffer[g_curY] = realloc(g_buffer[g_curY], virtualLen + 1);
-	strcpy(g_buffer[g_curY], g_buffer[g_virtualY]);
+	if(g_virtualY == g_curY){
+		int lenTempLine = strlen(g_tempCurrLine);
+		g_buffer[g_curY] = realloc(g_buffer[g_curY], lenTempLine + 1);
+		strcpy(g_buffer[g_curY], g_tempCurrLine);
+
+		g_curX = lenTempLine;
+		free(g_tempCurrLine);
+		g_tempCurrLine = NULL;
+		g_virtualY = -1;
+	}
+	else {
+		int virtualLen = strlen(g_buffer[g_virtualY]);
+		g_curX = virtualLen;
+		g_buffer[g_curY] = realloc(g_buffer[g_curY], virtualLen + 1);
+		strcpy(g_buffer[g_curY], g_buffer[g_virtualY]);
+	}
 }
 
 // move cursor left if possible, and return int indicating success or failure

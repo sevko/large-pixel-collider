@@ -4,7 +4,8 @@
 #include "src/interpreter/shell_graphics.h"
 
 #define COLOR(color, string)(color string XT_CH_NORMAL)
-#define LEFT_PADDING 0
+#define LEFT_PADDING 2
+#define PROMPT_STRING COLOR(XT_CH_RED, ">")
 
 static void clearShellScreen();
 
@@ -15,10 +16,14 @@ void renderShell(){
 	clearShellScreen();
 
 	int line;
-	for(line = 0; line <= g_curY; line++){
-		printf("%s\n", g_buffer[line]);
-	}
+	for(line = 0; line <= g_curY; line++)
+		printf("%s %s\n", PROMPT_STRING, g_buffer[line]);
+		// printLine(g_buffer[line]);
 	xt_par2(XT_SET_ROW_COL_POS, g_curY + 1, g_curX + LEFT_PADDING + 1);
+}
+
+void printLine(char * line){
+	puts(line);
 }
 
 static void clearShellScreen(){

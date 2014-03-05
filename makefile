@@ -1,11 +1,17 @@
-FLAGS = -Ofast -Wall -Wextra -Wunreachable-code -I ./
+FLAGS = -O0 -g -Wall -Wextra -Wunreachable-code -I ./
 CC = gcc $(FLAGS)
 LIBS = -lm $(shell sdl-config --libs)
+
+SHELL_TERMINAL = gnome-terminal --title="Graphics Engine" \
+	--geometry=108x49+1000 -e
 
 all: bin bin/engine
 
 run: all
-	bin/engine
+	$(SHELL_TERMINAL) bin/engine $(SCRIPT_FILE)
+
+kill:
+	killall -9 engine
 
 clean:
 	if [ -d "bin" ]; then rm -rf bin; fi
