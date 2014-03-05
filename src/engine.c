@@ -11,6 +11,7 @@
 #include "src/globals.h"
 #include "src/matrix.h"
 #include "src/interpreter/file_parser.h"
+#include "src/interpreter/shell.h"
 #include "src/screen.h"
 #include "src/utils.h"
 
@@ -87,12 +88,10 @@ void testMatrix(){
 
 int main(int argc, char * argv[]){
 	setup();
-	if(1 < argc){
+	if(1 < argc)
 		evaluateScript(readScriptFile(argv[1]));
-	}
-	else {
-		testMatrix();
-	}
-
+	else
+		// testMatrix();
+		shell();
 	return EXIT_SUCCESS;
 }

@@ -15,7 +15,6 @@
 #define CREATE_ROT_Y 'y'
 #define CREATE_ROT_Z 'z'
 #define DRAW_FRAME 'v'
-#define EXIT 'e'
 #define SAVE_FRAME 'g'
 #define SET_IDENTITY 'i'
 
@@ -31,7 +30,7 @@ int evaluateCommand(char ** command, Matrix_t * points, Matrix_t ** transform){
 	if(cmdChar == ADD_LINE){
 		double x1, y1, z1, x2, y2, z2;
 		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf",
-			&x1, &y1, &z1, &x2, &y2, &z2) == EOF)
+			&x1, &y1, &z1, &x2, &y2, &z2) < 6)
 			return INVALID_ARGS;
 		addEdge(points, x1, y1, z1, x2, y2, z2);
 	}
@@ -43,7 +42,7 @@ int evaluateCommand(char ** command, Matrix_t * points, Matrix_t ** transform){
 
 	else if(cmdChar == CREATE_SCALE){
 		double sx, sy, sz;
-		if(sscanf(command[1], "%lf %lf %lf", &sx, &sy, &sz) == EOF)
+		if(sscanf(command[1], "%lf %lf %lf", &sx, &sy, &sz) < 3)
 			return INVALID_ARGS;
 		Matrix_t * scale = createScale(sx, sy, sz);
 		multiplyMatrix(scale, *transform);
@@ -52,7 +51,7 @@ int evaluateCommand(char ** command, Matrix_t * points, Matrix_t ** transform){
 
 	else if(cmdChar == CREATE_TRANSLATION){
 		double tx, ty, tz;
-		if(sscanf(command[1], "%lf %lf %lf", &tx, &ty, &tz) == EOF)
+		if(sscanf(command[1], "%lf %lf %lf", &tx, &ty, &tz) < 3)
 			return INVALID_ARGS;
 		Matrix_t * translation = createTranslation(tx, ty, tz);
 		multiplyMatrix(translation, *transform);
@@ -63,7 +62,7 @@ int evaluateCommand(char ** command, Matrix_t * points, Matrix_t ** transform){
 		cmdChar == CREATE_ROT_Z ){
 
 		double theta;
-		if(sscanf(command[1], "%lf", &theta) == EOF)
+		if(sscanf(command[1], "%lf", &theta) < 1)
 			return INVALID_ARGS;
 
 		Matrix_t * rotation;
@@ -106,9 +105,6 @@ int evaluateCommand(char ** command, Matrix_t * points, Matrix_t ** transform){
 			return INVALID_ARGS;
 		}
 	}
-
-	else if(cmdChar == EXIT)
-		exit(EXIT_SUCCESS);
 
 	else
 		return INVALID_CMD;

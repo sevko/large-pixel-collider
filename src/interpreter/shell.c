@@ -17,10 +17,13 @@
 static void configureShell();
 static void freeShell();
 static void insertChar(char key);
+static void backspace();
+static void deleteChar();
 static void evaluateNewline();
 static void scrollUp();
 static void scrollDown();
-static void backspace();
+static int moveLeft();
+static void moveRight();
 
 int g_curX, g_curY;     // cursor position in the buffer
 char ** g_buffer;       // shell text-buffer
@@ -56,6 +59,14 @@ void shell(){
 						scrollDown();
 						break;
 
+					case KEY_LEFT:
+						moveLeft();
+						break;
+
+					case KEY_RIGHT:
+						moveRight();
+						break;
+
 					case KEY_BACKSPACE:
 						backspace();
 						break;
@@ -76,7 +87,7 @@ void shell(){
 
 // initialize all global variables, allocate g_buffer memory
 static void configureShell(){
-	configureScreen();
+	// configureScreen();
 	g_running = g_enteringCommand = 1;
 	g_curX = g_curY = 0;
 	g_virtualY = -1;
@@ -97,14 +108,34 @@ static void freeShell(){
 		free(g_buffer[line]);
 	free(g_buffer);
 	freeMatrices(2, points, transform);
-	quitScreen();
+	// quitScreen();
 }
 
 // insert char key at the current cursor position
 static void insertChar(char key){
-	g_buffer[g_curY] = realloc(g_buffer[g_curY], g_curX + 2);
+	int len = strlen(g_buffer[g_curY]);
+	g_buffer[g_curY] = realloc(g_buffer[g_curY], len + 2);
+
+	int ind;
+	for(ind = len + 1; g_curX < ind; ind--)
+		g_buffer[g_curY][ind] = g_buffer[g_curY][ind - 1];
+
 	g_buffer[g_curY][g_curX++] = key;
-	g_buffer[g_curY][g_curX] = '\0';
+}
+
+// delete the preceding character
+static void backspace(){
+	if(moveLeft())
+		deleteChar();
+}
+
+// deletes the character at the current cursor position
+static void deleteChar(){
+	int len = strlen(g_buffer[g_curY]);
+
+	int ind;
+	for(ind = g_curX; ind <= len; ind++)
+		g_buffer[g_curY][ind] = g_buffer[g_curY][ind + 1];
 }
 
 // evaluate a line entered in the shell: if the line is a command and arguments
@@ -134,6 +165,7 @@ static void evaluateNewline(){
 					break;
 			}
 			ERROR("Exiting.");
+			g_running = 0;
 		}
 		g_enteringCommand = 1;
 	}
@@ -157,7 +189,6 @@ static void scrollUp(){
 		return;
 
 	g_virtualY--;
-	// g_virtualChanged = 1;
 	int virtualLen = strlen(g_buffer[g_virtualY]);
 	g_curX = virtualLen;
 	g_buffer[g_curY] = realloc(g_buffer[g_curY], virtualLen + 1);
@@ -176,15 +207,25 @@ static void scrollDown(){
 		return;
 
 	g_virtualY++;
-	// g_virtualChanged = 1;
 	int virtualLen = strlen(g_buffer[g_virtualY]);
 	g_curX = virtualLen;
 	g_buffer[g_curY] = realloc(g_buffer[g_curY], virtualLen + 1);
 	strcpy(g_buffer[g_curY], g_buffer[g_virtualY]);
 }
 
-// delete the preceding character
-static void backspace(){
-	if(g_curX > 0)
-		g_buffer[g_curY][--g_curX] = '\0';
+// move cursor left if possible, and return int indicating success or failure
+// (mainly for use by delete())
+static int moveLeft(){
+	if(0 < g_curX){
+		g_curX--;
+		return 1;
+	}
+	else
+		return 0;
+}
+
+// move cursor right, if possible
+static void moveRight(){
+	if(g_curX < (int)strlen(g_buffer[g_curY]))
+		g_curX++;
 }
