@@ -32,7 +32,7 @@ Matrix_t * createMatrix(){
 	return matrix;
 }
 
-// free alloc'd Matrix_t and all internal pointers
+// call freeMatrix() on vararg Matrix_ts
 void freeMatrices(int numArgs, ...){
 	va_list matrices;
 	va_start(matrices, numArgs);
@@ -43,6 +43,7 @@ void freeMatrices(int numArgs, ...){
 	va_end(matrices);
 }
 
+// free alloc'd Matrix_t and all internal pointers
 void freeMatrix(Matrix_t * matrix){
 	free(matrix->points[0]);
 	free(matrix->points[1]);
@@ -87,10 +88,10 @@ void drawMatrixLines(const Matrix_t * const matrix){
 	int ptPair;
 	for(ptPair = 0; ptPair < matrix->numPoints; ptPair += 2)
 		drawLine(matrix->points[0][ptPair], matrix->points[1][ptPair],
-			matrix->points[0][ptPair + 1], matrix->points[1][ptPair + 1],
-				TEST_COLOR);
+			matrix->points[0][ptPair + 1], matrix->points[1][ptPair + 1]);
 }
 
+// multiply a Matrix_t by a scalar value
 void multiplyScalar(double scalar, Matrix_t * const matrix){
 	int row, col;
 	for(row = 0; row < 4; row++)
@@ -112,6 +113,7 @@ void multiplyMatrices(int numArgs, ...){
 	va_end(matrices);
 }
 
+// multiply Matrix_ts m1 and m2 in place, storing the result in m2
 void multiplyMatrix(Matrix_t * const m1, Matrix_t * const m2){
 	int col;
 	for(col = 0; col < m2->numPoints; col++){
@@ -127,6 +129,7 @@ void multiplyMatrix(Matrix_t * const m1, Matrix_t * const m2){
 	}
 }
 
+// return a 4x4 identity matrix
 Matrix_t * createIdentity(){
 	Matrix_t * identity = createMatrix();
 	addTransformPoint(identity, 1, 0, 0, 0);
@@ -136,6 +139,7 @@ Matrix_t * createIdentity(){
 	return identity;
 }
 
+// return a 4x4 matrix to translate a set of points by dx, dy, and dz
 Matrix_t * createTranslation(double dx, double dy, double dz){
 	Matrix_t * translation = createIdentity();
 	translation->points[0][3] = dx;
@@ -144,6 +148,7 @@ Matrix_t * createTranslation(double dx, double dy, double dz){
 	return translation;
 }
 
+// return a 4x4 matrix to scale a set of points by dx, dy, and dz
 Matrix_t * createScale(double dx, double dy, double dz){
 	Matrix_t * scale = createMatrix();
 	addTransformPoint(scale, dx, 0, 0, 0);
@@ -153,6 +158,7 @@ Matrix_t * createScale(double dx, double dy, double dz){
 	return scale;
 }
 
+// return a 4x4 matrix to rotate a set of points angle degrees across an axis
 Matrix_t * createRotation(int axis, double angle){
 	Matrix_t * rotation = createMatrix();
 
@@ -213,6 +219,7 @@ static void expandMatrix(Matrix_t * const matrix){
 			sizeof(double) * matrix->numPoints);
 }
 
+// return the dot-product of a row in Matrix_t m1 and a column in Matrix_t m2
 static double dotProduct(Matrix_t * const m1, int row, Matrix_t * const m2,
 	int col){
 	return m1->points[row][0] * m2->points[0][col] +

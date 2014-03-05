@@ -1,3 +1,8 @@
+/*
+ *  interpreter.c contains functions for evaluating strings containing commands
+ *  and arguments in the graphics engine's scripting language.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "src/matrix.h"
 
 // status of evaluation of a single command

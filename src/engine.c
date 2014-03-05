@@ -3,7 +3,7 @@
  *  functionality and startup.
 */
 
-#include <math.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -14,6 +14,9 @@
 #include "src/interpreter/shell.h"
 #include "src/screen.h"
 #include "src/utils.h"
+
+static void sigHandler(int sig);
+static void setup();
 
 // function to test drawPolygon() and drawLine() functionality; renders
 // concentric, rotating polygons with increasing radii and number of sides.
@@ -86,12 +89,22 @@ void testMatrix(){
 	quitScreen();
 }
 
+// establish signal handler for SIGINT
+static void sigHandler(int sig){
+	(void)sig;
+	exit(EXIT_SUCCESS);
+}
+
+// perform any necessary setup, before the engine runs
+static void setup(){
+	signal(SIGINT, sigHandler);
+}
+
 int main(int argc, char * argv[]){
 	setup();
 	if(1 < argc)
-		evaluateScript(readScriptFile(argv[1]));
+		readScriptFile(argv[1]);
 	else
-		// testMatrix();
 		shell();
 	return EXIT_SUCCESS;
 }

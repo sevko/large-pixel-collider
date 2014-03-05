@@ -1,3 +1,8 @@
+/*
+ *  shell.c contains functions for initializing and running an interactive shell
+ *  that allows the user to manipulate the graphics engine with commands.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

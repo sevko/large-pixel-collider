@@ -1,17 +1,28 @@
+/*
+ *  file_parser.c contains functions for reading and evaluating a script file.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "src/globals.h"
-#include "src/matrix.h"
 #include "src/screen.h"
 #include "src/interpreter/file_parser.h"
 #include "src/interpreter/interpreter.h"
 
 #define MAX_SCRIPT_LINE_LENGTH 100      // hard-coded, but a reasonable limit
-#define COMMENT_CHAR '#'
+#define COMMENT_CHAR '#'                // ignore lines beginning with this
 
-// read, and return the contents of filePath in a char **
-Script_t * readScriptFile(char * filePath){
+typedef struct {
+	char ** script;
+	int numLines;
+} Script_t;
+
+static void freeScript(Script_t * script);
+static void evaluateScript(Script_t * script);
+
+// read, and evaluate the contents of filePath in a char **
+void readScriptFile(char * filePath){
 	FILE * file = fopen(filePath, "r");
 	if(file == NULL){
 		ERROR("Failed to open file \"%s\"", filePath);
@@ -37,11 +48,13 @@ Script_t * readScriptFile(char * filePath){
 	script->numLines = line;
 
 	fclose(file);
-	return script;
+
+	evaluateScript(script);
+	freeScript(script);
 }
 
 // evaluate each of the commands in the Script_t
-void evaluateScript(Script_t * script){
+static void evaluateScript(Script_t * script){
 	configureScreen();
 	Matrix_t * points = createMatrix(), * transform = createIdentity();
 
@@ -68,13 +81,12 @@ void evaluateScript(Script_t * script){
 			line++;
 	}
 
-	freeScript(script);
 	freeMatrices(2, points, transform);
 	quitScreen();
 }
 
 // deallocate a Script_t and all internal pointers
-void freeScript(Script_t * script){
+static void freeScript(Script_t * script){
 	int line;
 	for(line = 0; line < script->numLines; line++)
 		free(script->script[line]);

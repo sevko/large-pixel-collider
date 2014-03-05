@@ -1,8 +1,3 @@
-typedef struct {
-	char ** script;
-	int numLines;
-} Script_t;
+#pragma once
 
-Script_t *  readScriptFile(char * filePath);
-void evaluateScript(Script_t * script);
-void freeScript(Script_t * script);
+void readScriptFile(char * filePath);

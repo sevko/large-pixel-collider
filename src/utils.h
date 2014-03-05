@@ -1,7 +1,4 @@
-#include <SDL/SDL.h>
+#pragma once
 
-#define TEST_COLOR (Uint32)0x00FF0000
-
-void drawLine(int x1, int y1, int x2, int y2, Uint32 color);
+void drawLine(int x1, int y1, int x2, int y2);
 void drawPolygon(int numSides, int radius, int xOffset, int yOffset, int inclineAngle);
-void setup();

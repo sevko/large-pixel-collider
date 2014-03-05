@@ -3,20 +3,15 @@
 */
 
 #include <math.h>
-#include <SDL/SDL.h>
-#include <signal.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "src/utils.h"
 #include "src/screen.h"
 
 #define ABS(val) (val > 0?val:-val)
 
-static void sigHandler(int sig);
-
 // Bresenham rasterize line with endpoints (x1, y1) and (x2, y2)
-void drawLine(int x1, int y1, int x2, int y2, Uint32 color){
+void drawLine(int x1, int y1, int x2, int y2){
 	int width = x2 - x1, height = y2 - y1;
 	int dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0;
 
@@ -48,7 +43,7 @@ void drawLine(int x1, int y1, int x2, int y2, Uint32 color){
 
 	unsigned int numerator = longDist >> 1, pixel;
 	for(pixel = 0; pixel <= longDist; pixel++){
-		drawPixel(x1, y1, color);
+		drawPixel(x1, y1);
 		numerator += shortDist;
 		if(numerator >= longDist){
 			numerator -= longDist;
@@ -64,7 +59,8 @@ void drawLine(int x1, int y1, int x2, int y2, Uint32 color){
 
 // draw a polygon with numSides sides, a radius of radius pixels, centered on
 // (xOffset, yOffset)
-void drawPolygon(int numSides, int radius, int xOffset, int yOffset, int inclineAngle){
+void drawPolygon(int numSides, int radius, int xOffset, int yOffset,
+	int inclineAngle){
 	double angle = (M_PI * 2) / numSides;
 	double incline = (180 / M_PI) * inclineAngle;
 
@@ -77,15 +73,6 @@ void drawPolygon(int numSides, int radius, int xOffset, int yOffset, int incline
 		int y2 = yOffset + radius * sin(currAngle + angle);
 		currAngle += angle;
 
-		drawLine(x1, y1, x2, y2, TEST_COLOR);
+		drawLine(x1, y1, x2, y2);
 	}
-}
-
-static void sigHandler(int sig){
-	(void)sig;
-	exit(EXIT_SUCCESS);
-}
-
-void setup(){
-	signal(SIGINT, sigHandler);
 }
