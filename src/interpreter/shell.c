@@ -3,12 +3,10 @@
  *  that allows the user to manipulate the graphics engine with commands.
 */
 
-#include <stdio.h>
+#include <ncurses.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
-#include "lib/keyboard/keyboard.h"
 
 #include "src/globals.h"
 #include "src/screen.h"
@@ -31,12 +29,12 @@ static int moveLeft();
 static void moveRight();
 
 int g_curX, g_curY;     // cursor position in the buffer
-char ** g_buffer;       // shell text-buffer
+char ** g_buffer;       // buffer for text entered by user
 
-static int g_running,   // indicates whether shell is still running
+static int g_running,   // whether the shell is still running
 	g_enteringCommand;  // whether user is entering a command, or arguments
 
-static int g_virtualY;  // when scrolling, line number of line last accessed
+static int g_virtualY;  // last line scrolled to in the command-line history
 static char * g_tempCurrLine;   // store current (last) line when scrolling
 
 static Matrix_t * points, * transform;
@@ -45,46 +43,45 @@ static Matrix_t * points, * transform;
 void shell(){
 	configureShell();
 
-	char key;
+	int key;
 	while(g_running){
-		if((key = getkey()) != KEY_NOTHING){
-			if(PRINTABLE(key))
-				insertChar(key);
+		key = getch();
 
-			else
-				switch(key){
-					case KEY_ENTER:
-						evaluateNewline();
-						break;
+		if(PRINTABLE(key))
+			insertChar(key);
 
-					case KEY_UP:
-						scrollUp();
-						break;
+		else
+			switch(key){
+				case KEY_ENTER: case '\n':
+					evaluateNewline();
+					break;
 
-					case KEY_DOWN:
-						scrollDown();
-						break;
+				case KEY_UP:
+					scrollUp();
+					break;
 
-					case KEY_LEFT:
-						moveLeft();
-						break;
+				case KEY_DOWN:
+					scrollDown();
+					break;
 
-					case KEY_RIGHT:
-						moveRight();
-						break;
+				case KEY_LEFT:
+					moveLeft();
+					break;
 
-					case KEY_BACKSPACE:
-						backspace();
-						break;
+				case KEY_RIGHT:
+					moveRight();
+					break;
 
-					case KEY_END:
-						g_running = 0;
-						break;
-				}
+				case KEY_BACKSPACE:
+					backspace();
+					break;
 
-			renderShell();
-		}
+				case KEY_END:
+					g_running = 0;
+					break;
+			}
 
+		renderShell();
 		usleep(TICK_PAUSE);
 	}
 
@@ -93,7 +90,6 @@ void shell(){
 
 // initialize all global variables, allocate g_buffer memory
 static void configureShell(){
-	// configureScreen();
 	g_running = g_enteringCommand = 1;
 	g_curX = g_curY = 0;
 	g_virtualY = -1;
@@ -105,7 +101,10 @@ static void configureShell(){
 
 	points = createMatrix();
 	transform = createIdentity();
+
+	configureGraphicsShell();
 	renderShell();
+	// configureScreen();
 }
 
 // deallocate all memory used by shell
@@ -114,9 +113,12 @@ static void freeShell(){
 	for(line = 0; line <= g_curY; line++)
 		free(g_buffer[line]);
 	free(g_buffer);
+
 	if(g_virtualY != -1)
 		free(g_tempCurrLine);
 	freeMatrices(2, points, transform);
+
+	freeGraphicsShell();
 	// quitScreen();
 }
 
@@ -151,6 +153,10 @@ static void deleteChar(){
 // are necessary, set the appropriate flags; otherwise, evaluate the command,
 // with arguments if necessary.
 static void evaluateNewline(){
+	char * visualLine = malloc(strlen(g_buffer[g_curY]) + 1);
+	strcpy(visualLine, g_buffer[g_curY]);
+	addVisualLine(visualLine);
+
 	if(g_enteringCommand && argsRequired(g_buffer[g_curY][0]))
 		g_enteringCommand = 0;
 	else {
@@ -162,32 +168,33 @@ static void evaluateNewline(){
 
 		int status = evaluateCommand(&g_buffer[lnWithCmd], points, &transform);
 		if(status != VALID_EVAL){
+			char * errMsg = malloc(1000);
+
 			switch(status){
 				case INVALID_CMD:
-					ERROR("Error, invalid command: %c.",
+					sprintf(errMsg, "Invalid command: %c.",
 						g_buffer[lnWithCmd][0]);
-					exit(EXIT_FAILURE);
 					break;
 
 				case INVALID_ARGS:
-					ERROR("Error, invalid arguments: %s",
-						g_buffer[g_curY]);
-					exit(EXIT_FAILURE);
+					sprintf(errMsg, "Invalid arguments: %s", g_buffer[g_curY]);
 					break;
 			}
-			ERROR("Exiting.");
-			g_running = 0;
+
+			addVisualLine(errMsg);
 		}
 		g_enteringCommand = 1;
 	}
 
 	g_curY++;
 	g_curX = 0;
+
 	if(g_virtualY != -1){
 		g_virtualY = -1;
 		free(g_tempCurrLine);
 		g_tempCurrLine = NULL;
 	}
+
 	g_buffer = realloc(g_buffer, (g_curY + 1) * sizeof(char *));
 	g_buffer[g_curY] = malloc(1);
 	g_buffer[g_curY][0] = '\0';

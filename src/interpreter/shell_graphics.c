@@ -3,32 +3,57 @@
  *  terminal user-interface.
 */
 
-#include <stdio.h>
-
-#include "lib/xterm_control/xterm_control.h"
+#include <ncurses.h>
+#include <stdlib.h>
 #include "src/interpreter/shell_graphics.h"
 
-#define COLOR(color, string)(color string XT_CH_NORMAL)
+// used to render a prompt character on the shell command-line
 #define LEFT_PADDING 2
-#define PROMPT_STRING COLOR(XT_CH_RED, ">")
-
-static void clearShellScreen();
+#define PROMPT_STRING "> "
 
 extern int g_enteringCommand, g_curX, g_curY;
 extern char ** g_buffer;
 
-// draw the shell's text-buffer contents to the screen
-void renderShell(){
-	clearShellScreen();
+static char ** g_visualBuffer;  // buffer containing text to appear in the shell
+static int g_numVisualLines;
 
-	int line;
-	for(line = 0; line <= g_curY; line++)
-		printf("%s %s\n", PROMPT_STRING, g_buffer[line]);
-	xt_par2(XT_SET_ROW_COL_POS, g_curY + 1, g_curX + LEFT_PADDING + 1);
+// allocate shell graphics, initialize global variables
+void configureGraphicsShell(){
+	initscr();
+	raw();
+	nl();
+	scrollok(stdscr, TRUE);
+	keypad(stdscr, TRUE);
 }
 
-// clear the terminal screen
-static void clearShellScreen(){
-	xt_par2(XT_SET_ROW_COL_POS, 0, 0);
-	xt_par0(XT_CLEAR_SCREEN);
+// draw the shell's text-buffer contents to the screen
+void renderShell(){
+	clear();
+
+	// draw static contents of the visual buffer
+	int line;
+	for(line = 0; line < g_numVisualLines; line++)
+		printw("%s%s\n", PROMPT_STRING, g_visualBuffer[line]);
+
+	// draw the line being currently entered straight from the g_buffer,
+	// as it's constantly changing
+	printw("%s%s", PROMPT_STRING, g_buffer[g_curY]);
+
+	move(g_numVisualLines, g_curX + LEFT_PADDING);
+}
+
+// add a line to the shell's visual buffer
+void addVisualLine(char * line){
+	g_visualBuffer = realloc(g_visualBuffer, ++g_numVisualLines * sizeof(char *));
+	g_visualBuffer[g_numVisualLines - 1] = line;
+}
+
+// deallocate memory used by shell graphics
+void freeGraphicsShell(){
+	endwin();
+
+	int line;
+	for(line = 0; line < g_numVisualLines; line++)
+		free(g_visualBuffer[line]);
+	free(g_visualBuffer);
 }

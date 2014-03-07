@@ -105,12 +105,20 @@ int evaluateCommand(char ** const command, Matrix_t * const points,
 		clearScreen();
 		drawMatrixLines(points);
 		renderScreen();
-		command[1][strlen(command[1]) - 1] = '\0';  // remove newline
+
+		int lenName = strlen(command[1]);
+		char * filename = malloc(lenName + 1);
+		strcpy(filename, command[1]);
+
+		if(filename[lenName - 1] == '\n')
+			filename[lenName - 1] = '\0';
 
 		if(writeScreen(command[1]) == -1){
-			ERROR("Failed to write file: %s.", command[1]);
+			ERROR("Failed to write file: %s.", filename);
 			return INVALID_ARGS;
 		}
+
+		free(filename);
 	}
 
 	else
