@@ -1,48 +1,44 @@
+PROJECT_NAME = engine
 FLAGS = -O0 -g -Wall -Wextra -Werror -Wunreachable-code -I ./
 CC = gcc $(FLAGS)
-LIBS = -lm $(shell sdl-config --libs) -lncurses
-
-SHELL_TERMINAL = gnome-terminal --title="Graphics Engine" \
+LIBS = -lm $(shell sdl-config --cflags --libs) -lncurses
+SHELL_TERMINAL = gnome-terminal --title="Graphics Engine: Shell" \
 	--geometry=108x49+1000 -e
 
-all: bin bin/engine
+# denotes whether SDL.h is located in subdir SDL/ of /usr/include;
+# used by src/screen.c
+SDL_HEADER_LOCATION =
+ifeq ($(wildcard /usr/include/SDL.h),)
+	SDL_HEADER_LOCATION = -DSDL_SUBDIR_HEADER
+endif
+
+SRC = $(wildcard src/*.c src/**/*.c)
+OBJ = $(patsubst %.c, bin/%.o, $(foreach srcFile, $(SRC), $(notdir $(srcFile))))
+
+.PHONY: all run kill clean
+
+all: bin bin/$(PROJECT_NAME)
 
 run: all
-	bin/engine $(SCRIPT_FILE)
+	@$(SHELL_TERMINAL) bin/$(PROJECT_NAME) $(SCRIPT_FILE)
 
 kill:
-	killall -9 engine
+	@killall -9 $(PROJECT_NAME)
 
 clean:
-	if [ -d "bin" ]; then rm -rf bin; fi
+	@rm -rf bin
 
-bin/engine: bin/engine.o bin/utils.o bin/matrix.o bin/screen.o \
-	bin/interpreter.o bin/file_parser.o bin/shell.o bin/shell_graphics.o
+bin:
+	@mkdir $@
+
+bin/$(PROJECT_NAME): $(OBJ)
 	$(CC) -o $@ $^ $(LIBS)
 
-bin/engine.o: src/engine.c
-	$(CC) -o $@ -c $^
-
-bin/utils.o: src/utils.c
-	$(CC) -o $@ -c $^
-
-bin/matrix.o: src/matrix.c
+bin/%.o: src/%.c
 	$(CC) -o $@ -c $^
 
 bin/screen.o: src/screen.c
-	$(CC) -o $@ -c $^
+	$(CC) -o $@ -c $^ $(SDL_HEADER_LOCATION)
 
-bin/interpreter.o: src/interpreter/interpreter.c
+bin/%.o: src/interpreter/%.c
 	$(CC) -o $@ -c $^
-
-bin/file_parser.o: src/interpreter/file_parser.c
-	$(CC) -o $@ -c $^
-
-bin/shell.o: src/interpreter/shell.c
-	$(CC) -o $@ -c $^
-
-bin/shell_graphics.o: src/interpreter/shell_graphics.c
-	$(CC) -o $@ -c $^
-
-bin:
-	mkdir bin

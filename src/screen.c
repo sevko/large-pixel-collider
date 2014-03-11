@@ -3,13 +3,17 @@
  *  SDL GUI.
 */
 
-#include <SDL/SDL.h>
+#ifdef SDL_SUBDIR_HEADER
+	#include <SDL/SDL.h>
+#else
+	#include <SDL.h>
+#endif
 
 #include "src/globals.h"
 #include "src/screen.h"
 
 #define QUIT_DELAY 400                  // milliseconds before screen quits
-#define SCREEN_NAME "sevko's window"
+#define SCREEN_NAME "Graphics Engine: Screen"
 #define TEST_COLOR (Uint32)0x00FF0000
 
 static SDL_Surface * screen;

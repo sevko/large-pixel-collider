@@ -104,7 +104,7 @@ static void configureShell(){
 
 	configureGraphicsShell();
 	renderShell();
-	// configureScreen();
+	configureScreen();
 }
 
 // deallocate all memory used by shell
@@ -119,7 +119,7 @@ static void freeShell(){
 	freeMatrices(2, points, transform);
 
 	freeGraphicsShell();
-	// quitScreen();
+	quitScreen();
 }
 
 // insert char key at the current cursor position
