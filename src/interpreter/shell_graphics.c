@@ -13,7 +13,7 @@
 #define PROMPT_COLOR_NUM (LINE_TYPE_OUTPUT + 1)
 #define PROMPT_PADDING 5
 
-extern int g_enteringCommand, g_curX, g_curY;
+extern int g_currLineType, g_curX, g_curY;
 extern char ** g_buffer;
 
 typedef struct {
@@ -52,39 +52,32 @@ void renderShell(){
 	// draw static contents of the visual buffer
 	int line;
 	for(line = 0; line < g_numVisualLines; line++){
-
 		// print prompt with color
-		int promptType = (g_visualBuffer[line].type == LINE_TYPE_CMD);
-		if(g_hasColor){
-			attron(COLOR_PAIR(PROMPT_COLOR_NUM));
-			printw("%s", (promptType)?PROMPT_CMD:PROMPT_ARGS_OUTPUT);
-			attroff(COLOR_PAIR(PROMPT_COLOR_NUM));
-
-			attron(COLOR_PAIR(g_visualBuffer[line].type));
-			printw("%s\n", g_visualBuffer[line].line);
-			attroff(COLOR_PAIR(g_visualBuffer[line].type));
-		}
-		else
-			printw("%s", (promptType)?PROMPT_CMD:PROMPT_ARGS_OUTPUT,
-				g_visualBuffer[line].line);
+		printLine(g_visualBuffer[line].line, g_visualBuffer[line].type);
+		printw("\n");
 	}
 
 	// draw the line being currently entered straight from the g_buffer,
 	// as it's constantly changing
-	if(g_hasColor){
-		attron(COLOR_PAIR(PROMPT_COLOR_NUM));
-		printw("%s", (g_enteringCommand)?PROMPT_CMD:PROMPT_ARGS_OUTPUT);
-		attroff(COLOR_PAIR(PROMPT_COLOR_NUM));
-
-		attron(COLOR_PAIR((g_enteringCommand)?LINE_TYPE_CMD:LINE_TYPE_ARGS));
-		printw("%s", g_buffer[g_curY]);
-		attroff(COLOR_PAIR((g_enteringCommand)?LINE_TYPE_CMD:LINE_TYPE_ARGS));
-	}
-	else
-		printw("%s%s", (g_enteringCommand)?PROMPT_CMD:PROMPT_ARGS_OUTPUT,
-			g_buffer[g_curY]);
+	printLine(g_buffer[g_curY], g_currLineType);
 
 	move(g_visualY, g_curX + PROMPT_PADDING);
+}
+
+// print line of type with appropriate prompt and, if possible, colors
+void printLine(char * line, int type){
+	if(g_hasColor){
+		attron(COLOR_PAIR(PROMPT_COLOR_NUM));
+		printw("%s", (type == LINE_TYPE_CMD)?PROMPT_CMD:PROMPT_ARGS_OUTPUT);
+		attroff(COLOR_PAIR(PROMPT_COLOR_NUM));
+
+		attron(COLOR_PAIR(type));
+		printw("%s", line);
+		attroff(COLOR_PAIR(type));
+	}
+	else
+		printw("%s%s", (type == LINE_TYPE_CMD)?PROMPT_CMD:PROMPT_ARGS_OUTPUT,
+			line);
 }
 
 // add a VisualLine_t with line of type to the shell's visual buffer

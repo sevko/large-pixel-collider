@@ -7,5 +7,6 @@
 
 void configureGraphicsShell();
 void renderShell();
+void printLine(char * line, int type);
 void addVisualLine(char * line, int type);
 void freeGraphicsShell();

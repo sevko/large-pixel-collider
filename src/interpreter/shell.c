@@ -30,7 +30,7 @@ static void moveRight();
 static void renderHelp();
 
 int g_curX, g_curY,     // cursor position in the buffer
-	g_enteringCommand;  // whether user is entering a command, or arguments
+	g_currLineType;  // whether user is entering a command, or arguments
 char ** g_buffer;       // buffer for text entered by user
 
 static int g_running;   // whether the shell is still running
@@ -91,7 +91,8 @@ void shell(){
 
 // initialize all global variables, allocate g_buffer memory
 static void configureShell(){
-	g_running = g_enteringCommand = 1;
+	g_running = 1;
+	g_currLineType = LINE_TYPE_CMD;
 	g_curX = g_curY = 0;
 	g_virtualY = -1;
 
@@ -156,14 +157,14 @@ static void deleteChar(){
 static void evaluateNewline(){
 	char * visualLine = malloc(strlen(g_buffer[g_curY]) + 1);
 	strcpy(visualLine, g_buffer[g_curY]);
-	addVisualLine(visualLine, (g_enteringCommand)?LINE_TYPE_CMD:LINE_TYPE_ARGS);
+	addVisualLine(visualLine, g_currLineType);
 
-	if(g_enteringCommand && argsRequired(g_buffer[g_curY][0]))
-		g_enteringCommand = 0;
+	if(g_currLineType == LINE_TYPE_CMD && argsRequired(g_buffer[g_curY][0]))
+		g_currLineType = LINE_TYPE_ARGS;
 
 	else {
 		int lnWithCmd;
-		if(g_enteringCommand)
+		if(g_currLineType == LINE_TYPE_CMD)
 			lnWithCmd = g_curY;
 		else
 			lnWithCmd = g_curY - 1;
@@ -181,15 +182,16 @@ static void evaluateNewline(){
 				char * errMsg = malloc(1000);
 
 				if(status == CMD_INVALID_CMD)
-					sprintf(errMsg, "Invalid command: %c.",
+					sprintf(errMsg, "Invalid command: %c. Enter 'h' for help.",
 						g_buffer[lnWithCmd][0]);
 				else
-					sprintf(errMsg, "Invalid arguments: %s", g_buffer[g_curY]);
+					sprintf(errMsg, "Invalid arguments: %s. Enter 'h' for help.",
+						g_buffer[g_curY]);
 
 				addVisualLine(errMsg, LINE_TYPE_ERROR);
 			}
 		}
-		g_enteringCommand = 1;
+		g_currLineType = LINE_TYPE_CMD;
 	}
 
 	g_curY++;
