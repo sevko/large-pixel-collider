@@ -34,13 +34,12 @@ void readScriptFile(const char * const filePath){
 	int line = 0;
 
 	char * lineBuffer = malloc(MAX_SCRIPT_LINE_LENGTH);
-	while(fgets(lineBuffer, MAX_SCRIPT_LINE_LENGTH, file) != NULL){
+	while(fgets(lineBuffer, MAX_SCRIPT_LINE_LENGTH, file) != NULL)
 		if(!(lineBuffer[0] == COMMENT_CHAR || lineBuffer[0] == '\n')){
 			fileBuffer[line++] = lineBuffer;
 			fileBuffer = realloc(fileBuffer, (line + 1) * sizeof(char *));
 			lineBuffer = malloc(MAX_SCRIPT_LINE_LENGTH);
 		}
-	}
 	free(lineBuffer);
 
 	Script_t * script = malloc(sizeof(Script_t));
@@ -61,14 +60,14 @@ static void evaluateScript(const Script_t * const script){
 	int line;
 	for(line = 0; line < script->numLines; line++){
 		int status = evaluateCommand(&script->script[line], points, &transform);
-		if(status != VALID_EVAL){
+		if(status != CMD_VALID_EVAL){
 			switch(status){
-				case INVALID_CMD:
+				case CMD_INVALID_CMD:
 					ERROR("Error on line %d:\n\t%sInvalid command.",
 						line + 1, script->script[line]);
 					break;
 
-				case INVALID_ARGS:
+				case CMD_INVALID_ARGS:
 					ERROR("Error on line %d:\n\t%sInvalid argument.",\
 						line + 2, script->script[line + 1]);
 					break;

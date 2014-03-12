@@ -13,16 +13,16 @@
 #include "src/interpreter/interpreter.h"
 
 // chars indicating commands in a script file
-#define ADD_LINE 'l'
-#define APPLY_TRANSFORM 'a'
-#define CREATE_SCALE 's'
-#define CREATE_TRANSLATION 't'
-#define CREATE_ROT_X 'x'
-#define CREATE_ROT_Y 'y'
-#define CREATE_ROT_Z 'z'
-#define DRAW_FRAME 'v'
-#define SAVE_FRAME 'g'
-#define SET_IDENTITY 'i'
+#define ADD_LINE_CMD 'l'
+#define APPLY_TRANSFORM_CMD 'a'
+#define CREATE_SCALE_CMD 's'
+#define CREATE_TRANSLATION_CMD 't'
+#define CREATE_ROT_X_CMD 'x'
+#define CREATE_ROT_Y_CMD 'y'
+#define CREATE_ROT_Z_CMD 'z'
+#define DRAW_FRAME_CMD 'v'
+#define SAVE_FRAME_CMD 'g'
+#define SET_IDENTITY_CMD 'i'
 
 // evaluate the command located at command[0], accounting for the arguments,
 // if any are required, at command[1], and manipulate the Matrix_ts points and
@@ -30,55 +30,55 @@
 int evaluateCommand(char ** const command, Matrix_t * const points,
 	Matrix_t ** transform){
 	if(2 < strlen(command[0]))
-		return INVALID_CMD;
+		return CMD_INVALID_CMD ;
 
 	char cmdChar = command[0][0];
 
-	if(cmdChar == ADD_LINE){
+	if(cmdChar == ADD_LINE_CMD){
 		double x1, y1, z1, x2, y2, z2;
 		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf",
 			&x1, &y1, &z1, &x2, &y2, &z2) < 6)
-			return INVALID_ARGS;
+			return CMD_INVALID_ARGS;
 		addEdge(points, x1, y1, z1, x2, y2, z2);
 	}
 
-	else if(cmdChar == SET_IDENTITY){
+	else if(cmdChar == SET_IDENTITY_CMD){
 		freeMatrix(*transform);
 		*transform = createIdentity();
 	}
 
-	else if(cmdChar == CREATE_SCALE){
+	else if(cmdChar == CREATE_SCALE_CMD){
 		double sx, sy, sz;
 		if(sscanf(command[1], "%lf %lf %lf", &sx, &sy, &sz) < 3)
-			return INVALID_ARGS;
+			return CMD_INVALID_ARGS;
 		Matrix_t * scale = createScale(sx, sy, sz);
 		multiplyMatrix(scale, *transform);
 		freeMatrix(scale);
 	}
 
-	else if(cmdChar == CREATE_TRANSLATION){
+	else if(cmdChar == CREATE_TRANSLATION_CMD){
 		double tx, ty, tz;
 		if(sscanf(command[1], "%lf %lf %lf", &tx, &ty, &tz) < 3)
-			return INVALID_ARGS;
+			return CMD_INVALID_ARGS;
 		Matrix_t * translation = createTranslation(tx, ty, tz);
 		multiplyMatrix(translation, *transform);
 		freeMatrix(translation);
 	}
 
-	else if(cmdChar == CREATE_ROT_X || cmdChar == CREATE_ROT_Y ||
-		cmdChar == CREATE_ROT_Z ){
+	else if(cmdChar == CREATE_ROT_X_CMD || cmdChar == CREATE_ROT_Y_CMD ||
+		cmdChar == CREATE_ROT_Z_CMD ){
 
 		double theta;
 		if(sscanf(command[1], "%lf", &theta) < 1)
-			return INVALID_ARGS;
+			return CMD_INVALID_ARGS;
 
 		Matrix_t * rotation;
 		switch(cmdChar){
-			case CREATE_ROT_X:
+			case CREATE_ROT_X_CMD:
 				rotation = createRotation(X_AXIS, theta);
 				break;
 
-			case CREATE_ROT_Y:
+			case CREATE_ROT_Y_CMD:
 				rotation = createRotation(Y_AXIS, theta);
 				break;
 
@@ -91,17 +91,17 @@ int evaluateCommand(char ** const command, Matrix_t * const points,
 		freeMatrix(rotation);
 	}
 
-	else if(cmdChar == APPLY_TRANSFORM){
+	else if(cmdChar == APPLY_TRANSFORM_CMD){
 		multiplyMatrix(*transform, points);
 	}
 
-	else if(cmdChar == DRAW_FRAME){
+	else if(cmdChar == DRAW_FRAME_CMD){
 		clearScreen();
 		drawMatrixLines(points);
 		renderScreen();
 	}
 
-	else if(cmdChar == SAVE_FRAME){
+	else if(cmdChar == SAVE_FRAME_CMD){
 		clearScreen();
 		drawMatrixLines(points);
 		renderScreen();
@@ -115,21 +115,24 @@ int evaluateCommand(char ** const command, Matrix_t * const points,
 
 		if(writeScreen(command[1]) == -1){
 			ERROR("Failed to write file: %s.", filename);
-			return INVALID_ARGS;
+			return CMD_INVALID_ARGS;
 		}
 
 		free(filename);
 	}
 
-	else
-		return INVALID_CMD;
+	else if(cmdChar == HELP_CMD || cmdChar == EXIT_CMD )
+		return CMD_SPECIAL;
 
-	return VALID_EVAL;
+	else
+		return CMD_INVALID_CMD ;
+
+	return CMD_VALID_EVAL;
 }
 
 // indicate whether or not a char's corresponding command requires arguments
 int argsRequired(char cmd){
-	return cmd == ADD_LINE || cmd == CREATE_SCALE ||
-		cmd == CREATE_TRANSLATION || cmd == CREATE_ROT_X ||
-		cmd == CREATE_ROT_Y || cmd == CREATE_ROT_Z || cmd == SAVE_FRAME;
+	return cmd == ADD_LINE_CMD || cmd == CREATE_SCALE_CMD ||
+		cmd == CREATE_TRANSLATION_CMD || cmd == CREATE_ROT_X_CMD ||
+		cmd == CREATE_ROT_Y_CMD || cmd == CREATE_ROT_Z_CMD || cmd == SAVE_FRAME_CMD;
 }

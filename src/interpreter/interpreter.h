@@ -3,9 +3,15 @@
 #include "src/matrix.h"
 
 // status of evaluation of a single command
-#define VALID_EVAL 0
-#define INVALID_CMD 1
-#define INVALID_ARGS 2
+#define CMD_SPECIAL 0
+#define CMD_VALID_EVAL 1
+#define CMD_INVALID_CMD 2
+#define CMD_INVALID_ARGS 3
+
+#define HELP_CMD 'h'
+#define EXIT_CMD 'e'
+
+#define HELP_FILE_PATH "doc/shell_help.txt"
 
 int evaluateCommand(char ** const command, Matrix_t * const points,
 	Matrix_t ** transform);

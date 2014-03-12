@@ -27,6 +27,7 @@ static void scrollUp();
 static void scrollDown();
 static int moveLeft();
 static void moveRight();
+static void renderHelp();
 
 int g_curX, g_curY;     // cursor position in the buffer
 char ** g_buffer;       // buffer for text entered by user
@@ -159,6 +160,7 @@ static void evaluateNewline(){
 
 	if(g_enteringCommand && argsRequired(g_buffer[g_curY][0]))
 		g_enteringCommand = 0;
+
 	else {
 		int lnWithCmd;
 		if(g_enteringCommand)
@@ -167,21 +169,25 @@ static void evaluateNewline(){
 			lnWithCmd = g_curY - 1;
 
 		int status = evaluateCommand(&g_buffer[lnWithCmd], points, &transform);
-		if(status != VALID_EVAL){
-			char * errMsg = malloc(1000);
-
-			switch(status){
-				case INVALID_CMD:
-					sprintf(errMsg, "Invalid command: %c.",
-						g_buffer[lnWithCmd][0]);
-					break;
-
-				case INVALID_ARGS:
-					sprintf(errMsg, "Invalid arguments: %s", g_buffer[g_curY]);
-					break;
+		if(status != CMD_VALID_EVAL){
+			if(status == CMD_SPECIAL){
+				if(g_buffer[lnWithCmd][0] == EXIT_CMD)
+					g_running = 0;
+				else
+					renderHelp();
 			}
 
-			addVisualLine(errMsg);
+			else {
+				char * errMsg = malloc(1000);
+
+				if(status == CMD_INVALID_CMD)
+					sprintf(errMsg, "Invalid command: %c.",
+						g_buffer[lnWithCmd][0]);
+				else
+					sprintf(errMsg, "Invalid arguments: %s", g_buffer[g_curY]);
+
+				addVisualLine(errMsg);
+			}
 		}
 		g_enteringCommand = 1;
 	}
@@ -262,4 +268,23 @@ static int moveLeft(){
 static void moveRight(){
 	if(g_curX < (int)strlen(g_buffer[g_curY]))
 		g_curX++;
+}
+
+static void renderHelp(){
+	const int maxLineLen = 1000;
+
+	FILE * file = fopen(HELP_FILE_PATH, "r");
+	if(file == NULL){
+		ERROR("Failed to open file \"%s\"", HELP_FILE_PATH);
+		exit(EXIT_FAILURE);
+	}
+
+	char * line = malloc(maxLineLen);
+	while(fgets(line, maxLineLen, file) != NULL){
+		line[strlen(line) - 1] = '\0';  // remove newline
+		addVisualLine(line);
+		line = malloc(maxLineLen);
+	}
+
+	fclose(file);
 }

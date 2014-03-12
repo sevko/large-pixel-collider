@@ -23,7 +23,7 @@ run: all
 	@$(SHELL_TERMINAL) bin/$(PROJECT_NAME) $(SCRIPT_FILE)
 
 kill:
-	@killall -9 $(PROJECT_NAME)
+	@-killall -9 $(PROJECT_NAME)
 
 clean:
 	@rm -rf bin

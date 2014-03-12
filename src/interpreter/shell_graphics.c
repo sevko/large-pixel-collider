@@ -15,7 +15,7 @@ extern int g_enteringCommand, g_curX, g_curY;
 extern char ** g_buffer;
 
 static char ** g_visualBuffer;  // buffer containing text to appear in the shell
-static int g_numVisualLines;
+static int g_numVisualLines, g_visualY;
 
 // allocate shell graphics, initialize global variables
 void configureGraphicsShell(){
@@ -24,6 +24,8 @@ void configureGraphicsShell(){
 	nl();
 	scrollok(stdscr, TRUE);
 	keypad(stdscr, TRUE);
+	g_numVisualLines = 0;
+	g_visualY = 0;
 }
 
 // draw the shell's text-buffer contents to the screen
@@ -39,13 +41,20 @@ void renderShell(){
 	// as it's constantly changing
 	printw("%s%s", PROMPT_STRING, g_buffer[g_curY]);
 
-	move(g_numVisualLines, g_curX + LEFT_PADDING);
+	move(g_visualY, g_curX + LEFT_PADDING);
 }
 
 // add a line to the shell's visual buffer
 void addVisualLine(char * line){
-	g_visualBuffer = realloc(g_visualBuffer, ++g_numVisualLines * sizeof(char *));
+	g_visualBuffer = realloc(g_visualBuffer, ++g_numVisualLines *
+		sizeof(char *));
 	g_visualBuffer[g_numVisualLines - 1] = line;
+	g_visualY++;
+
+	int ind = 0;
+	while(line[ind])
+		if(line[ind++] == '\n')
+			g_visualY++;
 }
 
 // deallocate memory used by shell graphics
