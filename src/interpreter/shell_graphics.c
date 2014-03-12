@@ -8,14 +8,21 @@
 #include "src/interpreter/shell_graphics.h"
 
 // used to render a prompt character on the shell command-line
-#define LEFT_PADDING 2
-#define PROMPT_STRING "> "
+#define PROMPT_ARGS_OUTPUT "     "
+#define PROMPT_CMD  "CMD: "
+#define PROMPT_COLOR_NUM (LINE_TYPE_OUTPUT + 1)
+#define PROMPT_PADDING 5
 
 extern int g_enteringCommand, g_curX, g_curY;
 extern char ** g_buffer;
 
-static char ** g_visualBuffer;  // buffer containing text to appear in the shell
-static int g_numVisualLines, g_visualY;
+typedef struct {
+	char * line;
+	int type;
+} VisualLine_t;
+
+static VisualLine_t * g_visualBuffer;
+static int g_numVisualLines, g_visualY, g_hasColor;
 
 // allocate shell graphics, initialize global variables
 void configureGraphicsShell(){
@@ -24,6 +31,16 @@ void configureGraphicsShell(){
 	nl();
 	scrollok(stdscr, TRUE);
 	keypad(stdscr, TRUE);
+
+	if((g_hasColor = has_colors()) == TRUE){
+		start_color();
+		init_pair(LINE_TYPE_ARGS, COLOR_CYAN, COLOR_BLACK);
+		init_pair(LINE_TYPE_CMD, COLOR_BLUE, COLOR_BLACK);
+		init_pair(LINE_TYPE_ERROR, COLOR_RED, COLOR_BLACK);
+		init_pair(LINE_TYPE_OUTPUT, COLOR_WHITE, COLOR_BLACK);
+		init_pair(PROMPT_COLOR_NUM, COLOR_GREEN, COLOR_BLACK);
+	}
+
 	g_numVisualLines = 0;
 	g_visualY = 0;
 }
@@ -34,21 +51,51 @@ void renderShell(){
 
 	// draw static contents of the visual buffer
 	int line;
-	for(line = 0; line < g_numVisualLines; line++)
-		printw("%s%s\n", PROMPT_STRING, g_visualBuffer[line]);
+	for(line = 0; line < g_numVisualLines; line++){
+
+		// print prompt with color
+		int promptType = (g_visualBuffer[line].type == LINE_TYPE_CMD);
+		if(g_hasColor){
+			attron(COLOR_PAIR(PROMPT_COLOR_NUM));
+			printw("%s", (promptType)?PROMPT_CMD:PROMPT_ARGS_OUTPUT);
+			attroff(COLOR_PAIR(PROMPT_COLOR_NUM));
+
+			attron(COLOR_PAIR(g_visualBuffer[line].type));
+			printw("%s\n", g_visualBuffer[line].line);
+			attroff(COLOR_PAIR(g_visualBuffer[line].type));
+		}
+		else
+			printw("%s", (promptType)?PROMPT_CMD:PROMPT_ARGS_OUTPUT,
+				g_visualBuffer[line].line);
+	}
 
 	// draw the line being currently entered straight from the g_buffer,
 	// as it's constantly changing
-	printw("%s%s", PROMPT_STRING, g_buffer[g_curY]);
+	if(g_hasColor){
+		attron(COLOR_PAIR(PROMPT_COLOR_NUM));
+		printw("%s", (g_enteringCommand)?PROMPT_CMD:PROMPT_ARGS_OUTPUT);
+		attroff(COLOR_PAIR(PROMPT_COLOR_NUM));
 
-	move(g_visualY, g_curX + LEFT_PADDING);
+		attron(COLOR_PAIR((g_enteringCommand)?LINE_TYPE_CMD:LINE_TYPE_ARGS));
+		printw("%s", g_buffer[g_curY]);
+		attroff(COLOR_PAIR((g_enteringCommand)?LINE_TYPE_CMD:LINE_TYPE_ARGS));
+	}
+	else
+		printw("%s%s", (g_enteringCommand)?PROMPT_CMD:PROMPT_ARGS_OUTPUT,
+			g_buffer[g_curY]);
+
+	move(g_visualY, g_curX + PROMPT_PADDING);
 }
 
-// add a line to the shell's visual buffer
-void addVisualLine(char * line){
+// add a VisualLine_t with line of type to the shell's visual buffer
+void addVisualLine(char * line, int type){
 	g_visualBuffer = realloc(g_visualBuffer, ++g_numVisualLines *
-		sizeof(char *));
-	g_visualBuffer[g_numVisualLines - 1] = line;
+		sizeof(VisualLine_t));
+
+	g_visualBuffer[g_numVisualLines - 1] = (VisualLine_t){
+		.line = line,
+		.type = type
+	};
 	g_visualY++;
 
 	int ind = 0;
@@ -63,6 +110,6 @@ void freeGraphicsShell(){
 
 	int line;
 	for(line = 0; line < g_numVisualLines; line++)
-		free(g_visualBuffer[line]);
+		free(g_visualBuffer[line].line);
 	free(g_visualBuffer);
 }

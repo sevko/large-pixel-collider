@@ -29,11 +29,11 @@ static int moveLeft();
 static void moveRight();
 static void renderHelp();
 
-int g_curX, g_curY;     // cursor position in the buffer
+int g_curX, g_curY,     // cursor position in the buffer
+	g_enteringCommand;  // whether user is entering a command, or arguments
 char ** g_buffer;       // buffer for text entered by user
 
-static int g_running,   // whether the shell is still running
-	g_enteringCommand;  // whether user is entering a command, or arguments
+static int g_running;   // whether the shell is still running
 
 static int g_virtualY;  // last line scrolled to in the command-line history
 static char * g_tempCurrLine;   // store current (last) line when scrolling
@@ -105,7 +105,7 @@ static void configureShell(){
 
 	configureGraphicsShell();
 	renderShell();
-	configureScreen();
+	// configureScreen();
 }
 
 // deallocate all memory used by shell
@@ -120,7 +120,7 @@ static void freeShell(){
 	freeMatrices(2, points, transform);
 
 	freeGraphicsShell();
-	quitScreen();
+	// quitScreen();
 }
 
 // insert char key at the current cursor position
@@ -156,7 +156,7 @@ static void deleteChar(){
 static void evaluateNewline(){
 	char * visualLine = malloc(strlen(g_buffer[g_curY]) + 1);
 	strcpy(visualLine, g_buffer[g_curY]);
-	addVisualLine(visualLine);
+	addVisualLine(visualLine, (g_enteringCommand)?LINE_TYPE_CMD:LINE_TYPE_ARGS);
 
 	if(g_enteringCommand && argsRequired(g_buffer[g_curY][0]))
 		g_enteringCommand = 0;
@@ -186,7 +186,7 @@ static void evaluateNewline(){
 				else
 					sprintf(errMsg, "Invalid arguments: %s", g_buffer[g_curY]);
 
-				addVisualLine(errMsg);
+				addVisualLine(errMsg, LINE_TYPE_ERROR);
 			}
 		}
 		g_enteringCommand = 1;
@@ -282,7 +282,7 @@ static void renderHelp(){
 	char * line = malloc(maxLineLen);
 	while(fgets(line, maxLineLen, file) != NULL){
 		line[strlen(line) - 1] = '\0';  // remove newline
-		addVisualLine(line);
+		addVisualLine(line, LINE_TYPE_OUTPUT);
 		line = malloc(maxLineLen);
 	}
 

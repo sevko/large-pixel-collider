@@ -3,7 +3,7 @@ FLAGS = -O0 -g -Wall -Wextra -Werror -Wunreachable-code -I ./
 CC = gcc $(FLAGS)
 LIBS = -lm $(shell sdl-config --cflags --libs) -lncurses
 SHELL_TERMINAL = gnome-terminal --title="Graphics Engine: Shell" \
-	--geometry=108x49+1000 -e
+	--geometry=108x49+1000 --profile=Default -e
 
 # denotes whether SDL.h is located in subdir SDL/ of /usr/include;
 # used by src/screen.c
