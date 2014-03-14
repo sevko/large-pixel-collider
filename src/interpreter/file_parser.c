@@ -7,11 +7,9 @@
 
 #include "src/globals.h"
 #include "src/screen.h"
+#include "src/utils.h"
 #include "src/interpreter/file_parser.h"
 #include "src/interpreter/interpreter.h"
-
-#define MAX_SCRIPT_LINE_LENGTH 100      // hard-coded, but a reasonable limit
-#define COMMENT_CHAR '#'                // ignore lines beginning with this
 
 typedef struct {
 	char ** script;
@@ -23,30 +21,11 @@ static void freeScript(Script_t * const script);
 
 // read, and evaluate the contents of filePath in a char **
 void readScriptFile(const char * const filePath){
-	FILE * file = fopen(filePath, "r");
-	if(file == NULL){
-		ERROR("Failed to open file \"%s\"", filePath);
-		exit(EXIT_FAILURE);
-	}
-
-	char ** fileBuffer = malloc(sizeof(char *));
-	fileBuffer[0] = NULL;
-	int line = 0;
-
-	char * lineBuffer = malloc(MAX_SCRIPT_LINE_LENGTH);
-	while(fgets(lineBuffer, MAX_SCRIPT_LINE_LENGTH, file) != NULL)
-		if(!(lineBuffer[0] == COMMENT_CHAR || lineBuffer[0] == '\n')){
-			fileBuffer[line++] = lineBuffer;
-			fileBuffer = realloc(fileBuffer, (line + 1) * sizeof(char *));
-			lineBuffer = malloc(MAX_SCRIPT_LINE_LENGTH);
-		}
-	free(lineBuffer);
-
+	ScannedFile_t * file = readFile(filePath);
 	Script_t * script = malloc(sizeof(Script_t));
-	script->script = fileBuffer;
-	script->numLines = line;
-
-	fclose(file);
+	script->script = file->buffer;
+	script->numLines = file->numLines;
+	free(file);
 
 	evaluateScript(script);
 	freeScript(script);

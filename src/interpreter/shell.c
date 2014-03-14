@@ -10,6 +10,7 @@
 
 #include "src/globals.h"
 #include "src/screen.h"
+#include "src/utils.h"
 #include "src/interpreter/interpreter.h"
 #include "src/interpreter/shell.h"
 #include "src/interpreter/shell_graphics.h"
@@ -106,7 +107,7 @@ static void configureShell(){
 
 	configureGraphicsShell();
 	renderShell();
-	// configureScreen();
+	configureScreen();
 }
 
 // deallocate all memory used by shell
@@ -121,7 +122,7 @@ static void freeShell(){
 	freeMatrices(2, points, transform);
 
 	freeGraphicsShell();
-	// quitScreen();
+	quitScreen();
 }
 
 // insert char key at the current cursor position
@@ -272,21 +273,13 @@ static void moveRight(){
 		g_curX++;
 }
 
+// print help information to shell console
 static void renderHelp(){
-	const int maxLineLen = 1000;
-
-	FILE * file = fopen(HELP_FILE_PATH, "r");
-	if(file == NULL){
-		ERROR("Failed to open file \"%s\"", HELP_FILE_PATH);
-		exit(EXIT_FAILURE);
+	ScannedFile_t * file = readFile(HELP_FILE_PATH);
+	int line;
+	for(line = 0; line < file->numLines; line++){
+		file->buffer[line][strlen(file->buffer[line]) - 1] = '\0';
+		addVisualLine(file->buffer[line], LINE_TYPE_OUTPUT);
 	}
-
-	char * line = malloc(maxLineLen);
-	while(fgets(line, maxLineLen, file) != NULL){
-		line[strlen(line) - 1] = '\0';  // remove newline
-		addVisualLine(line, LINE_TYPE_OUTPUT);
-		line = malloc(maxLineLen);
-	}
-
-	fclose(file);
+	free(file);
 }

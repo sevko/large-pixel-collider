@@ -1,4 +1,7 @@
-#pragma once
+typedef struct {
+	char ** buffer;
+	int numLines;
+} ScannedFile_t;
 
-void drawLine(int x1, int y1, int x2, int y2);
-void drawPolygon(int numSides, int radius, int xOffset, int yOffset, int inclineAngle);
+ScannedFile_t * readFile(const char * const filename);
+void freeFile(ScannedFile_t * file);

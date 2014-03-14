@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 #include "src/matrix.h"
-#include "src/utils.h"
+#include "src/graphics.h"
 
 #define RAD (M_PI / 180)
 

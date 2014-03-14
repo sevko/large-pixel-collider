@@ -12,6 +12,8 @@
 #include "src/screen.h"
 #include "src/interpreter/interpreter.h"
 
+#define COMMENT_CHAR '#'                // ignore lines beginning with this
+
 // chars indicating commands in a script file
 #define ADD_LINE_CMD 'l'
 #define APPLY_TRANSFORM_CMD 'a'
@@ -29,12 +31,16 @@
 // transform accordingly; report back status of command evaluation.
 int evaluateCommand(char ** const command, Matrix_t * const points,
 	Matrix_t ** transform){
-	if(2 < strlen(command[0]))
-		return CMD_INVALID_CMD ;
-
 	char cmdChar = command[0][0];
 
-	if(cmdChar == ADD_LINE_CMD){
+	int len = strlen(command[0]);
+	if(cmdChar == '\n' || len == 0 || cmdChar == COMMENT_CHAR)
+		return CMD_VALID_EVAL;
+
+	else if(2 < len)
+		return CMD_INVALID_CMD ;
+
+	else if(cmdChar == ADD_LINE_CMD){
 		double x1, y1, z1, x2, y2, z2;
 		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf",
 			&x1, &y1, &z1, &x2, &y2, &z2) < 6)
@@ -113,7 +119,7 @@ int evaluateCommand(char ** const command, Matrix_t * const points,
 		if(filename[lenName - 1] == '\n')
 			filename[lenName - 1] = '\0';
 
-		if(writeScreen(command[1]) == -1){
+		if(writeScreen(filename) == -1){
 			ERROR("Failed to write file: %s.", filename);
 			return CMD_INVALID_ARGS;
 		}

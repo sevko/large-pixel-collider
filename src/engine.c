@@ -9,11 +9,11 @@
 #include <unistd.h>
 
 #include "src/globals.h"
+#include "src/graphics.h"
 #include "src/matrix.h"
+#include "src/screen.h"
 #include "src/interpreter/file_parser.h"
 #include "src/interpreter/shell.h"
-#include "src/screen.h"
-#include "src/utils.h"
 
 static void sigHandler(int sig);
 static void setup();
