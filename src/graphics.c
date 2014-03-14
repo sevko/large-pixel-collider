@@ -5,6 +5,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "src/graphics.h"
 #include "src/utils.h"
 #include "src/screen.h"
 
@@ -54,6 +55,22 @@ void drawLine(int x1, int y1, int x2, int y2){
 			x1 += dx2;
 			y1 += dy2;
 		}
+	}
+}
+
+// rasterize a circle with origin (oX, oY) and radius by adding edges to points
+void drawCircle(Matrix_t * points, double oX, double oY, double radius){
+	double theta = 1 / radius;
+	double tanFactor = tan(theta), radFactor = cos(theta);
+	double x = radius, y = 0;
+
+	int segment;
+	for(segment = 0; segment < radius * 2 * M_PI; segment++){
+		addPoint(points, x + oX, y + oY, 0);
+		float tempX = x;
+		x = (x - y * tanFactor) * radFactor;
+		y = (y + tempX * tanFactor) * radFactor;
+		addPoint(points, x + oX, y + oY, 0);
 	}
 }
 

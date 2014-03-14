@@ -7,6 +7,7 @@ A proof-of-concept graphics engine, implemented in C.
 The project's dependencies are:
 
 * [SDL][SDL]
+* [ncurses][ncurses]
 
 Install any necessary libraries with the enclosed shell-script:
 
@@ -27,3 +28,4 @@ make clean
 ```
 
 [SDL]: http://www.libsdl.org/
+[ncurses]: http://www.gnu.org/software/ncurses/

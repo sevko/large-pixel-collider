@@ -31,6 +31,8 @@ void configureScreen(){
 
 // plot pixel to screen
 void drawPixel(int x, int y) {
+	x += IMAGE_WIDTH / 2;
+	y += IMAGE_HEIGHT / 2;
 	if(x < 0 || IMAGE_WIDTH - 1 < x || y < 0 || IMAGE_HEIGHT - 1 < y)
 		return;
 
