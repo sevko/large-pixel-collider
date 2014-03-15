@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "src/globals.h"
 #include "src/screen.h"
@@ -59,6 +60,7 @@ static void evaluateScript(const Script_t * const script){
 			line++;
 	}
 
+	usleep(5e6);
 	freeMatrices(2, points, transform);
 	quitScreen();
 }

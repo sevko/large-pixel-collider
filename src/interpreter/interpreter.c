@@ -16,8 +16,10 @@
 #define COMMENT_CHAR '#'                // ignore lines beginning with this
 
 // chars indicating commands in a script file
-#define ADD_LINE_CMD 'l'
+#define ADD_BEZIER_CMD 'b'
 #define ADD_CIRCLE_CMD 'c'
+#define ADD_HERMITE_CMD 'h'
+#define ADD_LINE_CMD 'l'
 #define APPLY_TRANSFORM_CMD 'a'
 #define CREATE_SCALE_CMD 's'
 #define CREATE_TRANSLATION_CMD 't'
@@ -42,12 +44,12 @@ int evaluateCommand(char ** const command, Matrix_t * const points,
 	else if(2 < len)
 		return CMD_INVALID_CMD ;
 
-	else if(cmdChar == ADD_LINE_CMD){
-		double x1, y1, z1, x2, y2, z2;
-		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf",
-			&x1, &y1, &z1, &x2, &y2, &z2) < 6)
+	else if(cmdChar == ADD_BEZIER_CMD){
+		double x0, y0, x1, y1, x2, y2, x3, y3;
+		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf %lf %lf",
+			&x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3) < 8)
 			return CMD_INVALID_ARGS;
-		addEdge(points, x1, y1, z1, x2, y2, z2);
+		drawBezier(points, x0, y0, x1, y1, x2, y2, x3, y3);
 	}
 
 	else if(cmdChar == ADD_CIRCLE_CMD){
@@ -55,6 +57,22 @@ int evaluateCommand(char ** const command, Matrix_t * const points,
 		if(sscanf(command[1], "%lf %lf %lf", &oX, &oY, &radius) < 3)
 			return CMD_INVALID_ARGS;
 		drawCircle(points, oX, oY, radius);
+	}
+
+	else if(cmdChar == ADD_HERMITE_CMD){
+		double x0, y0, x1, y1, x2, y2, x3, y3;
+		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf %lf %lf",
+			&x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3) < 8)
+			return CMD_INVALID_ARGS;
+		drawHermite(points, x0, y0, x1, y1, x2, y2, x3, y3);
+	}
+
+	else if(cmdChar == ADD_LINE_CMD){
+		double x1, y1, z1, x2, y2, z2;
+		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf",
+			&x1, &y1, &z1, &x2, &y2, &z2) < 6)
+			return CMD_INVALID_ARGS;
+		addEdge(points, x1, y1, z1, x2, y2, z2);
 	}
 
 	else if(cmdChar == SET_IDENTITY_CMD){
@@ -147,8 +165,15 @@ int evaluateCommand(char ** const command, Matrix_t * const points,
 
 // indicate whether or not a char's corresponding command requires arguments
 int argsRequired(char cmd){
-	return cmd == ADD_LINE_CMD || cmd == ADD_CIRCLE_CMD || cmd ==
-		CREATE_SCALE_CMD || cmd == CREATE_TRANSLATION_CMD || cmd ==
-		CREATE_ROT_X_CMD || cmd == CREATE_ROT_Y_CMD || cmd == CREATE_ROT_Z_CMD
-		|| cmd == SAVE_FRAME_CMD;
+	return
+		cmd == ADD_BEZIER_CMD ||
+		cmd == ADD_CIRCLE_CMD ||
+		cmd == ADD_LINE_CMD ||
+		cmd == ADD_HERMITE_CMD ||
+		cmd == CREATE_SCALE_CMD ||
+		cmd == CREATE_TRANSLATION_CMD ||
+		cmd == CREATE_ROT_X_CMD ||
+		cmd == CREATE_ROT_Y_CMD ||
+		cmd == CREATE_ROT_Z_CMD ||
+		cmd == SAVE_FRAME_CMD;
 }
