@@ -9,6 +9,7 @@
 #include "src/screen.h"
 
 #define ABS(val) (val > 0?val:-val)
+#define INTERPOL(a, b) (a + (b - a) * t)
 
 // Bresenham rasterize line with endpoints (x1, y1) and (x2, y2)
 void drawLine(int x1, int y1, int x2, int y2){
@@ -70,5 +71,26 @@ void drawPolygon(Matrix_t * points, int oX, int oY, int radius, int numSides){
 		x = (x - y * tanFactor) * radFactor;
 		y = (y + tempX * tanFactor) * radFactor;
 		addPoint(points, x + oX, y + oY, 0);
+	}
+}
+
+void drawBezier(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
+	int y2, int x3, int y3){
+
+	double t;
+	for(t = 0; t < 1; t += 0.001){
+		double abX = INTERPOL(x0, x1);
+		double bcX = INTERPOL(x1, x2);
+		double cdX = INTERPOL(x2, x3);
+		double abbcX = INTERPOL(abX, bcX);
+		double bccdX = INTERPOL(bcX, cdX);
+
+		double abY = INTERPOL(y0, y1);
+		double bcY = INTERPOL(y1, y2);
+		double cdY = INTERPOL(y2, y3);
+		double bccdY = INTERPOL(bcY, cdY);
+		double abbcY = INTERPOL(abY, bcY);
+
+		addPoint(points, INTERPOL(abbcX, bccdX), INTERPOL(abbcY, bccdY), 0);
 	}
 }
