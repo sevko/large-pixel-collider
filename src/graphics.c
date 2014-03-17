@@ -9,7 +9,10 @@
 #include "src/screen.h"
 
 #define ABS(val) (val > 0?val:-val)
-#define INTERPOL(a, b) (a + (b - a) * t)
+#define INTERPOL(a, b) (a + (b - a) * t1)
+
+// number of steps used in plotting a curve
+#define CURVE_STEP_PRECISION 1e3
 
 // Bresenham rasterize line with endpoints (x1, y1) and (x2, y2)
 void drawLine(int x1, int y1, int x2, int y2){
@@ -79,8 +82,10 @@ void drawPolygon(Matrix_t * points, int oX, int oY, int radius, int numSides){
 void drawBezier(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 	int y2, int x3, int y3){
 
-	double t, abX, bcX, cdX, abbcX, bccdX, abY, bcY, cdY, bccdY, abbcY;
-	for(t = 0; t < 1; t += 0.001){
+	int t;
+	double t1, abX, bcX, cdX, abbcX, bccdX, abY, bcY, cdY, bccdY, abbcY;
+	for(t = 0; t < CURVE_STEP_PRECISION; t++){
+		t1 = t / CURVE_STEP_PRECISION;
 		abX = INTERPOL(x0, x1);
 		bcX = INTERPOL(x1, x2);
 		cdX = INTERPOL(x2, x3);
@@ -101,7 +106,6 @@ void drawBezier(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 // rates of change as calculated using (x1, y1) and (x3, y3).
 void drawHermite(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 	int y2, int x3, int y3){
-	float t;
 
 	// calculate rates of change
 	int r0X = x1 - x0, r0Y = y1 - y0;
@@ -120,13 +124,16 @@ void drawHermite(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 	float dX = x0;
 	float dY = y0;
 
-	float t3, t2, x, y;
-	for(t = 0.001; t < 1; t += 0.001){
-		t3 = t * t * t;
-		t2 = t * t;
+	float t1, t2, t3, x, y;
 
-		x = aX * t3 + bX * t2 + cX * t + dX;
-		y = aY * t3 + bY * t2 + cY * t + dY;
+	int t;
+	for(t = 0; t < CURVE_STEP_PRECISION; t++){
+		t1 = t / CURVE_STEP_PRECISION;
+		t3 = t1 * t1 * t1;
+		t2 = t1 * t1;
+
+		x = aX * t3 + bX * t2 + cX * t1 + dX;
+		y = aY * t3 + bY * t2 + cY * t1 + dY;
 		addPoint(points, x, y, 0);
 	}
 }
