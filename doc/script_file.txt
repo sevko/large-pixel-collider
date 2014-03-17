@@ -1,0 +1,6 @@
+I. Description
+$graphics_engine$ can read and execute plaintext files containing any script
+commands detailed in "doc/interpreter.txt". Empty lines and lines beginning with
+a "#" (comments) are ignored; the engine's parser will terminate with an
+error message if an invalid command or argument is detected, and specify the
+line number of the offending statement.

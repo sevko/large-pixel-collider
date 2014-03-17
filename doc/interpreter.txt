@@ -25,10 +25,11 @@ another, like so:
 	a
 	i
 
-'v' renders the screen, 'a' applies the current transformation matrix to the
-current points matrix, and 'i' sets the transformation matrix equal to an
-identity matrix.
+In the example, 'v' renders the screen, 'a' applies the current transformation
+matrix to the current points matrix, and 'i' sets the transformation matrix
+equal to an identity matrix.
 
+Empty lines and lines beginning with "#" (comments) are ignored.
 
 III. Commands documentation format
 A given command will have the following documentation:
