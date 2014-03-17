@@ -1,48 +1,101 @@
+I. Description
 $graphics_engine$ supports an internal scripting language, which can be invoked
 either with script files (script_file.txt) or through the interactive shell
-(shell.txt). The available commands are detailed below:
+(shell.txt).
 
+
+II. Command format
+The $graphics_engine$ scripting language consists of single-character commands
+followed by, if arguments are necessary, a new line with space-delimited
+arguments. A script file, for instance, may contain the following two lines
+(indented only for readability -- whitespace at the beginning of a line in the
+file would case a parsing error):
+
+	l
+	10 30 0 50 60 70
+
+'l' specifies the command, which, as it happens, adds a line to the current
+point matrix in the form of two endpoints: (x0, y0, z0) & (x1, y1, z1), or
+(10, 30, 0) & (50, 60, 70).
+
+Commands that don't require arguments are simply entered on lines one after
+another, like so:
+
+	v
+	a
+	i
+
+'v' renders the screen, 'a' applies the current transformation matrix to the
+current points matrix, and 'i' sets the transformation matrix equal to an
+identity matrix.
+
+
+III. Commands documentation format
+A given command will have the following documentation:
+
+	Command: the command character
+	(optional)Arguments: if arguments are necessary, a C-style format string
+		that denotes the data type of the argument.
+	(optional)Verbose: if arguments are necessary, a list of arguments with
+		descriptive names each prepended with a '%'.
+	Description: a description of the command's functionality.
+
+Example commands (these don't actually exist):
+	Command: 'x'
+	Arguments: %d %s %s
+	Verbose: %numLines %fileformat %filename
+	Description: draw %numLines lines from the current points matrix to a file
+		of format %fileformat named %filename.
+
+	or
+
+	Command: 'o'
+	Description: draws "Hello world!" to the screen.
+
+
+IIII. Commands
 Add a Bezier curve:
-	command: 'b'
-	arguments: %d %d %d %d %d %d %d %d
-	arguments-verbose: %x0 %y0 %x1 %y1 %x2 %y2 %x3 %y3
-	description: add a cubic bezier spline with the four control points
-	specified in the arguments -- 
-		pt0: (%x0, %y0)
-		pt1: (%x1, %y1)
-		pt2: (%x2, %y2)
-		pt3: (%x3, %y3)
+	Command: 'b'
+	Arguments: %d %d %d %d %d %d %d %d
+	Arguments-verbose: %x0 %y0 %x1 %y1 %x2 %y2 %x3 %y3
+	Description: add a cubic bezier spline with the four control points
+		specified in the arguments -- 
 
-	-- to the point matrix. pt0 and pt3 are the endpoints of the curve.
+			pt0: (%x0, %y0)
+			pt1: (%x1, %y1)
+			pt2: (%x2, %y2)
+			pt3: (%x3, %y3)
+
+		-- to the point matrix. pt0 and pt3 are the endpoints of the curve.
 
 Add a circle:
 	Command: 'c'
 	Arguments: %d %d %d
 	Verbose: %oX %oY %radius
 	Description: add a circle with origin (oX, oY) and a radius equal to
-	%radius to the point matrix.
+		%radius to the point matrix.
 
 Add a Hermite curve:
 	Command: 'h'
 	Arguments: %d %d %d %d %d %d %d %d
 	Verbose: %x0 %y0 %x1 %y1 %x2 %y2 %x3 %y3
 	Description: add a Hermite curve to the point matrix, with points as
-	specified in the arguments.
+		specified in the arguments.
 
-		pt0: (%x0, %y0)
-		pt1: (%x1, %y1)
-		pt2: (%x2, %y2)
-		pt3: (%x3, %y3)
+			pt0: (%x0, %y0)
+			pt1: (%x1, %y1)
+			pt2: (%x2, %y2)
+			pt3: (%x3, %y3)
 
-	pt0 and pt2 are the endpoints of the curve, while pt1 and pt3 are used to
-	calculate the slopes at pt0 and pt2 respectively.
+		pt0 and pt2 are the endpoints of the curve, while pt1 and pt3 are used
+		to calculate the slopes at pt0 and pt2 respectively.
 
 Add a line:
 	Command: 'l'
 	Arguments: %d %d %d %d %d %d
 	Verbose: %x1 %y1 %z1 %x2 %y2 %z2
 	Description: add an edge (line) to the point matrix with endpoints
-	(%x1, %y1, %z1) and (%x2, %y2, %z2).
+		(%x1, %y1, %z1) and (%x2, %y2, %z2).
 
 Apply the transformation matrix: 'a'
 create scale transformation:
@@ -54,28 +107,28 @@ Create a translation:
 	Arguments: %d %d %d
 	Verbose: %x %y %z
 	Description: multiply the transformation matrix by a matrix that translates
-	a set of points %x, %y, and %z along the x, y, and z axes respectively.
+		a set of points %x, %y, and %z along the x, y, and z axes respectively.
 
 Create a rotation through x-axis:
 	Command: 'x'
 	Arguments: %d
 	Verbose: %theta
 	Description: multiply the transformation matrix by a matrix that rotates a
-	given set of points through %theta in the x-axis.
+		given set of points through %theta in the x-axis.
 
 Create a rotation through y-axis:
 	Command: 'y'
 	Arguments: %d
 	Verbose: %theta
 	Description: multiply the transformation matrix by a matrix that rotates a
-	given set of points through %theta in the y-axis.
+		given set of points through %theta in the y-axis.
 
 Create a rotation through z-axis:
 	Command: 'z'
 	Arguments: %d
 	Verbose: %theta
 	Description: multiply the transformation matrix by a matrix that rotates a
-	given set of points through %theta in the z-axis.
+		given set of points through %theta in the z-axis.
 
 Draw points to the screen:
 	Command: 'v'
@@ -86,9 +139,9 @@ Draw points to the screen, and save it to a file:
 	Arguments: %s
 	Verbose: %filename
 	Description: render the current points matrix on the screen, and save said
-	screen to a PNG file named filename.
+		screen to a PNG file named filename.
 
 Set the transformation matrix to an identity matrix: 'i'
 	Command: 'i'
 	Description: set the current transformation matrix to the identity matrix
-	(which, when multiplied into a points matrix, has no effect).
+		(which, when multiplied into a points matrix, has no effect).
