@@ -1,16 +1,9 @@
 PROJECT_NAME = engine
 FLAGS = -O0 -g -Wall -Wextra -Werror -Wunreachable-code -I ./
 CC = gcc $(FLAGS)
-LIBS = -lm $(shell sdl-config --cflags --libs) -lncurses
+LIBS = -lm $(shell sdl-config --libs) -lncurses
 SHELL_TERMINAL = gnome-terminal --title="Graphics Engine: Shell" \
 	--geometry=108x49+1000 --profile=Default -e
-
-# denotes whether SDL.h is located in subdir SDL/ of /usr/include;
-# used by src/screen.c
-SDL_HEADER_LOCATION =
-ifeq ($(wildcard /usr/include/SDL.h),)
-	SDL_HEADER_LOCATION = -DSDL_SUBDIR_HEADER
-endif
 
 SRC = $(wildcard src/*.c src/**/*.c)
 OBJ = $(patsubst %.c, bin/%.o, $(foreach srcFile, $(SRC), $(notdir $(srcFile))))
@@ -38,7 +31,7 @@ bin/%.o: src/%.c
 	$(CC) -o $@ -c $^
 
 bin/screen.o: src/screen.c
-	$(CC) -o $@ -c $^ $(SDL_HEADER_LOCATION)
+	$(CC) -o $@ -c $^ $(shell sdl-config --cflags)
 
 bin/%.o: src/interpreter/%.c
 	$(CC) -o $@ -c $^

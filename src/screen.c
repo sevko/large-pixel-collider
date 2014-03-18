@@ -3,11 +3,7 @@
  *  SDL GUI.
 */
 
-#ifdef SDL_SUBDIR_HEADER
-	#include <SDL/SDL.h>
-#else
-	#include <SDL.h>
-#endif
+#include <SDL.h>
 
 #include "src/globals.h"
 #include "src/screen.h"
