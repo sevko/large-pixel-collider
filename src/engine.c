@@ -22,11 +22,29 @@ static void setup();
 void testPolygon(){
 	configureScreen();
 	Matrix_t * points = createMatrix();
-	drawCircle(points, 0, 0, 100);
-	multiplyMatrix(createScale(2, 2, 2), points);
-	drawMatrixLines(points);
-	renderScreen();
+	Matrix_t * xRot = createRotation(X_AXIS, 1);
+	Matrix_t * yRot = createRotation(Y_AXIS, 1);
+	Matrix_t * zRot = createRotation(Z_AXIS, 1);
+
+	addEdge(points, 200, 0, 0, -200, 0, 0);
+	addEdge(points, 0, 200, 0, 0, -200, 0);
+	addEdge(points, 0, 0, 200, 0, 0, -200);
+	addSphere(points, 0, 0, 200);
+
+	int i;
+	for(i = 0; i < 1000; i++){
+		clearScreen();
+		multiplyMatrix(xRot, points);
+		multiplyMatrix(yRot, points);
+		multiplyMatrix(zRot, points);
+		drawMatrixLines(points);
+		renderScreen();
+		usleep(1e6 / 60);
+	}
+
 	usleep(10e6);
+
+	freeMatrices(2, zRot, points);
 	quitScreen();
 }
 
@@ -45,8 +63,8 @@ int main(int argc, char * argv[]){
 	setup();
 	if(1 < argc)
 		readScriptFile(argv[1]);
-	// else
-		// shell();
-	testPolygon();
+	else
+		shell();
+	// testPolygon();
 	return EXIT_SUCCESS;
 }

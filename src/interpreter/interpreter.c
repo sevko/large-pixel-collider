@@ -8,7 +8,6 @@
 #include <string.h>
 
 #include "src/globals.h"
-#include "src/graphics.h"
 #include "src/matrix.h"
 #include "src/screen.h"
 #include "src/interpreter/interpreter.h"
@@ -49,14 +48,14 @@ int evaluateCommand(char ** const command, Matrix_t * const points,
 		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf %lf %lf",
 			&x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3) < 8)
 			return CMD_INVALID_ARGS;
-		drawBezier(points, x0, y0, x1, y1, x2, y2, x3, y3);
+		addBezier(points, x0, y0, x1, y1, x2, y2, x3, y3);
 	}
 
 	else if(cmdChar == ADD_CIRCLE_CMD){
 		double oX, oY, radius;
 		if(sscanf(command[1], "%lf %lf %lf", &oX, &oY, &radius) < 3)
 			return CMD_INVALID_ARGS;
-		drawCircle(points, oX, oY, radius);
+		addCircle(points, oX, oY, radius);
 	}
 
 	else if(cmdChar == ADD_HERMITE_CMD){
@@ -64,7 +63,7 @@ int evaluateCommand(char ** const command, Matrix_t * const points,
 		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf %lf %lf",
 			&x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3) < 8)
 			return CMD_INVALID_ARGS;
-		drawHermite(points, x0, y0, x1, y1, x2, y2, x3, y3);
+		addHermite(points, x0, y0, x1, y1, x2, y2, x3, y3);
 	}
 
 	else if(cmdChar == ADD_LINE_CMD){
