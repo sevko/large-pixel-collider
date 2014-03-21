@@ -195,6 +195,7 @@ void addSphere(Matrix_t * points, double oX, double oY, double radius){
 	}
 }
 
+// 
 void addTorus(Matrix_t * points, double oX, double oY, double rad1,
 	double rad2){
 	Matrix_t * torus = generateTorus(oX, oY, rad1, rad2);
@@ -227,13 +228,16 @@ Matrix_t * generateSphere(double oX, double oY, double radius){
 	return sphere;
 }
 
+// return a Matrix_t with the points of a torus centered on (oX, oY), with a
+// ring of radius rad1, the constituent circles of which are centered along a
+// circle of rad2 centered on the torus's origin.
 Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2){
 	Matrix_t * torus = createMatrix();
 	Matrix_t * yRot = createRotation(Y_AXIS, 4);
 
 	int degree;
 	for(degree = 0; degree < 360; degree += 4){
-		addCircle(torus, rad1, 0, rad2);
+		addCircle(torus, rad2, 0, rad1);
 		multiplyMatrix(yRot, torus);
 	}
 

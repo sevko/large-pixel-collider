@@ -98,10 +98,43 @@ Add a line:
 	Description: add an edge (line) to the point matrix with endpoints
 		(%x1, %y1, %z1) and (%x2, %y2, %z2).
 
-Apply the transformation matrix: 'a'
-create scale transformation:
-	Command: 's'
+Add a rectangular prism:
+	Command: 'p'
+	Arguments: %d %d %d %d %d %d
+	Verbose: %x %y %z %width %height %depth
+	Description: add a rectangular prism to the points matrix with upper-left
+	corner (%x, %y, %z), width %width, height %height, and depth %depth.
+
+Add a sphere:
+	Command: 'm'
+	Arguments: %d %d %d
+	Verbose: %x %y %radius
+	Description: add a sphere to the points matrix centered on (%x, %y, 0) with
+	radius %radius.
+
+Add a torus:
+	Command: 'd'
+	Arguments: %d %d %d %d
+	Verbose: %x %y %rad1 %rad2
+	Description: add a torus to the points matrix centered on (%x, %y, 0) with a
+	ring of radius %rad1, the constituent circles of which are centered on a
+	circle of %rad2.
+
+Apply the transformation matrix:
+	Command: 'a'
 	Description: apply the current transformation matrix to the points matrix.
+
+Clear points matrix:
+	Command: 'w'
+	Description: clears the current points matrix.
+
+Create scale transformation:
+	Command: 's'
+	Arguments: %d %d %d
+	Verbose: %x %y %z
+	Description:  multiply the transformation matrix by a matrix that scales a
+	set of points by factor of %x, %y, and %z along the x, y, and z axes
+	respectively.
 
 Create a translation:
 	Command: 't'

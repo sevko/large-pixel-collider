@@ -27,7 +27,7 @@ void testPolygon(){
 	Matrix_t * zRot = createRotation(Z_AXIS, 1);
 
 	addEdge(points, 0, 200, 0, 0, -200, 0);
-	addTorus(points, 100, 100, 100, 50);
+	addTorus(points, 100, 100, 50, 100);
 
 	int i;
 	for(i = 0; i < 1000; i++){
@@ -37,8 +37,6 @@ void testPolygon(){
 		renderScreen();
 		usleep(1e6 / 60);
 	}
-
-	usleep(10e6);
 
 	freeMatrices(4, xRot, yRot, zRot, points);
 	quitScreen();
@@ -61,6 +59,6 @@ int main(int argc, char * argv[]){
 		readScriptFile(argv[1]);
 	// else
 		// shell();
-	testPolygon();
+	// testPolygon();
 	return EXIT_SUCCESS;
 }

@@ -19,7 +19,11 @@
 #define ADD_CIRCLE_CMD 'c'
 #define ADD_HERMITE_CMD 'h'
 #define ADD_LINE_CMD 'l'
+#define ADD_RECT_PRISM_CMD 'p'
+#define ADD_SPHERE_CMD 'm'
+#define ADD_TORUS_CMD 'd'
 #define APPLY_TRANSFORM_CMD 'a'
+#define CLEAR_POINTS_CMD 'w'
 #define CREATE_SCALE_CMD 's'
 #define CREATE_TRANSLATION_CMD 't'
 #define CREATE_ROT_X_CMD 'x'
@@ -32,7 +36,7 @@
 // evaluate the command located at command[0], accounting for the arguments,
 // if any are required, at command[1], and manipulate the Matrix_ts points and
 // transform accordingly; report back status of command evaluation.
-int evaluateCommand(char ** const command, Matrix_t * const points,
+int evaluateCommand(char ** const command, Matrix_t * points,
 	Matrix_t ** transform){
 	char cmdChar = command[0][0];
 
@@ -74,27 +78,34 @@ int evaluateCommand(char ** const command, Matrix_t * const points,
 		addEdge(points, x1, y1, z1, x2, y2, z2);
 	}
 
-	else if(cmdChar == SET_IDENTITY_CMD){
-		freeMatrix(*transform);
-		*transform = createIdentity();
+	else if(cmdChar == ADD_RECT_PRISM_CMD){
+		double x, y, z, width, height, depth;
+		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf",
+			&x, &y, &z, &width, &height, &depth) < 6)
+			return CMD_INVALID_ARGS;
+		addRectangularPrism(points, x, y, z, width, height, depth);
 	}
 
-	else if(cmdChar == CREATE_SCALE_CMD){
-		double sx, sy, sz;
-		if(sscanf(command[1], "%lf %lf %lf", &sx, &sy, &sz) < 3)
+	else if(cmdChar == ADD_SPHERE_CMD){
+		double x, y, radius;
+		if(sscanf(command[1], "%lf %lf %lf", &x, &y, &radius) < 3)
 			return CMD_INVALID_ARGS;
-		Matrix_t * scale = createScale(sx, sy, sz);
-		multiplyMatrix(scale, *transform);
-		freeMatrix(scale);
+		addSphere(points, x, y, radius);
 	}
 
-	else if(cmdChar == CREATE_TRANSLATION_CMD){
-		double tx, ty, tz;
-		if(sscanf(command[1], "%lf %lf %lf", &tx, &ty, &tz) < 3)
+	else if(cmdChar == ADD_TORUS_CMD){
+		double x, y, rad1, rad2;
+		if(sscanf(command[1], "%lf %lf %lf %lf", &x, &y, &rad1, &rad2) < 4)
 			return CMD_INVALID_ARGS;
-		Matrix_t * translation = createTranslation(tx, ty, tz);
-		multiplyMatrix(translation, *transform);
-		freeMatrix(translation);
+		addTorus(points, x, y, rad1, rad2);
+	}
+
+	else if(cmdChar == APPLY_TRANSFORM_CMD)
+		multiplyMatrix(*transform, points);
+
+	else if(cmdChar == CLEAR_POINTS_CMD){
+		freeMatrix(points);
+		points = createMatrix();
 	}
 
 	else if(cmdChar == CREATE_ROT_X_CMD || cmdChar == CREATE_ROT_Y_CMD ||
@@ -123,8 +134,22 @@ int evaluateCommand(char ** const command, Matrix_t * const points,
 		freeMatrix(rotation);
 	}
 
-	else if(cmdChar == APPLY_TRANSFORM_CMD){
-		multiplyMatrix(*transform, points);
+	else if(cmdChar == CREATE_SCALE_CMD){
+		double sx, sy, sz;
+		if(sscanf(command[1], "%lf %lf %lf", &sx, &sy, &sz) < 3)
+			return CMD_INVALID_ARGS;
+		Matrix_t * scale = createScale(sx, sy, sz);
+		multiplyMatrix(scale, *transform);
+		freeMatrix(scale);
+	}
+
+	else if(cmdChar == CREATE_TRANSLATION_CMD){
+		double tx, ty, tz;
+		if(sscanf(command[1], "%lf %lf %lf", &tx, &ty, &tz) < 3)
+			return CMD_INVALID_ARGS;
+		Matrix_t * translation = createTranslation(tx, ty, tz);
+		multiplyMatrix(translation, *transform);
+		freeMatrix(translation);
 	}
 
 	else if(cmdChar == DRAW_FRAME_CMD){
@@ -132,6 +157,9 @@ int evaluateCommand(char ** const command, Matrix_t * const points,
 		drawMatrixLines(points);
 		renderScreen();
 	}
+
+	else if(cmdChar == HELP_CMD || cmdChar == EXIT_CMD )
+		return CMD_SPECIAL;
 
 	else if(cmdChar == SAVE_FRAME_CMD){
 		clearScreen();
@@ -153,8 +181,10 @@ int evaluateCommand(char ** const command, Matrix_t * const points,
 		free(filename);
 	}
 
-	else if(cmdChar == HELP_CMD || cmdChar == EXIT_CMD )
-		return CMD_SPECIAL;
+	else if(cmdChar == SET_IDENTITY_CMD){
+		freeMatrix(*transform);
+		*transform = createIdentity();
+	}
 
 	else
 		return CMD_INVALID_CMD ;
@@ -168,6 +198,9 @@ int argsRequired(char cmd){
 		cmd == ADD_BEZIER_CMD ||
 		cmd == ADD_CIRCLE_CMD ||
 		cmd == ADD_LINE_CMD ||
+		cmd == ADD_RECT_PRISM_CMD ||
+		cmd == ADD_SPHERE_CMD ||
+		cmd == ADD_TORUS_CMD ||
 		cmd == ADD_HERMITE_CMD ||
 		cmd == CREATE_SCALE_CMD ||
 		cmd == CREATE_TRANSLATION_CMD ||
