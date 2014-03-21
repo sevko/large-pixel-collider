@@ -34,7 +34,7 @@ void readScriptFile(const char * const filePath){
 
 // evaluate each of the commands in the Script_t
 static void evaluateScript(const Script_t * const script){
-	// configureScreen();
+	configureScreen();
 	Matrix_t * points = createMatrix(), * transform = createIdentity();
 
 	int line;
@@ -61,9 +61,9 @@ static void evaluateScript(const Script_t * const script){
 			line++;
 	}
 
-	// usleep(5e6);
+	usleep(5e6);
 	freeMatrices(2, points, transform);
-	// quitScreen();
+	quitScreen();
 }
 
 // deallocate a Script_t and all internal pointers

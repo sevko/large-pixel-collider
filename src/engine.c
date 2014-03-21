@@ -18,30 +18,6 @@
 static void sigHandler(int sig);
 static void setup();
 
-// function to test drawPolygon() and drawCircle()
-void testPolygon(){
-	configureScreen();
-	Matrix_t * points = createMatrix();
-	Matrix_t * xRot = createRotation(X_AXIS, 1);
-	Matrix_t * yRot = createRotation(Y_AXIS, 1);
-	Matrix_t * zRot = createRotation(Z_AXIS, 1);
-
-	addEdge(points, 0, 200, 0, 0, -200, 0);
-	addTorus(points, 100, 100, 50, 100);
-
-	int i;
-	for(i = 0; i < 1000; i++){
-		clearScreen();
-		multiplyMatrices(4, xRot, yRot, zRot, points);
-		drawMatrixLines(points);
-		renderScreen();
-		usleep(1e6 / 60);
-	}
-
-	freeMatrices(4, xRot, yRot, zRot, points);
-	quitScreen();
-}
-
 // establish signal handler for SIGINT
 static void sigHandler(int sig){
 	(void)sig;
