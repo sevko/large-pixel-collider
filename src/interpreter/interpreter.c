@@ -36,7 +36,7 @@
 // evaluate the command located at command[0], accounting for the arguments,
 // if any are required, at command[1], and manipulate the Matrix_ts points and
 // transform accordingly; report back status of command evaluation.
-int evaluateCommand(char ** const command, Matrix_t * points,
+int evaluateCommand(char ** const command, Matrix_t ** points,
 	Matrix_t ** transform){
 	char cmdChar = command[0][0];
 
@@ -52,14 +52,14 @@ int evaluateCommand(char ** const command, Matrix_t * points,
 		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf %lf %lf",
 			&x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3) < 8)
 			return CMD_INVALID_ARGS;
-		addBezier(points, x0, y0, x1, y1, x2, y2, x3, y3);
+		addBezier(*points, x0, y0, x1, y1, x2, y2, x3, y3);
 	}
 
 	else if(cmdChar == ADD_CIRCLE_CMD){
 		double oX, oY, radius;
 		if(sscanf(command[1], "%lf %lf %lf", &oX, &oY, &radius) < 3)
 			return CMD_INVALID_ARGS;
-		addCircle(points, oX, oY, radius);
+		addCircle(*points, oX, oY, radius);
 	}
 
 	else if(cmdChar == ADD_HERMITE_CMD){
@@ -67,7 +67,7 @@ int evaluateCommand(char ** const command, Matrix_t * points,
 		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf %lf %lf",
 			&x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3) < 8)
 			return CMD_INVALID_ARGS;
-		addHermite(points, x0, y0, x1, y1, x2, y2, x3, y3);
+		addHermite(*points, x0, y0, x1, y1, x2, y2, x3, y3);
 	}
 
 	else if(cmdChar == ADD_LINE_CMD){
@@ -75,7 +75,7 @@ int evaluateCommand(char ** const command, Matrix_t * points,
 		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf",
 			&x1, &y1, &z1, &x2, &y2, &z2) < 6)
 			return CMD_INVALID_ARGS;
-		addEdge(points, x1, y1, z1, x2, y2, z2);
+		addEdge(*points, x1, y1, z1, x2, y2, z2);
 	}
 
 	else if(cmdChar == ADD_RECT_PRISM_CMD){
@@ -83,29 +83,29 @@ int evaluateCommand(char ** const command, Matrix_t * points,
 		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf",
 			&x, &y, &z, &width, &height, &depth) < 6)
 			return CMD_INVALID_ARGS;
-		addRectangularPrism(points, x, y, z, width, height, depth);
+		addRectangularPrism(*points, x, y, z, width, height, depth);
 	}
 
 	else if(cmdChar == ADD_SPHERE_CMD){
 		double x, y, radius;
 		if(sscanf(command[1], "%lf %lf %lf", &x, &y, &radius) < 3)
 			return CMD_INVALID_ARGS;
-		addSphere(points, x, y, radius);
+		addSphere(*points, x, y, radius);
 	}
 
 	else if(cmdChar == ADD_TORUS_CMD){
 		double x, y, rad1, rad2;
 		if(sscanf(command[1], "%lf %lf %lf %lf", &x, &y, &rad1, &rad2) < 4)
 			return CMD_INVALID_ARGS;
-		addTorus(points, x, y, rad1, rad2);
+		addTorus(*points, x, y, rad1, rad2);
 	}
 
 	else if(cmdChar == APPLY_TRANSFORM_CMD)
-		multiplyMatrix(*transform, points);
+		multiplyMatrix(*transform, *points);
 
 	else if(cmdChar == CLEAR_POINTS_CMD){
-		freeMatrix(points);
-		points = createMatrix();
+		freeMatrix(*points);
+		*points = createMatrix();
 	}
 
 	else if(cmdChar == CREATE_ROT_X_CMD || cmdChar == CREATE_ROT_Y_CMD ||
@@ -154,7 +154,7 @@ int evaluateCommand(char ** const command, Matrix_t * points,
 
 	else if(cmdChar == DRAW_FRAME_CMD){
 		clearScreen();
-		drawMatrixLines(points);
+		drawMatrixLines(*points);
 		renderScreen();
 	}
 
@@ -163,7 +163,7 @@ int evaluateCommand(char ** const command, Matrix_t * points,
 
 	else if(cmdChar == SAVE_FRAME_CMD){
 		clearScreen();
-		drawMatrixLines(points);
+		drawMatrixLines(*points);
 		renderScreen();
 
 		int lenName = strlen(command[1]);

@@ -13,6 +13,6 @@
 
 #define HELP_FILE_PATH "doc/shell_help.txt"
 
-int evaluateCommand(char ** const command, Matrix_t * points,
+int evaluateCommand(char ** const command, Matrix_t ** points,
 	Matrix_t ** transform);
 int argsRequired(char cmd);

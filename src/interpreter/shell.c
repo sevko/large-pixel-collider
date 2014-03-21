@@ -170,7 +170,7 @@ static void evaluateNewline(){
 		else
 			lnWithCmd = g_curY - 1;
 
-		int status = evaluateCommand(&g_buffer[lnWithCmd], points, &transform);
+		int status = evaluateCommand(&g_buffer[lnWithCmd], &points, &transform);
 		if(status != CMD_VALID_EVAL){
 			if(status == CMD_SPECIAL){
 				if(g_buffer[lnWithCmd][0] == EXIT_CMD)

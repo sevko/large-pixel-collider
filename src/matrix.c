@@ -181,8 +181,8 @@ void addRectangularPrism(Matrix_t * points, double x, double y, double z,
 	addEdge(points, x, y - height, z, x, y - height, z - depth);
 }
 
-// add the points of a sphere centered on (oX, oY) with the given radius to the
-// argument Matrix_t.
+// add the points of a sphere to points, centered on (oX, oY) with the given
+// radius to the argument Matrix_t.
 void addSphere(Matrix_t * points, double oX, double oY, double radius){
 	Matrix_t * sphere = generateSphere(oX, oY, radius);
 
@@ -193,9 +193,12 @@ void addSphere(Matrix_t * points, double oX, double oY, double radius){
 		addPoint(points, sphere->points[0][point], sphere->points[1][point],
 			sphere->points[2][point]);
 	}
+	freeMatrix(sphere);
 }
 
-// 
+// add the points of a torus to points centered on (oX, oY), with a ring of
+// radius rad1, the constituent circles of which are centered along a circle of
+// rad2 centered on the torus's origin.
 void addTorus(Matrix_t * points, double oX, double oY, double rad1,
 	double rad2){
 	Matrix_t * torus = generateTorus(oX, oY, rad1, rad2);
@@ -207,6 +210,7 @@ void addTorus(Matrix_t * points, double oX, double oY, double rad1,
 		addPoint(points, torus->points[0][point], torus->points[1][point],
 			torus->points[2][point]);
 	}
+	freeMatrix(torus);
 }
 
 // return a Matrix_t with the points of a sphere centered on (oX, oY) with the

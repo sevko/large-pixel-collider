@@ -1,5 +1,5 @@
 PROJECT_NAME = engine
-FLAGS = -O0 -g -Wall -Wextra -Werror -Wunreachable-code -I ./
+FLAGS = -Ofast -Wall -Wextra -Werror -Wunreachable-code -I ./
 CC = gcc $(FLAGS)
 LIBS = -lm $(shell sdl-config --libs) -lncurses
 SHELL_TERMINAL = gnome-terminal --title="Graphics Engine: Shell" \
@@ -13,14 +13,17 @@ OBJ = $(patsubst %.c, bin/%.o, $(foreach srcFile, $(SRC), $(notdir $(srcFile))))
 all: bin bin/$(PROJECT_NAME)
 
 run: all
-	@$(SHELL_TERMINAL) bin/$(PROJECT_NAME) $(SCRIPT_FILE)
+	@if [ "$(SCRIPT_FILE)" != "" ]; then \
+		bin/$(PROJECT_NAME) $(SCRIPT_FILE); \
+	else \
+		$(SHELL_TERMINAL) bin/$(PROJECT_NAME); \
+	fi
 
 kill:
 	@-killall -9 $(PROJECT_NAME)
 
 clean:
 	@rm -rf bin
-
 bin:
 	@mkdir $@
 
