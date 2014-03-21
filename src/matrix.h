@@ -23,13 +23,13 @@ void addBezier(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 	int y2, int x3, int y3);
 void addHermite(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 	int y2, int x3, int y3);
-void addBox(Matrix_t * points, double x, double y, double z, double width,
-	double height, double depth);
+void addRectangularPrism(Matrix_t * points, double x, double y, double z,
+	double width, double height, double depth);
 void addSphere(Matrix_t * points, double oX, double oY, double radius);
-// void addTorus(Matrix_t * points, double oX, double oY, double rad1,
-	// double rad2);
+void addTorus(Matrix_t * points, double oX, double oY, double rad1,
+	double rad2);
 Matrix_t * generateSphere(double oX, double oY, double radius);
-// Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2);
+Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2);
 void drawMatrixLines(const Matrix_t * const matrix);
 void multiplyScalar(double scalar, Matrix_t * const matrix);
 void multiplyMatrices(int numArgs, ...);

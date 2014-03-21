@@ -161,8 +161,10 @@ void addHermite(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 	}
 }
 
-void addBox(Matrix_t * points, double x, double y, double z, double width,
-	double height, double depth){
+// add a rectangular prism to points, with upper-left corner (x, y, z), and the
+// given width, height, and depth
+void addRectangularPrism(Matrix_t * points, double x, double y, double z,
+	double width, double height, double depth){
 	addEdge(points, x, y, z, x + width, y, z);
 	addEdge(points, x + width, y, z, x + width, y - height, z);
 	addEdge(points, x + width, y - height, z, x, y - height, z);
@@ -179,6 +181,8 @@ void addBox(Matrix_t * points, double x, double y, double z, double width,
 	addEdge(points, x, y - height, z, x, y - height, z - depth);
 }
 
+// add the points of a sphere centered on (oX, oY) with the given radius to the
+// argument Matrix_t.
 void addSphere(Matrix_t * points, double oX, double oY, double radius){
 	Matrix_t * sphere = generateSphere(oX, oY, radius);
 
@@ -191,26 +195,54 @@ void addSphere(Matrix_t * points, double oX, double oY, double radius){
 	}
 }
 
-// void addTorus(Matrix_t * points, double oX, double oY, double rad1,
-	// double rad2){
-// }
+void addTorus(Matrix_t * points, double oX, double oY, double rad1,
+	double rad2){
+	Matrix_t * torus = generateTorus(oX, oY, rad1, rad2);
 
+	int point;
+	for(point = 0; point < torus->numPoints; point++){
+		addPoint(points, torus->points[0][point], torus->points[1][point],
+			torus->points[2][point]);
+		addPoint(points, torus->points[0][point], torus->points[1][point],
+			torus->points[2][point]);
+	}
+}
+
+// return a Matrix_t with the points of a sphere centered on (oX, oY) with the
+// given radius
 Matrix_t * generateSphere(double oX, double oY, double radius){
 	Matrix_t * sphere = createMatrix();
 	Matrix_t * xRot = createRotation(X_AXIS, 4);
 
 	int degree;
 	for(degree = 0; degree < 360; degree += 4){
-		addCircle(sphere, oX, oY, radius);
+		addCircle(sphere, 0, 0, radius);
 		multiplyMatrix(xRot, sphere);
 	}
 
-	freeMatrix(xRot);
+	Matrix_t * translation = createTranslation(oX, oY, 0);
+	multiplyMatrix(translation, sphere);
+
+	freeMatrices(2, xRot, translation);
 	return sphere;
 }
 
-// Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2){
-// }
+Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2){
+	Matrix_t * torus = createMatrix();
+	Matrix_t * yRot = createRotation(Y_AXIS, 4);
+
+	int degree;
+	for(degree = 0; degree < 360; degree += 4){
+		addCircle(torus, rad1, 0, rad2);
+		multiplyMatrix(yRot, torus);
+	}
+
+	Matrix_t * translation = createTranslation(oX, oY, 0);
+	multiplyMatrix(translation, torus);
+
+	freeMatrices(2, yRot, translation);
+	return torus;
+}
 
 // iterate over a Matrix_t's points, and draw lines with adjacent point pairs
 void drawMatrixLines(const Matrix_t * const matrix){
@@ -231,18 +263,24 @@ void multiplyScalar(double scalar, Matrix_t * const matrix){
 			matrix->points[row][col] *= scalar;
 }
 
+// multiply the first (numArgs - 1) argument Matrix_ts into the last Matrix_t
 void multiplyMatrices(int numArgs, ...){
 	va_list matrices;
 	va_start(matrices, numArgs);
 
+	Matrix_t ** multiplicands = malloc((numArgs - 1) * sizeof(Matrix_t *));
+
 	int arg;
-	Matrix_t * prevMatrix = va_arg(matrices, Matrix_t *);
-	for(arg = 0; arg < numArgs - 1; arg++){
-		Matrix_t * newMatrix = va_arg(matrices, Matrix_t *);
-		multiplyMatrix(prevMatrix, newMatrix);
-		prevMatrix = newMatrix;
-	}
+	for(arg = 0; arg < numArgs - 1; arg++)
+		multiplicands[arg] = va_arg(matrices, Matrix_t *);
+
+	// last matrix, into which all preceding matrices will be multiplied
+	Matrix_t * points = va_arg(matrices, Matrix_t *);
 	va_end(matrices);
+
+	for(arg = 0; arg < numArgs - 1; arg++)
+		multiplyMatrix(multiplicands[arg], points);
+	free(multiplicands);
 }
 
 // multiply Matrix_ts m1 and m2 in place, storing the result in m2

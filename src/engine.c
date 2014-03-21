@@ -26,17 +26,13 @@ void testPolygon(){
 	Matrix_t * yRot = createRotation(Y_AXIS, 1);
 	Matrix_t * zRot = createRotation(Z_AXIS, 1);
 
-	addEdge(points, 200, 0, 0, -200, 0, 0);
 	addEdge(points, 0, 200, 0, 0, -200, 0);
-	addEdge(points, 0, 0, 200, 0, 0, -200);
-	addSphere(points, 0, 0, 200);
+	addTorus(points, 100, 100, 100, 50);
 
 	int i;
 	for(i = 0; i < 1000; i++){
 		clearScreen();
-		multiplyMatrix(xRot, points);
-		multiplyMatrix(yRot, points);
-		multiplyMatrix(zRot, points);
+		multiplyMatrices(4, xRot, yRot, zRot, points);
 		drawMatrixLines(points);
 		renderScreen();
 		usleep(1e6 / 60);
@@ -44,7 +40,7 @@ void testPolygon(){
 
 	usleep(10e6);
 
-	freeMatrices(2, zRot, points);
+	freeMatrices(4, xRot, yRot, zRot, points);
 	quitScreen();
 }
 
@@ -63,8 +59,8 @@ int main(int argc, char * argv[]){
 	setup();
 	if(1 < argc)
 		readScriptFile(argv[1]);
-	else
-		shell();
-	// testPolygon();
+	// else
+		// shell();
+	testPolygon();
 	return EXIT_SUCCESS;
 }
