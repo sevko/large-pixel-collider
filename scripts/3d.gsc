@@ -1,3 +1,5 @@
+# script to test functionality of rectangular prism, sphere, and torus rendering
+
 p
 40 40 40 40 200 120
 m

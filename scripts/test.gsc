@@ -1,3 +1,6 @@
+# script to test (with valgrind) whether all functions are managing their memory
+# correctly
+
 b
 10 30 40 50 60 70 80 90
 c

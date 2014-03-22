@@ -1,3 +1,5 @@
+# script to test Hermite and Bezier curves
+
 c
 250 250 200
 c
