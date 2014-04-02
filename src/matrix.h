@@ -30,7 +30,7 @@ void addTorus(Matrix_t * points, double oX, double oY, double rad1,
 	double rad2);
 Matrix_t * generateSphere(double oX, double oY, double radius);
 Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2);
-void drawMatrixLines(const Matrix_t * const matrix);
+void drawMatrix(const Matrix_t * const matrix);
 void multiplyScalar(double scalar, Matrix_t * const matrix);
 void multiplyMatrices(int numArgs, ...);
 void multiplyMatrix(Matrix_t * const m1, Matrix_t * const m2);

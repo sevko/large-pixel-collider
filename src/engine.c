@@ -33,8 +33,7 @@ int main(int argc, char * argv[]){
 	setup();
 	if(1 < argc)
 		readScriptFile(argv[1]);
-	// else
-		// shell();
-	// testPolygon();
+	else
+		shell();
 	return EXIT_SUCCESS;
 }

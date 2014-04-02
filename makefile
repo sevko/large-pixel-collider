@@ -3,7 +3,7 @@ FLAGS = -Ofast -Wall -Wextra -Werror -Wunreachable-code -I ./
 CC = gcc $(FLAGS)
 LIBS = -lm $(shell sdl-config --libs) -lncurses
 SHELL_TERMINAL = gnome-terminal --title="Graphics Engine: Shell" \
-	--geometry=108x49+1000 --profile=Default -e
+	--geometry=78x49+1000 --profile=Default -e
 
 SRC = $(wildcard src/*.c src/**/*.c)
 OBJ = $(patsubst %.c, bin/%.o, $(foreach srcFile, $(SRC), $(notdir $(srcFile))))

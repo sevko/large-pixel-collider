@@ -8,7 +8,7 @@
 #define CMD_INVALID_CMD 2
 #define CMD_INVALID_ARGS 3
 
-#define HELP_CMD 'h'
+#define HELP_CMD 'H'
 #define EXIT_CMD 'e'
 
 #define HELP_FILE_PATH "doc/shell_help.txt"

@@ -11,8 +11,15 @@ Documentation format:
 		save file: 's' \"%s %s\"
 		's' saves a file, and requires two string arguments.
 
+add bezier: 'b' (%d %d %d %d %d %d %d %d)
+add circle: 'c' (%d %d %d)
+add hermite: 'h' (%d %d %d %d %d %d %d %d)
 add line: 'l' (%d %d %d %d %d %d)
+add rectangular prism: 'p' (%d %d %d %d %d %d)
+add sphere: 'm' (%d %d %d)
+add torus: 'd' (%d %d %d %d)
 apply transformation: 'a'
+clear points: 'w'
 create scale transformation: 's' (%d %d %d)
 create translation: 't' (%d %d %d)
 create rotation through x-axis: 'x' (%d)

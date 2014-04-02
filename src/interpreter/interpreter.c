@@ -154,7 +154,7 @@ int evaluateCommand(char ** const command, Matrix_t ** points,
 
 	else if(cmdChar == DRAW_FRAME_CMD){
 		clearScreen();
-		drawMatrixLines(*points);
+		drawMatrix(*points);
 		renderScreen();
 	}
 
@@ -163,7 +163,7 @@ int evaluateCommand(char ** const command, Matrix_t ** points,
 
 	else if(cmdChar == SAVE_FRAME_CMD){
 		clearScreen();
-		drawMatrixLines(*points);
+		drawMatrix(*points);
 		renderScreen();
 
 		int lenName = strlen(command[1]);

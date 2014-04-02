@@ -84,6 +84,13 @@ void addEdge(Matrix_t * const matrix, double x1, double y1, double z1,
 	addPoint(matrix, x2, y2, z2);
 }
 
+void addTriangle(Matrix_t * const matrix,  double x1, double y1, double z1,
+	double x2, double y2, double z2, double x3, double y3, double z3){
+	addPoint(matrix, x1, y1, z1);
+	addPoint(matrix, x2, y2, z2);
+	addPoint(matrix, x3, y3, z3);
+}
+
 // draw a polygon with origin (oX, oY), radius, and numSides
 void addPolygon(Matrix_t * points, int oX, int oY, int radius, int numSides){
 	double theta = 2 * M_PI / numSides;
@@ -165,20 +172,70 @@ void addHermite(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 // given width, height, and depth
 void addRectangularPrism(Matrix_t * points, double x, double y, double z,
 	double width, double height, double depth){
-	addEdge(points, x, y, z, x + width, y, z);
-	addEdge(points, x + width, y, z, x + width, y - height, z);
-	addEdge(points, x + width, y - height, z, x, y - height, z);
-	addEdge(points, x, y - height, z, x, y, z);
 
-	addEdge(points, x, y, z - depth, x + width, y, z - depth);
-	addEdge(points, x + width, y, z - depth, x + width, y - height, z - depth);
-	addEdge(points, x + width, y - height, z - depth, x, y - height, z - depth);
-	addEdge(points, x, y - height, z - depth, x, y, z - depth);
+	// front, top-left
+	double aX = x;
+	double aY = y;
+	double aZ = z;
 
-	addEdge(points, x, y, z, x, y, z - depth);
-	addEdge(points, x + width, y, z, x + width, y, z - depth);
-	addEdge(points, x + width, y - height, z, x + width, y - height, z - depth);
-	addEdge(points, x, y - height, z, x, y - height, z - depth);
+	// front, bottom-left
+	double bX = x;
+	double bY = y - height;
+	double bZ = z;
+
+	// front, bottom-right
+	double cX = x + width;
+	double cY = y - height;
+	double cZ = z;
+
+	// front, top-right
+	double dX = x + width;
+	double dY = y;
+	double dZ = z;
+
+	// back, top-left
+	double eX = aX;
+	double eY = aY;
+	double eZ = aZ - depth;
+
+	// back, bottom-left
+	double fX = bX;
+	double fY = bY;
+	double fZ = bZ - depth;
+
+	// back, bottom-right
+	double gX = cX;
+	double gY = cY;
+	double gZ = cZ - depth;
+
+	// back, top-right
+	double hX = dX;
+	double hY = dY;
+	double hZ = dZ - depth;
+
+	// front xz face
+	addTriangle(points, aX, aY, aZ, bX, bY, bZ, cX, cY, cZ);
+	addTriangle(points, aX, aY, aZ, cX, cY, cZ, dX, dY, dZ);
+
+	// back xz face
+	addTriangle(points, fX, fY, fZ, eX, eY, eZ, hX, hY, hZ);
+	addTriangle(points, fX, fY, fZ, hX, hY, hZ, gX, gY, gZ);
+
+	// top xy face
+	addTriangle(points, eX, eY, eZ, aX, aY, aZ, dX, dY, dZ);
+	addTriangle(points, eX, eY, eZ, dX, dY, dZ, hX, hY, hZ);
+
+	// bottom xy face
+	addTriangle(points, bX, bY, bZ, fX, fY, fZ, gX, gY, gZ);
+	addTriangle(points, bX, bY, bZ, gX, gY, gZ, cX, cY, cZ);
+
+	// left yz face
+	addTriangle(points, eX, eY, eZ, fX, fY, fZ, bX, bY, bZ);
+	addTriangle(points, eX, eY, eZ, bX, bY, bZ, aX, aY, aZ);
+
+	// right yz face
+	addTriangle(points, dX, dY, dZ, cX, cY, cZ, gX, gY, gZ);
+	addTriangle(points, dX, dY, dZ, gX, gY, gZ, hX, hY, hZ);
 }
 
 // add the points of a sphere to points, centered on (oX, oY) with the given
@@ -253,14 +310,19 @@ Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2){
 }
 
 // iterate over a Matrix_t's points, and draw lines with adjacent point pairs
-void drawMatrixLines(const Matrix_t * const matrix){
-	if(matrix->numPoints < 2)
+void drawMatrix(const Matrix_t * const matrix){
+	if(matrix->numPoints < 3)
 		return;
 
 	int ptPair;
-	for(ptPair = 0; ptPair < matrix->numPoints; ptPair += 2)
+	for(ptPair = 0; ptPair < matrix->numPoints; ptPair += 3){
 		drawLine(matrix->points[0][ptPair], matrix->points[1][ptPair],
 			matrix->points[0][ptPair + 1], matrix->points[1][ptPair + 1]);
+		drawLine(matrix->points[0][ptPair], matrix->points[1][ptPair],
+			matrix->points[0][ptPair + 2], matrix->points[1][ptPair + 2]);
+		drawLine(matrix->points[0][ptPair + 1], matrix->points[1][ptPair + 1],
+			matrix->points[0][ptPair + 2], matrix->points[1][ptPair + 2]);
+	}
 }
 
 // multiply a Matrix_t by a scalar value
