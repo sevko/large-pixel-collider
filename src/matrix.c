@@ -10,10 +10,10 @@
 #include "src/matrix.h"
 #include "src/graphics.h"
 
-#define INTERPOL(a, b) (a + (b - a) * t1)
+#define INTERPOL(a, b) (a + (b - a) * t1)   // interpolate a point
 
-// number of steps used in plotting a curve
-#define CURVE_STEP_PRECISION 1e3
+#define CIRCLE_STEP_SIZE 4 // angle between circles of a sphere/torus
+#define CURVE_STEP_NUMBER 1e3 // number of steps used in plotting a curve
 #define RAD (M_PI / 180)
 
 struct Matrix {
@@ -84,6 +84,8 @@ void addEdge(Matrix_t * const matrix, double x1, double y1, double z1,
 	addPoint(matrix, x2, y2, z2);
 }
 
+// add a triangle of points (x1, y1, z1), (x2, y2, z2), and (x3, y3, z3) to a
+// Matrix_t
 void addTriangle(Matrix_t * const matrix,  double x1, double y1, double z1,
 	double x2, double y2, double z2, double x3, double y3, double z3){
 	addPoint(matrix, x1, y1, z1);
@@ -114,8 +116,8 @@ void addBezier(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 
 	int t;
 	double t1, abX, bcX, cdX, abbcX, bccdX, abY, bcY, cdY, bccdY, abbcY;
-	for(t = 0; t < CURVE_STEP_PRECISION; t++){
-		t1 = t / CURVE_STEP_PRECISION;
+	for(t = 0; t < CURVE_STEP_NUMBER; t++){
+		t1 = t / CURVE_STEP_NUMBER;
 		abX = INTERPOL(x0, x1);
 		bcX = INTERPOL(x1, x2);
 		cdX = INTERPOL(x2, x3);
@@ -157,8 +159,8 @@ void addHermite(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 	float t1, t2, t3, x, y;
 
 	int t;
-	for(t = 0; t < CURVE_STEP_PRECISION; t++){
-		t1 = t / CURVE_STEP_PRECISION;
+	for(t = 0; t < CURVE_STEP_NUMBER; t++){
+		t1 = t / CURVE_STEP_NUMBER;
 		t3 = t1 * t1 * t1;
 		t2 = t1 * t1;
 
@@ -242,14 +244,35 @@ void addRectangularPrism(Matrix_t * points, double x, double y, double z,
 // radius to the argument Matrix_t.
 void addSphere(Matrix_t * points, double oX, double oY, double radius){
 	Matrix_t * sphere = generateSphere(oX, oY, radius);
+	int circlePts = sphere->numPoints / (180 / CIRCLE_STEP_SIZE);
 
 	int point;
-	for(point = 0; point < sphere->numPoints; point++){
-		addPoint(points, sphere->points[0][point], sphere->points[1][point],
-			sphere->points[2][point]);
-		addPoint(points, sphere->points[0][point], sphere->points[1][point],
-			sphere->points[2][point]);
-	}
+	for(point = 0; point < sphere->numPoints - circlePts - 1; point++)
+		addTriangle(points,
+			sphere->points[0][point],
+			sphere->points[1][point],
+			sphere->points[2][point],
+			sphere->points[0][point + 1],
+			sphere->points[1][point + 1],
+			sphere->points[2][point + 1],
+			sphere->points[0][circlePts + point + 1],
+			sphere->points[1][circlePts + point + 1],
+			sphere->points[2][circlePts + point + 1]
+		);
+
+	for(; point < sphere->numPoints - 1; point++)
+		addTriangle(points,
+			sphere->points[0][point],
+			sphere->points[1][point],
+			sphere->points[2][point],
+			sphere->points[0][point + 1],
+			sphere->points[1][point + 1],
+			sphere->points[2][point + 1],
+			sphere->points[0][sphere->numPoints - point - 1],
+			sphere->points[1][sphere->numPoints - point - 1],
+			sphere->points[2][sphere->numPoints - point - 1]
+		);
+
 	freeMatrix(sphere);
 }
 
@@ -259,25 +282,46 @@ void addSphere(Matrix_t * points, double oX, double oY, double radius){
 void addTorus(Matrix_t * points, double oX, double oY, double rad1,
 	double rad2){
 	Matrix_t * torus = generateTorus(oX, oY, rad1, rad2);
+	int torusPts = torus->numPoints / (360 / CIRCLE_STEP_SIZE);
 
 	int point;
-	for(point = 0; point < torus->numPoints; point++){
-		addPoint(points, torus->points[0][point], torus->points[1][point],
-			torus->points[2][point]);
-		addPoint(points, torus->points[0][point], torus->points[1][point],
-			torus->points[2][point]);
-	}
+	for(point = 0; point < torus->numPoints - torusPts - 1; point++)
+		addTriangle(points,
+			torus->points[0][point],
+			torus->points[1][point],
+			torus->points[2][point],
+			torus->points[0][point + 1],
+			torus->points[1][point + 1],
+			torus->points[2][point + 1],
+			torus->points[0][torusPts + point + 1],
+			torus->points[1][torusPts + point + 1],
+			torus->points[2][torusPts + point + 1]
+		);
+
+	for(; point < torus->numPoints - 1; point++)
+		addTriangle(points,
+			torus->points[0][point],
+			torus->points[1][point],
+			torus->points[2][point],
+			torus->points[0][point + 1],
+			torus->points[1][point + 1],
+			torus->points[2][point + 1],
+			torus->points[0][(point + 1) % torusPts],
+			torus->points[1][(point + 1) % torusPts],
+			torus->points[2][(point + 1) % torusPts]
+		);
+
 	freeMatrix(torus);
 }
 
 // return a Matrix_t with the points of a sphere centered on (oX, oY) with the
 // given radius
 Matrix_t * generateSphere(double oX, double oY, double radius){
-	Matrix_t * sphere = createMatrix();
-	Matrix_t * xRot = createRotation(X_AXIS, 4);
+	Matrix_t * sphere = createMatrix(),
+		* xRot = createRotation(X_AXIS, CIRCLE_STEP_SIZE);
 
 	int degree;
-	for(degree = 0; degree < 360; degree += 4){
+	for(degree = 0; degree < 180; degree += CIRCLE_STEP_SIZE){
 		addCircle(sphere, 0, 0, radius);
 		multiplyMatrix(xRot, sphere);
 	}
@@ -294,7 +338,7 @@ Matrix_t * generateSphere(double oX, double oY, double radius){
 // circle of rad2 centered on the torus's origin.
 Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2){
 	Matrix_t * torus = createMatrix();
-	Matrix_t * yRot = createRotation(Y_AXIS, 4);
+	Matrix_t * yRot = createRotation(Y_AXIS, CIRCLE_STEP_SIZE);
 
 	int degree;
 	for(degree = 0; degree < 360; degree += 4){
