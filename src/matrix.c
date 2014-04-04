@@ -6,8 +6,10 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "src/matrix.h"
+#include "src/globals.h"
 #include "src/graphics.h"
 
 #define INTERPOL(a, b) (a + (b - a) * t1)   // interpolate a point
@@ -16,17 +18,25 @@
 #define CURVE_STEP_NUMBER 1e3 // number of steps used in plotting a curve
 #define RAD (M_PI / 180)
 
+// dir to contain all unit_test points CSV files.
+#define TEST_FILE_DIR "test/"
+
 static void expandMatrix(Matrix_t * const matrix);
 static double dotProduct(const Matrix_t * const m1, int row,
 	const Matrix_t * const m2, int col);
+
+struct Matrix {
+	double * points[4];
+	int numPoints;
+};
 
 // alloc memory for Matrix_t, set all internal pointers
 Matrix_t * createMatrix(){
 	Matrix_t * const matrix = malloc(sizeof(Matrix_t));
 	matrix->numPoints = 0;
 
-	matrix->points[0] = matrix->points[1] = NULL;
-	matrix->points[2] = matrix->points[3] = NULL;
+	matrix->points[X] = matrix->points[Y] = NULL;
+	matrix->points[Z] = matrix->points[W] = NULL;
 
 	return matrix;
 }
@@ -44,10 +54,10 @@ void freeMatrices(int numArgs, ...){
 
 // free alloc'd Matrix_t and all internal pointers
 void freeMatrix(Matrix_t * matrix){
-	free(matrix->points[0]);
-	free(matrix->points[1]);
-	free(matrix->points[2]);
-	free(matrix->points[3]);
+	free(matrix->points[X]);
+	free(matrix->points[Y]);
+	free(matrix->points[Z]);
+	free(matrix->points[W]);
 	free(matrix);
 }
 
@@ -55,10 +65,10 @@ void freeMatrix(Matrix_t * matrix){
 // used to add coordinate points to a matrix, which have a default w value of 1.
 void addPoint(Matrix_t * const matrix, double x, double y, double z){
 	expandMatrix(matrix);
-	matrix->points[0][matrix->numPoints - 1] = x;
-	matrix->points[1][matrix->numPoints - 1] = y;
-	matrix->points[2][matrix->numPoints - 1] = z;
-	matrix->points[3][matrix->numPoints - 1] = 1;
+	matrix->points[X][matrix->numPoints - 1] = x;
+	matrix->points[Y][matrix->numPoints - 1] = y;
+	matrix->points[Z][matrix->numPoints - 1] = z;
+	matrix->points[W][matrix->numPoints - 1] = 1;
 }
 
 // expand a Matrix_t, and add a point (x, y, z, w) to its last column;
@@ -66,10 +76,10 @@ void addPoint(Matrix_t * const matrix, double x, double y, double z){
 void addTransformPoint(Matrix_t * const matrix, double x, double y, double z,
 	double w){
 	expandMatrix(matrix);
-	matrix->points[0][matrix->numPoints - 1] = x;
-	matrix->points[1][matrix->numPoints - 1] = y;
-	matrix->points[2][matrix->numPoints - 1] = z;
-	matrix->points[3][matrix->numPoints - 1] = w;
+	matrix->points[X][matrix->numPoints - 1] = x;
+	matrix->points[Y][matrix->numPoints - 1] = y;
+	matrix->points[Z][matrix->numPoints - 1] = z;
+	matrix->points[W][matrix->numPoints - 1] = w;
 }
 
 // DEPRECATED UNTIL FURTHER NOTICE.
@@ -245,28 +255,28 @@ void addSphere(Matrix_t * points, double oX, double oY, double radius){
 	int point;
 	for(point = 0; point < sphere->numPoints - circlePts - 1; point++)
 		addTriangle(points,
-			sphere->points[0][point],
-			sphere->points[1][point],
-			sphere->points[2][point],
-			sphere->points[0][point + 1],
-			sphere->points[1][point + 1],
-			sphere->points[2][point + 1],
-			sphere->points[0][circlePts + point + 1],
-			sphere->points[1][circlePts + point + 1],
-			sphere->points[2][circlePts + point + 1]
+			sphere->points[X][point],
+			sphere->points[Y][point],
+			sphere->points[Z][point],
+			sphere->points[X][point + 1],
+			sphere->points[Y][point + 1],
+			sphere->points[Z][point + 1],
+			sphere->points[X][circlePts + point + 1],
+			sphere->points[Y][circlePts + point + 1],
+			sphere->points[Z][circlePts + point + 1]
 		);
 
 	for(; point < sphere->numPoints - 1; point++)
 		addTriangle(points,
-			sphere->points[0][point],
-			sphere->points[1][point],
-			sphere->points[2][point],
-			sphere->points[0][point + 1],
-			sphere->points[1][point + 1],
-			sphere->points[2][point + 1],
-			sphere->points[0][sphere->numPoints - point - 1],
-			sphere->points[1][sphere->numPoints - point - 1],
-			sphere->points[2][sphere->numPoints - point - 1]
+			sphere->points[X][point],
+			sphere->points[Y][point],
+			sphere->points[Z][point],
+			sphere->points[X][point + 1],
+			sphere->points[Y][point + 1],
+			sphere->points[Z][point + 1],
+			sphere->points[X][sphere->numPoints - point - 1],
+			sphere->points[Y][sphere->numPoints - point - 1],
+			sphere->points[Z][sphere->numPoints - point - 1]
 		);
 
 	freeMatrix(sphere);
@@ -283,28 +293,28 @@ void addTorus(Matrix_t * points, double oX, double oY, double rad1,
 	int point;
 	for(point = 0; point < torus->numPoints - torusPts - 1; point++)
 		addTriangle(points,
-			torus->points[0][point],
-			torus->points[1][point],
-			torus->points[2][point],
-			torus->points[0][point + 1],
-			torus->points[1][point + 1],
-			torus->points[2][point + 1],
-			torus->points[0][torusPts + point + 1],
-			torus->points[1][torusPts + point + 1],
-			torus->points[2][torusPts + point + 1]
+			torus->points[X][point],
+			torus->points[Y][point],
+			torus->points[Z][point],
+			torus->points[X][point + 1],
+			torus->points[Y][point + 1],
+			torus->points[Z][point + 1],
+			torus->points[X][torusPts + point + 1],
+			torus->points[Y][torusPts + point + 1],
+			torus->points[Z][torusPts + point + 1]
 		);
 
 	for(; point < torus->numPoints - 1; point++)
 		addTriangle(points,
-			torus->points[0][point],
-			torus->points[1][point],
-			torus->points[2][point],
-			torus->points[0][point + 1],
-			torus->points[1][point + 1],
-			torus->points[2][point + 1],
-			torus->points[0][(point + 1) % torusPts],
-			torus->points[1][(point + 1) % torusPts],
-			torus->points[2][(point + 1) % torusPts]
+			torus->points[X][point],
+			torus->points[Y][point],
+			torus->points[Z][point],
+			torus->points[X][point + 1],
+			torus->points[Y][point + 1],
+			torus->points[Z][point + 1],
+			torus->points[X][(point + 1) % torusPts],
+			torus->points[Y][(point + 1) % torusPts],
+			torus->points[Z][(point + 1) % torusPts]
 		);
 
 	freeMatrix(torus);
@@ -356,12 +366,12 @@ void drawMatrix(const Matrix_t * const matrix){
 
 	int ptPair;
 	for(ptPair = 0; ptPair < matrix->numPoints - 2; ptPair += 3){
-		drawLine(matrix->points[0][ptPair], matrix->points[1][ptPair],
-			matrix->points[0][ptPair + 1], matrix->points[1][ptPair + 1]);
-		drawLine(matrix->points[0][ptPair], matrix->points[1][ptPair],
-			matrix->points[0][ptPair + 2], matrix->points[1][ptPair + 2]);
-		drawLine(matrix->points[0][ptPair + 1], matrix->points[1][ptPair + 1],
-			matrix->points[0][ptPair + 2], matrix->points[1][ptPair + 2]);
+		drawLine(matrix->points[X][ptPair], matrix->points[Y][ptPair],
+			matrix->points[X][ptPair + 1], matrix->points[Y][ptPair + 1]);
+		drawLine(matrix->points[X][ptPair], matrix->points[Y][ptPair],
+			matrix->points[X][ptPair + 2], matrix->points[Y][ptPair + 2]);
+		drawLine(matrix->points[X][ptPair + 1], matrix->points[Y][ptPair + 1],
+			matrix->points[X][ptPair + 2], matrix->points[Y][ptPair + 2]);
 	}
 }
 
@@ -372,8 +382,8 @@ void drawMatrixLines(const Matrix_t * const matrix){
 
 	int ptPair;
 	for(ptPair = 0; ptPair < matrix->numPoints; ptPair += 2)
-		drawLine(matrix->points[0][ptPair], matrix->points[1][ptPair],
-			matrix->points[0][ptPair + 1], matrix->points[1][ptPair + 1]);
+		drawLine(matrix->points[X][ptPair], matrix->points[Y][ptPair],
+			matrix->points[X][ptPair + 1], matrix->points[Y][ptPair + 1]);
 }
 
 // multiply a Matrix_t by a scalar value
@@ -413,10 +423,10 @@ void multiplyMatrix(Matrix_t * const m1, Matrix_t * const m2){
 		double dot2 = dotProduct(m1, 2, m2, col);
 		double dot3 = dotProduct(m1, 3, m2, col);
 
-		m2->points[0][col] = dot0;
-		m2->points[1][col] = dot1;
-		m2->points[2][col] = dot2;
-		m2->points[3][col] = dot3;
+		m2->points[X][col] = dot0;
+		m2->points[Y][col] = dot1;
+		m2->points[Z][col] = dot2;
+		m2->points[W][col] = dot3;
 	}
 }
 
@@ -433,9 +443,9 @@ Matrix_t * createIdentity(){
 // return a 4x4 matrix to translate a set of points by dx, dy, and dz
 Matrix_t * createTranslation(double dx, double dy, double dz){
 	Matrix_t * translation = createIdentity();
-	translation->points[0][3] = dx;
-	translation->points[1][3] = dy;
-	translation->points[2][3] = dz;
+	translation->points[X][W] = dx;
+	translation->points[Y][W] = dy;
+	translation->points[Z][W] = dz;
 	return translation;
 }
 
@@ -484,8 +494,8 @@ void printPointMatrix(const Matrix_t * const matrix){
 	int point;
 	for(point = 0; point < matrix->numPoints; point++)
 		printf("#%d\t(%d, %d, %d, %d)\n", point + 1,
-			(int)matrix->points[0][point], (int)matrix->points[1][point],
-			(int)matrix->points[2][point], (int)matrix->points[3][point]);
+			(int)matrix->points[X][point], (int)matrix->points[Y][point],
+			(int)matrix->points[Z][point], (int)matrix->points[W][point]);
 }
 
 // print the Matrix_t in a matrix format
@@ -529,8 +539,65 @@ static void expandMatrix(Matrix_t * const matrix){
 // return the dot-product of a row in Matrix_t m1 and a column in Matrix_t m2
 static double dotProduct(const Matrix_t * const m1, int row,
 	const Matrix_t * const m2, int col){
-	return m1->points[row][0] * m2->points[0][col] +
-		m1->points[row][1] * m2->points[1][col] +
-		m1->points[row][2] * m2->points[2][col] +
-		m1->points[row][3] * m2->points[3][col];
+	return m1->points[row][0] * m2->points[X][col] +
+		m1->points[row][1] * m2->points[Y][col] +
+		m1->points[row][2] * m2->points[Z][col] +
+		m1->points[row][3] * m2->points[W][col];
+}
+
+// read points from a CSV file named filename in directory TEST_FILE_DIR, and
+// return them in a Matrix_t
+Matrix_t * readPointsFromFile(char * filename){
+	char * fullFilename = malloc(strlen(filename) + strlen(TEST_FILE_DIR) + 1);
+	strcpy(fullFilename, TEST_FILE_DIR);
+	strcat(fullFilename, filename);
+
+	FILE * file;
+	if((file = fopen(fullFilename, "r")) == NULL){
+		FATAL("Cannot open file %s.", fullFilename);
+	}
+
+	free(fullFilename);
+	Matrix_t * points = createMatrix();
+
+	// read number of points contained in file
+	int numPoints;
+	if(fscanf(file, "%d:", &numPoints) < 1)
+		FATAL("Reading %s. Failed to read number of points.", fullFilename);
+
+	// read points from file; add them to the points matrix
+	int point;
+	for(point = 0; point < numPoints; point++){
+		int x, y, z;
+		if(fscanf(file, "%d,%d,%d,", &x, &y, &z) < 3)
+			FATAL("Reading %s. Failed to read point #%d.", fullFilename, point);
+		addPoint(points, x, y, z);
+	}
+
+	fclose(file);
+	return points;
+}
+
+// write points contained in a Matrix_t to a CSV file named filename, in
+// directory TEST_FILE_DIR
+void writePointsToFile(Matrix_t * points, char * filename){
+	// prepend filename with test-files directory name
+	char * fullFilename = malloc(strlen(filename) + strlen(TEST_FILE_DIR) + 1);
+	strcpy(fullFilename, TEST_FILE_DIR);
+	strcat(fullFilename, filename);
+	FILE * file;
+	if((file = fopen(fullFilename, "w")) == NULL)
+		FATAL("Cannot open file %s.", fullFilename);
+	free(fullFilename);
+
+	fprintf(file, "%d:", points->numPoints);
+
+	// write points to file
+	int point;
+	for(point = 0; point < points->numPoints; point++)
+		fprintf(file, "%d,%d,%d,",
+			(int)points->points[X][point],
+			(int)points->points[Y][point],
+			(int)points->points[Z][point]);
+	fclose(file);
 }

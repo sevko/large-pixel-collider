@@ -1,5 +1,8 @@
+/*
+ *  unit_tests.c contains unit-test for functions contained in matrix.c.
+*/
+
 #include <stdio.h>
-#include <string.h>
 #include <unistd.h>
 
 #include "globals.h"
@@ -24,6 +27,8 @@
 	writePointsToFile(matrix, filename);\
 	quitScreen()
 
+// return 1 if the Matrix_t named matrix is equivalent to the matrix points
+// stored in the file named filename; otherwise, return 0.
 #define ASSERT_EQUAL(matrix, filename) \
 	do {\
 		Matrix_t * filePoints = readPointsFromFile(filename);\
@@ -32,15 +37,96 @@
 		return result;\
 	} while(0)
 
-#define TEST_FILE_DIR "test/"
-
-static int testMultiplyMatrices();
 static int testAddPoint();
+static int testAddEdge();
 static int testAddPolygons();
+static int testAddBezier();
+static int testAddHermite();
+static int testAddRectangularPrism();
+static int testAddSphere();
+static int testAddTorus();
+static int testMultiplyScalar();
+static int testMultiplyMatrices();
 static int testPointsFileIO();
-static Matrix_t * readPointsFromFile(char * filename);
-static void writePointsToFile(Matrix_t * points, char * filename);
+static int testCreateTranslation();
+static int testCreateScale();
+static int testCreateRotation();
+static int testCreateIdentity();
+static int testEqualMatrix();
+static int testAddPoint();
 
+// test addPoint()
+static int testAddPoint(){
+	Matrix_t * points = createMatrix();
+
+	addPoint(points, 0, 0, 0);
+	addPoint(points, 100, 100, 100);
+	addPoint(points, 100, 200, 200);
+
+	addPoint(points, 0, 0, 0);
+	addPoint(points, -100, -100, -100);
+	addPoint(points, -100, -200, -200);
+
+	ASSERT_EQUAL(points, "testAddPoint.csv");
+}
+
+// test addEdge()
+static int testAddEdge(){
+	Matrix_t * points = createMatrix();
+	addEdge(points, 0, 0, 0, 100, 0, 100);
+	addEdge(points, 100, 0, 100, 100, 100, 100);
+	addEdge(points, 100, 100, 100, 0, 0, 0);
+	ASSERT_EQUAL(points, "testAddEdge");
+}
+
+// test addPolygon(), addCircle()
+static int testAddPolygons(){
+	Matrix_t * points = createMatrix();
+	addCircle(points, 0, 0, 200);
+	addPolygon(points, 0, 0, 100, 8);
+
+	ASSERT_EQUAL(points, "testAddPolygons.csv");
+}
+
+// test addBezier()
+static int testAddBezier(){
+	Matrix_t * points = createMatrix();
+	addBezier(points, 200, 250, 150, 50, 300, 250, 300, 250);
+	ASSERT_EQUAL(points, "testAddBezier.csv");
+}
+
+// test addHermite()
+static int testAddHermite(){
+	Matrix_t * points = createMatrix();
+	addHermite(points, 150, 150, 150, 50, 350, 150, 350, 300);
+	ASSERT_EQUAL(points, "testAddHermite.csv");
+}
+
+// test addRectangularPrism()
+static int testAddRectangularPrism(){
+	Matrix_t * points = createMatrix();
+	addRectangularPrism(points, 0, 0, 0, 100, 200, 300);
+	ASSERT_EQUAL(points, "testAddRectangularPrism.csv");
+}
+
+// test addSphere()
+static int testAddSphere(){
+	Matrix_t * points = createMatrix();
+	addSphere(points, 0, 0, 100);
+	addSphere(points, 100, 0, 50);
+	addSphere(points, 100, 100, 50);
+	ASSERT_EQUAL(points, "testAddSphere.csv");
+}
+
+// test addTorus()
+static int testAddTorus(){
+	Matrix_t * points = createMatrix();
+	addTorus(points, 0, 0, 50, 200);
+	addTorus(points, 0, 0, 20, 100);
+	ASSERT_EQUAL(points, "testAddTorus.csv");
+}
+
+// test multiplyScalar()
 static int testMultiplyScalar(){
 	Matrix_t * points = createMatrix();
 	addPoint(points, 11, 22, 33);
@@ -121,6 +207,66 @@ static int testMultiplyMatrices(){
 	return result1 && result2;
 }
 
+// test readPointsFromFile(), writePointsToFile()
+static int testPointsFileIO(){
+	Matrix_t * points = createMatrix();
+	addPoint(points, 11, 22, 33);
+	addPoint(points, 22, 33, 44);
+	addPoint(points, 33, 44, 55);
+	addPoint(points, 44, 55, 66);
+
+	writePointsToFile(points, "testPointsFileIO.csv");
+	ASSERT_EQUAL(points, "testPointsFileIO.csv");
+}
+
+// test createTranslation()
+static int testCreateTranslation(){
+	Matrix_t * points = createMatrix(),
+		* translation = createTranslation(-50, -100, 0);
+	addTriangle(points, 0, 0, 0, 100, 0, 100, 100, 100, 200);
+	multiplyMatrix(translation, points);
+	freeMatrix(translation);
+	ASSERT_EQUAL(points, "testCreateTranslation.csv");
+}
+
+// test createScale()
+static int testCreateScale(){
+	Matrix_t * points = createMatrix(),
+		* scale = createScale(3, 3, 3);
+	addRectangularPrism(points, 0, 0, 0, 100, 100, 100);
+	multiplyMatrix(scale, points);
+	freeMatrix(scale);
+	ASSERT_EQUAL(points, "testCreateScale.csv");
+}
+
+// test createRotation() through the X, Y, and Z axes
+static int testCreateRotation(){
+	Matrix_t * points = createMatrix(),
+		* rotX = createRotation(X_AXIS, 270),
+		* rotY = createRotation(Y_AXIS, 30),
+		* rotZ = createRotation(Z_AXIS, 45);
+	addRectangularPrism(points, 0, 0, 0, 20, 100, 300);
+	multiplyMatrices(4, rotX, rotY, rotZ, points);
+	freeMatrices(3, rotX, rotY, rotZ);
+	ASSERT_EQUAL(points, "testCreateRotation.csv");
+}
+
+// test createIdentity()
+static int testCreateIdentity(){
+	Matrix_t * identity = createIdentity();
+
+	Matrix_t * matrix = createMatrix();
+	addTransformPoint(matrix, 1, 0, 0, 0);
+	addTransformPoint(matrix, 0, 1, 0, 0);
+	addTransformPoint(matrix, 0, 0, 1, 0);
+	addTransformPoint(matrix, 0, 0, 0, 1);
+
+	int result = equalMatrix(identity, matrix);
+	freeMatrices(2, identity, matrix);
+	return result;
+}
+
+// test equalMatrix()
 static int testEqualMatrix(){
 	Matrix_t * m1 = createMatrix();
 	addPoint(m1, 11, 22, 33);
@@ -139,127 +285,7 @@ static int testEqualMatrix(){
 	return result;
 }
 
-// test addPoint()
-static int testAddPoint(){
-	Matrix_t * points = createMatrix();
-
-	addPoint(points, 0, 0, 0);
-	addPoint(points, 100, 100, 100);
-	addPoint(points, 100, 200, 200);
-
-	addPoint(points, 0, 0, 0);
-	addPoint(points, -100, -100, -100);
-	addPoint(points, -100, -200, -200);
-
-	ASSERT_EQUAL(points, "testAddPoint.csv");
-}
-
-static int testAddEdge(){
-	Matrix_t * points = createMatrix();
-	addEdge(points, 0, 0, 0, 100, 0, 100);
-	addEdge(points, 100, 0, 100, 100, 100, 100);
-	addEdge(points, 100, 100, 100, 0, 0, 0);
-	ASSERT_EQUAL(points, "testAddEdge");
-}
-
-// test addPolygon(), addCircle()
-static int testAddPolygons(){
-	Matrix_t * points = createMatrix();
-	addCircle(points, 0, 0, 200);
-	addPolygon(points, 0, 0, 100, 8);
-
-	ASSERT_EQUAL(points, "testAddPolygons.csv");
-}
-
-// test readPointsFromFile(), writePointsToFile()
-static int testPointsFileIO(){
-	Matrix_t * points = createMatrix();
-	addPoint(points, 11, 22, 33);
-	addPoint(points, 22, 33, 44);
-	addPoint(points, 33, 44, 55);
-	addPoint(points, 44, 55, 66);
-
-	writePointsToFile(points, "testPointsFileIO.csv");
-	ASSERT_EQUAL(points, "testPointsFileIO.csv");
-}
-
-static int testAddBezier(){
-	Matrix_t * points = createMatrix();
-	addBezier(points, 200, 250, 150, 50, 300, 250, 300, 250);
-	ASSERT_EQUAL(points, "testAddBezier.csv");
-}
-
-static int testAddHermite(){
-	Matrix_t * points = createMatrix();
-	addHermite(points, 150, 150, 150, 50, 350, 150, 350, 300);
-	ASSERT_EQUAL(points, "testAddHermite.csv");
-}
-
-static int testAddRectangularPrism(){
-	Matrix_t * points = createMatrix();
-	addRectangularPrism(points, 0, 0, 0, 100, 200, 300);
-	ASSERT_EQUAL(points, "testAddRectangularPrism.csv");
-}
-
-static int testAddSphere(){
-	Matrix_t * points = createMatrix();
-	addSphere(points, 0, 0, 100);
-	addSphere(points, 100, 0, 50);
-	addSphere(points, 100, 100, 50);
-	ASSERT_EQUAL(points, "testAddSphere.csv");
-}
-
-static int testAddTorus(){
-	Matrix_t * points = createMatrix();
-	addTorus(points, 0, 0, 50, 200);
-	addTorus(points, 0, 0, 20, 100);
-	ASSERT_EQUAL(points, "testAddTorus.csv");
-}
-
-static int testCreateTranslation(){
-	Matrix_t * points = createMatrix(),
-		* translation = createTranslation(-50, -100, 0);
-	addTriangle(points, 0, 0, 0, 100, 0, 100, 100, 100, 200);
-	multiplyMatrix(translation, points);
-	freeMatrix(translation);
-	ASSERT_EQUAL(points, "testCreateTranslation.csv");
-}
-
-static int testCreateScale(){
-	Matrix_t * points = createMatrix(),
-		* scale = createScale(3, 3, 3);
-	addRectangularPrism(points, 0, 0, 0, 100, 100, 100);
-	multiplyMatrix(scale, points);
-	freeMatrix(scale);
-	ASSERT_EQUAL(points, "testCreateScale.csv");
-}
-
-static int testCreateRotation(){
-	Matrix_t * points = createMatrix(),
-		* rotX = createRotation(X_AXIS, 270),
-		* rotY = createRotation(Y_AXIS, 30),
-		* rotZ = createRotation(Z_AXIS, 45);
-	addRectangularPrism(points, 0, 0, 0, 20, 100, 300);
-	multiplyMatrices(4, rotX, rotY, rotZ, points);
-	freeMatrices(3, rotX, rotY, rotZ);
-	ASSERT_EQUAL(points, "testCreateRotation.csv");
-}
-
-static int testCreateIdentity(){
-	Matrix_t * identity = createIdentity();
-
-	Matrix_t * matrix = createMatrix();
-	addTransformPoint(matrix, 1, 0, 0, 0);
-	addTransformPoint(matrix, 0, 1, 0, 0);
-	addTransformPoint(matrix, 0, 0, 1, 0);
-	addTransformPoint(matrix, 0, 0, 0, 1);
-
-	int result = equalMatrix(identity, matrix);
-	freeMatrices(2, identity, matrix);
-	return result;
-}
-
-// run all unit tests
+// run all unit tests, and print appropriate output.
 void testAll(){
 	puts("Begin unit tests.\n");
 
@@ -281,64 +307,4 @@ void testAll(){
 	TEST(testCreateIdentity());
 
 	puts("\nUnit tests completed successfully.");
-}
-
-// temporary function, used while writing unit_tests.c
-void test(){
-	testAddEdge();
-}
-
-// read points from a CSV file named filename, and return them in a Matrix_t
-Matrix_t * readPointsFromFile(char * filename){
-	char * fullFilename = malloc(strlen(filename) + strlen(TEST_FILE_DIR) + 1);
-	strcpy(fullFilename, TEST_FILE_DIR);
-	strcat(fullFilename, filename);
-
-	FILE * file;
-	if((file = fopen(fullFilename, "r")) == NULL){
-		FATAL("Cannot open file %s.", fullFilename);
-	}
-
-	free(fullFilename);
-	Matrix_t * points = createMatrix();
-
-	// read number of points contained in file
-	int numPoints;
-	if(fscanf(file, "%d:", &numPoints) < 1)
-		FATAL("Reading %s. Failed to read number of points.", fullFilename);
-
-	// read points from file; add them to the points matrix
-	int point;
-	for(point = 0; point < numPoints; point++){
-		int x, y, z;
-		if(fscanf(file, "%d,%d,%d,", &x, &y, &z) < 3)
-			FATAL("Reading %s. Failed to read point #%d.", fullFilename, point);
-		addPoint(points, x, y, z);
-	}
-
-	fclose(file);
-	return points;
-}
-
-// write points contained in a Matrix_t to a CSV file named filename
-void writePointsToFile(Matrix_t * points, char * filename){
-	// prepend filename with test-files directory name
-	char * fullFilename = malloc(strlen(filename) + strlen(TEST_FILE_DIR) + 1);
-	strcpy(fullFilename, TEST_FILE_DIR);
-	strcat(fullFilename, filename);
-	FILE * file;
-	if((file = fopen(fullFilename, "w")) == NULL)
-		FATAL("Cannot open file %s.", fullFilename);
-	free(fullFilename);
-
-	fprintf(file, "%d:", points->numPoints);
-
-	// write points to file
-	int point;
-	for(point = 0; point < points->numPoints; point++)
-		fprintf(file, "%d,%d,%d,",
-			(int)points->points[X][point],
-			(int)points->points[Y][point],
-			(int)points->points[Z][point]);
-	fclose(file);
 }

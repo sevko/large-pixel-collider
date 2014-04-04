@@ -1,2 +1,1 @@
 void testAll();
-void test();
