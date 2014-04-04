@@ -18,7 +18,6 @@ typedef struct {
 	int numPoints;
 } Matrix_t;
 
-
 Matrix_t * createMatrix();
 void freeMatrices(int numArgs, ...);
 void freeMatrix(Matrix_t * matrix);
@@ -27,6 +26,8 @@ void addTransformPoint(Matrix_t * const matrix, double x, double y, double z,
 	double w);
 void addEdge(Matrix_t * const matrix, double x1, double y1, double z1,
 	double x2, double y2, double z2);
+void addTriangle(Matrix_t * const matrix,  double x1, double y1, double z1,
+	double x2, double y2, double z2, double x3, double y3, double z3);
 void addPolygon(Matrix_t * points, int oX, int oY, int radius, int numSides);
 void addBezier(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 	int y2, int x3, int y3);
@@ -40,6 +41,7 @@ void addTorus(Matrix_t * points, double oX, double oY, double rad1,
 Matrix_t * generateSphere(double oX, double oY, double radius);
 Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2);
 void drawMatrix(const Matrix_t * const matrix);
+void drawMatrixLines(const Matrix_t * const matrix);
 void multiplyScalar(double scalar, Matrix_t * const matrix);
 void multiplyMatrices(int numArgs, ...);
 void multiplyMatrix(Matrix_t * const m1, Matrix_t * const m2);

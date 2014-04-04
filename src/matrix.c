@@ -72,6 +72,7 @@ void addTransformPoint(Matrix_t * const matrix, double x, double y, double z,
 	matrix->points[3][matrix->numPoints - 1] = w;
 }
 
+// DEPRECATED UNTIL FURTHER NOTICE.
 // add two points (x1, y1, z1) and (x2, y2, z2) to a Matrix_t
 void addEdge(Matrix_t * const matrix, double x1, double y1, double z1,
 	double x2, double y2, double z2){
@@ -354,7 +355,7 @@ void drawMatrix(const Matrix_t * const matrix){
 		return;
 
 	int ptPair;
-	for(ptPair = 0; ptPair < matrix->numPoints; ptPair += 3){
+	for(ptPair = 0; ptPair < matrix->numPoints - 2; ptPair += 3){
 		drawLine(matrix->points[0][ptPair], matrix->points[1][ptPair],
 			matrix->points[0][ptPair + 1], matrix->points[1][ptPair + 1]);
 		drawLine(matrix->points[0][ptPair], matrix->points[1][ptPair],
@@ -362,6 +363,17 @@ void drawMatrix(const Matrix_t * const matrix){
 		drawLine(matrix->points[0][ptPair + 1], matrix->points[1][ptPair + 1],
 			matrix->points[0][ptPair + 2], matrix->points[1][ptPair + 2]);
 	}
+}
+
+// iterate over a Matrix_t's points, and draw lines with adjacent point pairs
+void drawMatrixLines(const Matrix_t * const matrix){
+	if(matrix->numPoints < 2)
+		return;
+
+	int ptPair;
+	for(ptPair = 0; ptPair < matrix->numPoints; ptPair += 2)
+		drawLine(matrix->points[0][ptPair], matrix->points[1][ptPair],
+			matrix->points[0][ptPair + 1], matrix->points[1][ptPair + 1]);
 }
 
 // multiply a Matrix_t by a scalar value
@@ -496,10 +508,10 @@ int equalMatrix(Matrix_t * m1, Matrix_t * m2){
 
 	int point;
 	for(point = 0; point < m1->numPoints; point++)
-		if(m1->points[X][point] != m2->points[X][point] ||
-			m1->points[Y][point] != m2->points[Y][point] ||
-			m1->points[Z][point] != m2->points[Z][point] ||
-			m1->points[W][point] != m2->points[W][point])
+		if((int)m1->points[X][point] != (int)m2->points[X][point] ||
+			(int)m1->points[Y][point] != (int)m2->points[Y][point] ||
+			(int)m1->points[Z][point] != (int)m2->points[Z][point] ||
+			(int)m1->points[W][point] != (int)m2->points[W][point])
 			return 0;
 
 	return 1;
