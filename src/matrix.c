@@ -16,11 +16,6 @@
 #define CURVE_STEP_NUMBER 1e3 // number of steps used in plotting a curve
 #define RAD (M_PI / 180)
 
-struct Matrix {
-	double * points[4];
-	int numPoints;
-};
-
 static void expandMatrix(Matrix_t * const matrix);
 static double dotProduct(const Matrix_t * const m1, int row,
 	const Matrix_t * const m2, int col);
@@ -486,12 +481,28 @@ void printMatrix(const Matrix_t * const matrix){
 	puts("\nPrinting matrix.");
 
 	int row, col;
-	for(row = 0; row < 4; row++){
+	for(col = 0; col < matrix->numPoints; col++){
 		printf("|");
-		for(col = 0; col < matrix->numPoints; col++)
+		for(row = 0; row < 4; row++)
 			printf("\t%d,", (int)matrix->points[row][col]);
 		puts("\t|");
 	}
+}
+
+// return 1 if m1 and m2 are equal matrices; otherwise, return 0
+int equalMatrix(Matrix_t * m1, Matrix_t * m2){
+	if(m1->numPoints != m2->numPoints)
+		return 0;
+
+	int point;
+	for(point = 0; point < m1->numPoints; point++)
+		if(m1->points[X][point] != m2->points[X][point] ||
+			m1->points[Y][point] != m2->points[Y][point] ||
+			m1->points[Z][point] != m2->points[Z][point] ||
+			m1->points[W][point] != m2->points[W][point])
+			return 0;
+
+	return 1;
 }
 
 // expand each of a Matrix_t's points rows by 1

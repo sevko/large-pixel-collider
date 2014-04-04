@@ -8,7 +8,16 @@
 #define Y_AXIS 1
 #define Z_AXIS 2
 
-typedef struct Matrix Matrix_t;
+#define X 0
+#define Y 1
+#define Z 2
+#define W 3
+
+typedef struct {
+	double * points[4];
+	int numPoints;
+} Matrix_t;
+
 
 Matrix_t * createMatrix();
 void freeMatrices(int numArgs, ...);
@@ -40,3 +49,4 @@ Matrix_t * createScale(double dx, double dy, double dz);
 Matrix_t * createRotation(int axis, double angle);
 void printPointMatrix(const Matrix_t * const matrix);
 void printMatrix(const Matrix_t * const matrix);
+int equalMatrix(Matrix_t * m1, Matrix_t * m2);
