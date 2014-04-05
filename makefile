@@ -44,4 +44,4 @@ clean:
 	@rm -rf bin
 
 install:
-	@./install.sh
+	@sh install.sh

@@ -1,5 +1,7 @@
 # graphics engine
 
+[![Build Status](https://travis-ci.org/sevko/graphics-engine.svg?branch=master)](https://travis-ci.org/sevko/graphics-engine)
+
 ### about
 A proof-of-concept graphics engine, implemented in C.
 
@@ -9,19 +11,19 @@ The project's dependencies are:
 * [SDL][SDL]
 * [ncurses][ncurses]
 
-Install any necessary libraries with the enclosed shell-script:
+Install them with:
 
 ```bash
-chmod +x install.sh && ./install.sh
+make install
 ```
 
-### compile and run
+#### compile and run
 
 ```bash
 make run
 ```
 
-### delete compiled binaries
+#### delete compiled binaries
 
 ```bash
 make clean
