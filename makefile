@@ -8,9 +8,24 @@ SHELL_TERMINAL = gnome-terminal --title="Graphics Engine: Shell" \
 SRC = $(wildcard src/*.c src/**/*.c)
 OBJ = $(patsubst %.c, bin/%.o, $(foreach srcFile, $(SRC), $(notdir $(srcFile))))
 
-.PHONY: all run kill clean
+.PHONY: all run test kill clean install
 
 all: bin bin/$(PROJECT_NAME)
+
+bin:
+	@mkdir $@
+
+bin/$(PROJECT_NAME): $(OBJ)
+	$(CC) -o $@ $^ $(LIBS)
+
+bin/%.o: src/%.c
+	$(CC) -o $@ -c $^
+
+bin/screen.o: src/screen.c
+	$(CC) -o $@ -c $^ $(shell sdl-config --cflags)
+
+bin/%.o: src/interpreter/%.c
+	$(CC) -o $@ -c $^
 
 run: all
 	@if [ "$(SCRIPT_FILE)" != "" ]; then \
@@ -28,17 +43,5 @@ kill:
 clean:
 	@rm -rf bin
 
-bin:
-	@mkdir $@
-
-bin/$(PROJECT_NAME): $(OBJ)
-	$(CC) -o $@ $^ $(LIBS)
-
-bin/%.o: src/%.c
-	$(CC) -o $@ -c $^
-
-bin/screen.o: src/screen.c
-	$(CC) -o $@ -c $^ $(shell sdl-config --cflags)
-
-bin/%.o: src/interpreter/%.c
-	$(CC) -o $@ -c $^
+install:
+	@./install.sh
