@@ -11,12 +11,7 @@
 #include "unit_tests.h"
 
 #define TEST(func) \
-	do {\
-		int success = func;\
-		printf("Testing %-30s %s.\n", #func ":", success?"Success":"Failure");\
-		if(!success)\
-			FATAL("Unit test %s failed.", #func);\
-	} while(0)
+	printf("Testing %-30s %s.\n", #func ":", func?"Success":"Failure");
 
 #define SAVE(matrix, filename, ...) \
 	configureScreen();\
@@ -286,7 +281,7 @@ static int testEqualMatrix(){
 }
 
 // run all unit tests, and print appropriate output.
-void testAll(){
+void unitTests(){
 	puts("Begin unit tests.\n");
 
 	TEST(testMultiplyScalar());

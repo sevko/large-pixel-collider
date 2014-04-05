@@ -19,11 +19,15 @@ run: all
 		$(SHELL_TERMINAL) bin/$(PROJECT_NAME); \
 	fi
 
+test: all
+	@bin/engine --test
+
 kill:
 	@-killall -9 $(PROJECT_NAME)
 
 clean:
 	@rm -rf bin
+
 bin:
 	@mkdir $@
 

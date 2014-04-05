@@ -16,6 +16,6 @@
 // same as ERROR(), but exits with code 1
 #define FATAL(format, ...) \
 	do {\
-		ERROR(format " Exiting.", __VA_ARGS__);\
+		ERROR(format " Exiting.", ##__VA_ARGS__);\
 		exit(EXIT_FAILURE);\
 	} while(0)

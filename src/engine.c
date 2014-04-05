@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "src/globals.h"
@@ -16,8 +17,33 @@
 #include "src/interpreter/shell.h"
 #include "src/unit_tests.h"
 
+#define TEST_CMD "--test"
+#define SCRIPT_CMD "--script"
+
 static void sigHandler(int sig);
 static void setup();
+static void argumentHandler(int argc, char * argv[]);
+
+static void argumentHandler(int argc, char * argv[]){
+	if(1 < argc){
+		if(strcmp(TEST_CMD, argv[1]) == 0)
+			unitTests();
+
+		else if(strcmp(SCRIPT_CMD, argv[1]) == 0){
+			if(argc == 3)
+				readScriptFile(argv[2]);
+
+			else
+				FATAL("--script flag requires argument.");
+		}
+
+		else
+			FATAL("Argument not recognized.");
+	}
+
+	else
+		shell();
+}
 
 // establish signal handler for SIGINT
 static void sigHandler(int sig){
@@ -32,10 +58,6 @@ static void setup(){
 
 int main(int argc, char * argv[]){
 	setup();
-	if(1 < argc)
-		readScriptFile(argv[1]);
-	else
-		testAll();
-
+	argumentHandler(argc, argv);
 	return EXIT_SUCCESS;
 }

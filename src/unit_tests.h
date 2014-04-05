@@ -1,1 +1,1 @@
-void testAll();
+void unitTests();
