@@ -1,5 +1,5 @@
 /*!
- *  @file interpreter.h
+ *  @file
  *  @brief Functions for interpreting commands in the graphics engine's
  *      scripting quasi-language.
  */
@@ -9,42 +9,38 @@
 #include "src/matrix.h"
 
 /*!
- *  @brief Returned by evaluateCommand() if a command was "special," or specific
- *      to the shell (see HELP_CMD and EXIT_CMD).
+ *  Returned by evaluateCommand() if a command was "special," or specific to
+ *  the shell (see HELP_CMD and EXIT_CMD).
  */
 #define CMD_SPECIAL 0
 
 /*!
- *  @brief Returned by evaluateCommand() to indicate successfull evaluation of
- *      a command.
+ *  Returned by evaluateCommand() to indicate successfull evaluation of a
+ *  command.
  */
 #define CMD_VALID_EVAL 1
 
 /*!
- *  @brief Returned by evaluateCommand() to indicate failed evaluation of a
- *  command due to an invalid command.
+ *  Returned by evaluateCommand() to indicate failed evaluation of a command
+ *  due to an invalid command.
  */
 #define CMD_INVALID_CMD 2
 
 /*!
- *  @brief Returned by evaluateCommand() to indicate failed evaluation of a
- *  command due to invalid arguments.
+ *  Returned by evaluateCommand() to indicate failed evaluation of a command
+ *  due to invalid arguments.
  */
 #define CMD_INVALID_ARGS 3
 
-/*!
- *  @brief Command to print help information in the shell.
- */
+//! Command to print help information in the shell.
 #define HELP_CMD 'H'
 
-/*!
- *  @brief Command to exit the shell.
- */
+//! Command to exit the shell.
 #define EXIT_CMD 'e'
 
 /*!
- *  @brief Path of the file whose contents will be printed to the shell in
- *      response to receipt of the HELP_CMD command.
+ *  Path of the file whose contents will be printed to the shell in response to
+ *  receipt of the HELP_CMD command.
  */
 #define HELP_FILE_PATH "doc/shell_help.txt"
 

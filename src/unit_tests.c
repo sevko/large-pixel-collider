@@ -1,7 +1,7 @@
 /*!
- *  @file: unit_tests.c
+ *  @file
  *  @brief Unit-test functions used to perform regression testing.
-*/
+ */
 
 #include <stdio.h>
 #include <unistd.h>

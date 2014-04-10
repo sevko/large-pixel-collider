@@ -1,7 +1,3 @@
-/*
- *  file_parser.c contains functions for reading and evaluating a script file.
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -12,20 +8,15 @@
 #include "src/interpreter/file_parser.h"
 #include "src/interpreter/interpreter.h"
 
+
 /*!
- *  @brief Evaluate the commands contained in a ::ScannedFile_t.
- *
- *  @param script The ::ScannedFile_t whose commands will be executed.
+ * Microseconds to wait before the file parser exits after successful script
+ * evaluation.
  */
-static void evaluateScript(const ScannedFile_t * const script);
+#define PARSER_EXIT_PAUSE 5e6
 
 void readScriptFile(const char * const filePath){
 	ScannedFile_t * script = readFile(filePath);
-	evaluateScript(script);
-	freeFile(script);
-}
-
-static void evaluateScript(const ScannedFile_t * const script){
 	configureScreen();
 	Matrix_t * points = createMatrix(), * transform = createIdentity();
 
@@ -53,7 +44,8 @@ static void evaluateScript(const ScannedFile_t * const script){
 			line++;
 	}
 
-	usleep(5e6);
+	usleep(PARSER_EXIT_PAUSE);
 	freeMatrices(2, points, transform);
 	quitScreen();
+	freeFile(script);
 }

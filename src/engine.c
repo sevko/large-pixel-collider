@@ -1,10 +1,10 @@
 /*!
- *  @file engine.c
+ *  @file
  *  @brief The engine's main module.
  *
  *  engine.c is the graphics engine's main module, and contains functions for
- *  initialization and setup.
-*/
+ *  project initialization and setup.
+ */
 
 #include <signal.h>
 #include <stdio.h>
@@ -56,6 +56,20 @@ static void setup(void);
  */
 static void argumentHandler(int argc, char * argv[]);
 
+void test(void){
+	configureScreen();
+
+	int x, y;
+	for(x = -10; x <= 10; x++)
+		for(y = -10; y <= 10; y++)
+			drawPixel(x, y);
+			// drawPixel(x, y, 0xFFFFFF);
+
+	renderScreen();
+	usleep(2e6);
+	quitScreen();
+}
+
 static void argumentHandler(int argc, char * argv[]){
 	if(1 < argc){
 		if(strcmp(TEST_CMD, argv[1]) == 0)
@@ -74,6 +88,7 @@ static void argumentHandler(int argc, char * argv[]){
 	}
 
 	else
+		// test();
 		shell();
 }
 

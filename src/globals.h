@@ -1,25 +1,21 @@
 /*!
- *  @file globals.h
+ *  @file
  *  @brief A collection of macros and declarations universal to the graphics
  *      engine.
  *
  *  globals.h contains object-like and function-like macros, such as the
  *  dimensions of the screen and those to facilitate debugging, used universally
  *  throughout the engine's source code.
-*/
+ */
 
 #pragma once
 
 #include <stdlib.h>
 
-/*!
- *  @brief The width of the engine's screen.
- */
+//! The width of the engine's screen. The what.
 #define IMAGE_WIDTH 800
 
-/*!
- *  @brief The height of the engine's screen.
- */
+//! The height of the engine's screen.
 #define IMAGE_HEIGHT 700
 
 /*!

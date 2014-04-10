@@ -1,5 +1,5 @@
 /*!
- *  @file matrix.h
+ *  @file
  *  @brief Functions that concern shape creation and point manipulations.
  *
  *  matrix.h contains functions that constitute the backbone of the graphics
@@ -24,50 +24,34 @@
 #define addCircle(points, oX, oY, radius) \
 	addPolygon(points, oX, oY, radius, (radius / 2 ))
 
-/*!
- *  @brief Macro for the x-axis -- used as an argument to createRotation().
-*/
+//! @brief Macro for the x-axis -- used as an argument to createRotation().
 #define X_AXIS 0
 
-/*!
- *  @brief Macro for the y-axis -- used as an argument to createRotation().
-*/
+//! Macro for the y-axis -- used as an argument to createRotation().
 #define Y_AXIS 1
 
-/*!
- *  @brief Macro for the z-axis -- used as an argument to createRotation().
-*/
+//! Macro for the z-axis -- used as an argument to createRotation().
 #define Z_AXIS 2
 
-/*!
- *  @brief The index of the x-coordinate of a point in ::Matrix_t::points.
-*/
+//! The index of the x-coordinate of a point in ::Matrix_t::points.
 #define X 0
 
-/*!
- *  @brief The index of the y-coordinate of a point in ::Matrix_t::points.
-*/
+//! The index of the y-coordinate of a point in ::Matrix_t::points.
 #define Y 1
 
-/*!
- *  @brief The index of the x-coordinate of a point in ::Matrix_t::points.
-*/
+//! The index of the x-coordinate of a point in ::Matrix_t::points.
 #define Z 2
 
-/*!
- *  @brief The index of the w-coordinate of a point in ::Matrix_t::points.
-*/
+//! The index of the w-coordinate of a point in ::Matrix_t::points.
 #define W 3
 
-/*!
- *  @brief A typedef'd struct of point coordinates.
- */
+//! A typedef'd struct of point coordinates.
 typedef struct Matrix Matrix_t;
 
 /*!
  *  @brief Allocate memory for a ::Matrix_t.
  *  @return A pointer to a newly allocated ::Matrix_t.
-*/
+ */
 Matrix_t * createMatrix(void);
 
 /*!
@@ -75,7 +59,7 @@ Matrix_t * createMatrix(void);
  *
  *  @param numMatrices The number of ::Matrix_t arguments.
  *  @param ... Varargs ::Matrix_t to be called freeMatrix() on.
-*/
+ */
 void freeMatrices(int numMatrices, ...);
 
 /*!
@@ -84,7 +68,7 @@ void freeMatrices(int numMatrices, ...);
  *  Deallocate all of the memory belonging to the Matrix_t pointed to by @p
  *  matrix.
  *  @param matrix Pointer to a ::Matrix_t.
-*/
+ */
 void freeMatrix(Matrix_t * matrix);
 
 /*!
@@ -94,7 +78,7 @@ void freeMatrix(Matrix_t * matrix);
  *  @param x The double x-coordinate of the point.
  *  @param y The double y-coordinate of the point.
  *  @param z The double z-coordinate of the point.
-*/
+ */
 void addPoint(Matrix_t * const matrix, double x, double y, double z);
 
 /*!
@@ -105,7 +89,7 @@ void addPoint(Matrix_t * const matrix, double x, double y, double z);
  *  @param y The double y-coordinate of the point.
  *  @param z The double z-coordinate of the point.
  *  @param w The double w-coordinate of the point.
-*/
+ */
 void addTransformPoint(Matrix_t * const matrix, double x, double y, double z,
 	double w);
 
@@ -122,7 +106,7 @@ void addTransformPoint(Matrix_t * const matrix, double x, double y, double z,
  *
  *  @deprecated Deprecated since the introduction of polygonal rendering, which
  *      requires that points be added to a ::Matrix_t with addTriangle().
-*/
+ */
 void addEdge(Matrix_t * const matrix, double x1, double y1, double z1,
 	double x2, double y2, double z2);
 
@@ -139,7 +123,7 @@ void addEdge(Matrix_t * const matrix, double x1, double y1, double z1,
  *  @param x3 The double x-coordinate of the third vertex.
  *  @param y3 The double y-coordinate of the third vertex.
  *  @param z3 The double z-coordinate of the third vertex.
-*/
+ */
 void addTriangle(Matrix_t * const matrix,  double x1, double y1, double z1,
 	double x2, double y2, double z2, double x3, double y3, double z3);
 
@@ -152,7 +136,7 @@ void addTriangle(Matrix_t * const matrix,  double x1, double y1, double z1,
  *  @param radius The distance between the centroid and any of the polygon's
  *      vertices.
  *  @param numSides The number of edges the polygon has.
-*/
+ */
 void addPolygon(Matrix_t * points, int oX, int oY, int radius, int numSides);
 
 /*!
@@ -167,7 +151,7 @@ void addPolygon(Matrix_t * points, int oX, int oY, int radius, int numSides);
  *  @param y2 The y-coordinate of the curve's third control point.
  *  @param x3 The x-coordinate of the curve's fourth control point.
  *  @param y3 The y-coordinate of the curve's fourth control point.
-*/
+ */
 void addBezier(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 	int y2, int x3, int y3);
 

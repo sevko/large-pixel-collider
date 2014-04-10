@@ -1,14 +1,12 @@
 /*!
- *  @file utils.h
+ *  @file
  *  @brief Functions that provide general, miscellaneous utility.
  */
 
-/*!
- *  @brief A typedef'd struct to contain a file read with readFile().
- */
+//! A typedef'd struct to contain a file read with readFile().
 typedef struct {
-	char ** buffer; /*!< The contents of the file. */
-	int numLines;   /*!< The number of lines in the file. */
+	char ** buffer; //!< The contents of the file.
+	int numLines;   //!< Number of lines in the file.
 } ScannedFile_t;
 
 /*

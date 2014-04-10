@@ -1,5 +1,5 @@
 /*!
- *  @file shell.h
+ *  @file
  *  @brief Functions for initializing and running the shell.
  */
 

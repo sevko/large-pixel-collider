@@ -1,5 +1,5 @@
 /*!
- *  @file graphics.h
+ *  @file
  *  @brief Functions that govern graphical rasterization and point-plotting.
  *
  *  graphics.h contains graphics-processing -- ie, line rasterization --

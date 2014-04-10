@@ -16,26 +16,19 @@
  */
 #define INTERPOL(a, b) (a + (b - a) * t1)
 
-/*!
- *  @brief The angle between the subsequent, rotated circles that compose a
- *      sphere.
-*/
+//! The angle between the subsequent, rotated circles that compose a sphere.
 #define CIRCLE_STEP_SIZE 4 // angle between circles of a sphere/torus
 
-/*!
- *  @brief The number of steps taken in plotting Bezier and Hermite curves.
- */
+//! The number of steps taken in plotting Bezier and Hermite curves.
 #define CURVE_STEP_NUMBER 1e3
 
 /*!
- *  @brief The ratio between degrees and radians -- faciliates conversion from
- *      the former to the latter.
+ *  The ratio between degrees and radians -- faciliates conversion from the
+ *  former to the latter.
  */
 #define RAD (M_PI / 180)
 
-/*!
- * @brief The directory to contain all ::Matrix_t points CSV files.
-*/
+//! The directory to contain all ::Matrix_t points CSV files.
 #define TEST_FILE_DIR "test/"
 
 /*!
@@ -85,16 +78,14 @@ static void expandMatrix(Matrix_t * const matrix);
 static double dotProduct(const Matrix_t * const m1, int row,
 	const Matrix_t * const m2, int col);
 
-/*!
- *  @brief A struct to contain point coordinates.
-*/
+//! A struct to contain point coordinates.
 struct Matrix {
 	/*! A @f$4xn@f$ matrix of @a n points, with four double values each: the @a
 	 * x-, @a y-, and @a z- coordinates, and a fourth placeholder value, @a w,
 	 * to facilitate transformation matrix mathematics.
 	*/
 	double * points[4];
-	int numPoints;  /*!< The number of points contained in this Matrix.*/
+	int numPoints;  //!< The number of points contained in this Matrix.
 };
 
 Matrix_t * createMatrix(void){
@@ -464,7 +455,7 @@ void multiplyMatrix(Matrix_t * const m1, Matrix_t * const m2){
 	}
 }
 
-Matrix_t * createIdentity(){
+Matrix_t * createIdentity(void){
 	Matrix_t * identity = createMatrix();
 	addTransformPoint(identity, 1, 0, 0, 0);
 	addTransformPoint(identity, 0, 1, 0, 0);

@@ -1,8 +1,3 @@
-/*
- *  shell.c contains functions for initializing and running an interactive shell
- *  that allows the user to manipulate the graphics engine with commands.
-*/
-
 #include <ncurses.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,11 +9,6 @@
 #include "src/interpreter/interpreter.h"
 #include "src/interpreter/shell.h"
 #include "src/interpreter/shell_graphics.h"
-
-/*!
- *  @brief The microsecond pause between the shell's ticks (during which it)
- */
-#define TICK_PAUSE (1e6 / 60)
 
 /*!
  *  @brief Indicate whether char is printable (alphanumeric, a symbol, etc).
@@ -112,7 +102,7 @@ int g_curX, g_curY;
 /*!
  *  @brief Indicates the contents -- a command or arguments -- of the line
  *      currently being written by the user.
-*/
+ */
 int g_currLineType;
 
 /*!
@@ -186,7 +176,6 @@ void shell(void){
 			}
 
 		renderShell();
-		usleep(TICK_PAUSE);
 	}
 
 	freeShell();

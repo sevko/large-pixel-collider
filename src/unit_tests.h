@@ -1,5 +1,5 @@
 /*!
- *  @file unit_tests.h
+ *  @file
  *  @brief Unit-test functions used to perform regression testing.
  */
 

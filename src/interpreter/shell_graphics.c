@@ -2,16 +2,16 @@
 #include <stdlib.h>
 #include "src/interpreter/shell_graphics.h"
 
-//<! Prompt displayed for lines containing arguments.
+//! Prompt displayed for lines containing arguments.
 #define PROMPT_ARGS_OUTPUT "     "
 
-//<! Prompt displayed for lines containing a command.
+//! Prompt displayed for lines containing a command.
 #define PROMPT_CMD  "CMD: "
 
-//<! The color of the prompt.
+//! The color of the prompt.
 #define PROMPT_COLOR_NUM (LINE_TYPE_OUTPUT + 1)
 
-//<! The character width of the prompt.
+//! The character width of the prompt.
 #define PROMPT_PADDING 5
 
 extern int g_currLineType, g_curX, g_curY;
@@ -43,13 +43,13 @@ static void printLine(char * line, int type);
  */
 static VisualLine_t * g_visualBuffer;
 
-//!< The number of ::VisualLine_t in g_visualBuffer.
+//! The number of ::VisualLine_t in g_visualBuffer.
 static int g_numVisualLines;
 
-//<! The line number from which to begin rendering g_visualBuffer.
+//! The line number from which to begin rendering g_visualBuffer.
 static int g_visualY;
 
-//<! 1 if the terminal supports color; 0 otherwise.
+//! 1 if the terminal supports color; 0 otherwise.
 static int g_hasColor;
 
 void configureGraphicsShell(void){

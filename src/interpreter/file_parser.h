@@ -1,5 +1,5 @@
 /*!
- *  @file file_parser.h
+ *  @file
  *  @brief Functions for reading and evaluating the commands contained in a
  *      file of the engine's script flavor.
  */
