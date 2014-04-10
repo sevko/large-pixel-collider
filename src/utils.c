@@ -4,7 +4,6 @@
 #include "globals.h"
 #include "utils.h"
 
-// read file named filePath into a ScannedFile_t, return it
 ScannedFile_t * readFile(const char * const filePath){
 	FILE * file = fopen(filePath, "r");
 	if(file == NULL){
@@ -38,7 +37,6 @@ ScannedFile_t * readFile(const char * const filePath){
 	return scannedFile;
 }
 
-// deallocate all internal pointers of a ScannedFile_t
 void freeFile(ScannedFile_t * file){
 	int line;
 	for(line = 0; line < file->numLines; line++)

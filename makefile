@@ -1,3 +1,4 @@
+SCRIPT_FILE = 
 PROJECT_NAME = engine
 FLAGS = -Ofast -Wall -Wextra -Werror -Wunreachable-code -I ./
 CC = gcc $(FLAGS)
@@ -29,7 +30,7 @@ bin/%.o: src/interpreter/%.c
 
 run: all
 	@if [ "$(SCRIPT_FILE)" != "" ]; then \
-		bin/$(PROJECT_NAME) $(SCRIPT_FILE); \
+		bin/$(PROJECT_NAME) --script $(SCRIPT_FILE); \
 	else \
 		$(SHELL_TERMINAL) bin/$(PROJECT_NAME); \
 	fi

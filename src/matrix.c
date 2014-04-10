@@ -1,7 +1,3 @@
-/*
- *  matrix.c contains functions for creating and manipulating Matrix_t structs.
-*/
-
 #include <math.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -12,26 +8,96 @@
 #include "src/globals.h"
 #include "src/graphics.h"
 
-#define INTERPOL(a, b) (a + (b - a) * t1)   // interpolate a point
+/*!
+ *  @brief Return the linear interpolation of numeric values @p a and @p b.
+ *
+ *  @param a The first numeric value.
+ *  @param b The second numeric value.
+ */
+#define INTERPOL(a, b) (a + (b - a) * t1)
 
+/*!
+ *  @brief The angle between the subsequent, rotated circles that compose a
+ *      sphere.
+*/
 #define CIRCLE_STEP_SIZE 4 // angle between circles of a sphere/torus
-#define CURVE_STEP_NUMBER 1e3 // number of steps used in plotting a curve
+
+/*!
+ *  @brief The number of steps taken in plotting Bezier and Hermite curves.
+ */
+#define CURVE_STEP_NUMBER 1e3
+
+/*!
+ *  @brief The ratio between degrees and radians -- faciliates conversion from
+ *      the former to the latter.
+ */
 #define RAD (M_PI / 180)
 
-// dir to contain all unit_test points CSV files.
+/*!
+ * @brief The directory to contain all ::Matrix_t points CSV files.
+*/
 #define TEST_FILE_DIR "test/"
 
+/*!
+ *  @brief Return a pointer to a ::Matrix_t containing the points of a sphere.
+ *
+ *  @param oX The x-coordinate of the sphere's origin.
+ *  @param oY The y-coordinate of the sphere's origin.
+ *  @param radius The radius of the sphere.
+ *
+ *  @return A pointer to a ::Matrix_t containing the points of the sphere.
+ */
+static Matrix_t * generateSphere(double oX, double oY, double radius);
+
+/*!
+ *  @brief Return a pointer to a ::Matrix_t containing the points of a torus.
+ *
+ *  @param oX The x-coordinate of the torus's centroid.
+ *  @param oY The y-coordinate of the torus's centroid.
+ *  @param radius The radius of the torus.
+ *
+ *  @return A pointer to a ::Matrix_t containing the points of the torus.
+ */
+static Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2);
+
+/*!
+ *  @brief Expand a ::Matrix_t::points to accomodate an additional point.
+ *
+ *  Realloc a given ::Matrix_t::points, and increment ::Matrix_t::numPoints.
+ *
+ *  @param matrix The ::Matrix_t whose ::Matrix_t::points matrix will be
+ *      expanded to an additional column
+ */
 static void expandMatrix(Matrix_t * const matrix);
+
+/*!
+ *  @brief Return the dot-product of a row of one ::Matrix_t and a column of
+ *      another ::Matrix_t.
+ *
+ *  @param m1 The first @a n*4 matrix (in practice, should always be @a 4*4).
+ *  @param row The row of @p m1 to be multiplied.
+ *  @param m2 The second @a 4*n ::Matrix_t.
+ *  @param col The col of @p m2 to be multiplied.
+ *
+ *  @return The dot-product of row @p row of m1::points and column @p col of
+ *      m2::points.
+ */
 static double dotProduct(const Matrix_t * const m1, int row,
 	const Matrix_t * const m2, int col);
 
+/*!
+ *  @brief A struct to contain point coordinates.
+*/
 struct Matrix {
+	/*! A @f$4xn@f$ matrix of @a n points, with four double values each: the @a
+	 * x-, @a y-, and @a z- coordinates, and a fourth placeholder value, @a w,
+	 * to facilitate transformation matrix mathematics.
+	*/
 	double * points[4];
-	int numPoints;
+	int numPoints;  /*!< The number of points contained in this Matrix.*/
 };
 
-// alloc memory for Matrix_t, set all internal pointers
-Matrix_t * createMatrix(){
+Matrix_t * createMatrix(void){
 	Matrix_t * const matrix = malloc(sizeof(Matrix_t));
 	matrix->numPoints = 0;
 
@@ -41,18 +107,16 @@ Matrix_t * createMatrix(){
 	return matrix;
 }
 
-// call freeMatrix() on vararg Matrix_ts
-void freeMatrices(int numArgs, ...){
+void freeMatrices(int numMatrices, ...){
 	va_list matrices;
-	va_start(matrices, numArgs);
+	va_start(matrices, numMatrices);
 
 	int arg;
-	for(arg = 0; arg < numArgs; arg++)
+	for(arg = 0; arg < numMatrices; arg++)
 		freeMatrix(va_arg(matrices, Matrix_t *));
 	va_end(matrices);
 }
 
-// free alloc'd Matrix_t and all internal pointers
 void freeMatrix(Matrix_t * matrix){
 	free(matrix->points[X]);
 	free(matrix->points[Y]);
@@ -61,8 +125,6 @@ void freeMatrix(Matrix_t * matrix){
 	free(matrix);
 }
 
-// expand a Matrix_t, and add a point (x, y, z, 1) to its last column;
-// used to add coordinate points to a matrix, which have a default w value of 1.
 void addPoint(Matrix_t * const matrix, double x, double y, double z){
 	expandMatrix(matrix);
 	matrix->points[X][matrix->numPoints - 1] = x;
@@ -71,8 +133,6 @@ void addPoint(Matrix_t * const matrix, double x, double y, double z){
 	matrix->points[W][matrix->numPoints - 1] = 1;
 }
 
-// expand a Matrix_t, and add a point (x, y, z, w) to its last column;
-// used to add values to a transformation matrix, which has a variable w value.
 void addTransformPoint(Matrix_t * const matrix, double x, double y, double z,
 	double w){
 	expandMatrix(matrix);
@@ -82,16 +142,12 @@ void addTransformPoint(Matrix_t * const matrix, double x, double y, double z,
 	matrix->points[W][matrix->numPoints - 1] = w;
 }
 
-// DEPRECATED UNTIL FURTHER NOTICE.
-// add two points (x1, y1, z1) and (x2, y2, z2) to a Matrix_t
 void addEdge(Matrix_t * const matrix, double x1, double y1, double z1,
 	double x2, double y2, double z2){
 	addPoint(matrix, x1, y1, z1);
 	addPoint(matrix, x2, y2, z2);
 }
 
-// add a triangle of points (x1, y1, z1), (x2, y2, z2), and (x3, y3, z3) to a
-// Matrix_t
 void addTriangle(Matrix_t * const matrix,  double x1, double y1, double z1,
 	double x2, double y2, double z2, double x3, double y3, double z3){
 	addPoint(matrix, x1, y1, z1);
@@ -99,7 +155,6 @@ void addTriangle(Matrix_t * const matrix,  double x1, double y1, double z1,
 	addPoint(matrix, x3, y3, z3);
 }
 
-// draw a polygon with origin (oX, oY), radius, and numSides
 void addPolygon(Matrix_t * points, int oX, int oY, int radius, int numSides){
 	double theta = 2 * M_PI / numSides;
 	double tanFactor = tan(theta), radFactor = cos(theta);
@@ -115,8 +170,6 @@ void addPolygon(Matrix_t * points, int oX, int oY, int radius, int numSides){
 	}
 }
 
-// draw a Bezier curve with control points (x0, y0), (x1, y1), (x2, y2),
-// and (x3, y3)
 void addBezier(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 	int y2, int x3, int y3){
 
@@ -140,8 +193,6 @@ void addBezier(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 	}
 }
 
-// draw a Hermite curve with start and endpoints (x0, y0) and (x2, y2), and
-// rates of change as calculated using (x1, y1) and (x3, y3).
 void addHermite(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 	int y2, int x3, int y3){
 
@@ -176,8 +227,6 @@ void addHermite(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 	}
 }
 
-// add a rectangular prism to points, with upper-left corner (x, y, z), and the
-// given width, height, and depth
 void addRectangularPrism(Matrix_t * points, double x, double y, double z,
 	double width, double height, double depth){
 
@@ -246,8 +295,6 @@ void addRectangularPrism(Matrix_t * points, double x, double y, double z,
 	addTriangle(points, dX, dY, dZ, gX, gY, gZ, hX, hY, hZ);
 }
 
-// add the points of a sphere to points, centered on (oX, oY) with the given
-// radius to the argument Matrix_t.
 void addSphere(Matrix_t * points, double oX, double oY, double radius){
 	Matrix_t * sphere = generateSphere(oX, oY, radius);
 	int circlePts = sphere->numPoints / (180 / CIRCLE_STEP_SIZE);
@@ -282,9 +329,6 @@ void addSphere(Matrix_t * points, double oX, double oY, double radius){
 	freeMatrix(sphere);
 }
 
-// add the points of a torus to points centered on (oX, oY), with a ring of
-// radius rad1, the constituent circles of which are centered along a circle of
-// rad2 centered on the torus's origin.
 void addTorus(Matrix_t * points, double oX, double oY, double rad1,
 	double rad2){
 	Matrix_t * torus = generateTorus(oX, oY, rad1, rad2);
@@ -320,8 +364,6 @@ void addTorus(Matrix_t * points, double oX, double oY, double rad1,
 	freeMatrix(torus);
 }
 
-// return a Matrix_t with the points of a sphere centered on (oX, oY) with the
-// given radius
 Matrix_t * generateSphere(double oX, double oY, double radius){
 	Matrix_t * sphere = createMatrix(),
 		* xRot = createRotation(X_AXIS, CIRCLE_STEP_SIZE);
@@ -339,9 +381,6 @@ Matrix_t * generateSphere(double oX, double oY, double radius){
 	return sphere;
 }
 
-// return a Matrix_t with the points of a torus centered on (oX, oY), with a
-// ring of radius rad1, the constituent circles of which are centered along a
-// circle of rad2 centered on the torus's origin.
 Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2){
 	Matrix_t * torus = createMatrix();
 	Matrix_t * yRot = createRotation(Y_AXIS, CIRCLE_STEP_SIZE);
@@ -359,7 +398,6 @@ Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2){
 	return torus;
 }
 
-// iterate over a Matrix_t's points, and draw lines with adjacent point pairs
 void drawMatrix(const Matrix_t * const matrix){
 	if(matrix->numPoints < 3)
 		return;
@@ -375,7 +413,6 @@ void drawMatrix(const Matrix_t * const matrix){
 	}
 }
 
-// iterate over a Matrix_t's points, and draw lines with adjacent point pairs
 void drawMatrixLines(const Matrix_t * const matrix){
 	if(matrix->numPoints < 2)
 		return;
@@ -386,7 +423,6 @@ void drawMatrixLines(const Matrix_t * const matrix){
 			matrix->points[X][ptPair + 1], matrix->points[Y][ptPair + 1]);
 }
 
-// multiply a Matrix_t by a scalar value
 void multiplyScalar(double scalar, Matrix_t * const matrix){
 	int row, col;
 	for(row = 0; row < 4; row++)
@@ -394,27 +430,25 @@ void multiplyScalar(double scalar, Matrix_t * const matrix){
 			matrix->points[row][col] *= scalar;
 }
 
-// multiply the first (numArgs - 1) argument Matrix_ts into the last Matrix_t
-void multiplyMatrices(int numArgs, ...){
+void multiplyMatrices(int numMatrices, ...){
 	va_list matrices;
-	va_start(matrices, numArgs);
+	va_start(matrices, numMatrices);
 
-	Matrix_t ** multiplicands = malloc((numArgs - 1) * sizeof(Matrix_t *));
+	Matrix_t ** multiplicands = malloc((numMatrices - 1) * sizeof(Matrix_t *));
 
 	int arg;
-	for(arg = 0; arg < numArgs - 1; arg++)
+	for(arg = 0; arg < numMatrices - 1; arg++)
 		multiplicands[arg] = va_arg(matrices, Matrix_t *);
 
 	// last matrix, into which all preceding matrices will be multiplied
 	Matrix_t * points = va_arg(matrices, Matrix_t *);
 	va_end(matrices);
 
-	for(arg = 0; arg < numArgs - 1; arg++)
+	for(arg = 0; arg < numMatrices - 1; arg++)
 		multiplyMatrix(multiplicands[arg], points);
 	free(multiplicands);
 }
 
-// multiply Matrix_ts m1 and m2 in place, storing the result in m2
 void multiplyMatrix(Matrix_t * const m1, Matrix_t * const m2){
 	int col;
 	for(col = 0; col < m2->numPoints; col++){
@@ -430,7 +464,6 @@ void multiplyMatrix(Matrix_t * const m1, Matrix_t * const m2){
 	}
 }
 
-// return a 4x4 identity matrix
 Matrix_t * createIdentity(){
 	Matrix_t * identity = createMatrix();
 	addTransformPoint(identity, 1, 0, 0, 0);
@@ -440,7 +473,6 @@ Matrix_t * createIdentity(){
 	return identity;
 }
 
-// return a 4x4 matrix to translate a set of points by dx, dy, and dz
 Matrix_t * createTranslation(double dx, double dy, double dz){
 	Matrix_t * translation = createIdentity();
 	translation->points[X][W] = dx;
@@ -449,7 +481,6 @@ Matrix_t * createTranslation(double dx, double dy, double dz){
 	return translation;
 }
 
-// return a 4x4 matrix to scale a set of points by dx, dy, and dz
 Matrix_t * createScale(double dx, double dy, double dz){
 	Matrix_t * scale = createMatrix();
 	addTransformPoint(scale, dx, 0, 0, 0);
@@ -459,7 +490,6 @@ Matrix_t * createScale(double dx, double dy, double dz){
 	return scale;
 }
 
-// return a 4x4 matrix to rotate a set of points angle degrees across an axis
 Matrix_t * createRotation(int axis, double angle){
 	Matrix_t * rotation = createMatrix();
 
@@ -487,7 +517,6 @@ Matrix_t * createRotation(int axis, double angle){
 	return rotation;
 }
 
-// print the formatted values of each of a Matrix_t's points
 void printPointMatrix(const Matrix_t * const matrix){
 	puts("Printing points.");
 
@@ -498,7 +527,6 @@ void printPointMatrix(const Matrix_t * const matrix){
 			(int)matrix->points[Z][point], (int)matrix->points[W][point]);
 }
 
-// print the Matrix_t in a matrix format
 void printMatrix(const Matrix_t * const matrix){
 	puts("\nPrinting matrix.");
 
@@ -511,7 +539,6 @@ void printMatrix(const Matrix_t * const matrix){
 	}
 }
 
-// return 1 if m1 and m2 are equal matrices; otherwise, return 0
 int equalMatrix(Matrix_t * m1, Matrix_t * m2){
 	if(m1->numPoints != m2->numPoints)
 		return 0;
@@ -527,26 +554,6 @@ int equalMatrix(Matrix_t * m1, Matrix_t * m2){
 	return 1;
 }
 
-// expand each of a Matrix_t's points rows by 1
-static void expandMatrix(Matrix_t * const matrix){
-	matrix->numPoints++;
-	int varPtr;
-	for(varPtr = 0; varPtr < 4; varPtr++)
-		matrix->points[varPtr] = realloc(matrix->points[varPtr],
-			sizeof(double) * matrix->numPoints);
-}
-
-// return the dot-product of a row in Matrix_t m1 and a column in Matrix_t m2
-static double dotProduct(const Matrix_t * const m1, int row,
-	const Matrix_t * const m2, int col){
-	return m1->points[row][0] * m2->points[X][col] +
-		m1->points[row][1] * m2->points[Y][col] +
-		m1->points[row][2] * m2->points[Z][col] +
-		m1->points[row][3] * m2->points[W][col];
-}
-
-// read points from a CSV file named filename in directory TEST_FILE_DIR, and
-// return them in a Matrix_t
 Matrix_t * readPointsFromFile(char * filename){
 	char * fullFilename = malloc(strlen(filename) + strlen(TEST_FILE_DIR) + 1);
 	strcpy(fullFilename, TEST_FILE_DIR);
@@ -578,8 +585,6 @@ Matrix_t * readPointsFromFile(char * filename){
 	return points;
 }
 
-// write points contained in a Matrix_t to a CSV file named filename, in
-// directory TEST_FILE_DIR
 void writePointsToFile(Matrix_t * points, char * filename){
 	// prepend filename with test-files directory name
 	char * fullFilename = malloc(strlen(filename) + strlen(TEST_FILE_DIR) + 1);
@@ -600,4 +605,20 @@ void writePointsToFile(Matrix_t * points, char * filename){
 			(int)points->points[Y][point],
 			(int)points->points[Z][point]);
 	fclose(file);
+}
+
+static void expandMatrix(Matrix_t * const matrix){
+	matrix->numPoints++;
+	int varPtr;
+	for(varPtr = 0; varPtr < 4; varPtr++)
+		matrix->points[varPtr] = realloc(matrix->points[varPtr],
+			sizeof(double) * matrix->numPoints);
+}
+
+static double dotProduct(const Matrix_t * const m1, int row,
+	const Matrix_t * const m2, int col){
+	return m1->points[row][0] * m2->points[X][col] +
+		m1->points[row][1] * m2->points[Y][col] +
+		m1->points[row][2] * m2->points[Z][col] +
+		m1->points[row][3] * m2->points[W][col];
 }

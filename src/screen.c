@@ -1,20 +1,30 @@
-/*
- *  screen.c contains functions for initializing, rendering, and drawing to an
- *  SDL GUI.
-*/
-
 #include <SDL.h>
 
 #include "src/globals.h"
 #include "src/screen.h"
 
-#define QUIT_DELAY 400                  // milliseconds before screen quits
+/*!
+ *  @brief The millisecond delay before the SDL screen quits after quitScreen()
+ *      is called.
+ */
+#define QUIT_DELAY 400
+
+/*!
+ *  @brief The name of the SDL screen.
+ */
 #define SCREEN_NAME "Graphics Engine: Screen"
+
+/*!
+ *  @brief The default color of pixels plotted with drawPixel().
+ */
 #define TEST_COLOR (Uint32)0x00FF0000
 
+/*!
+ *  @brief The global SDL screen -- global because only one will be necessary
+ *      per run of the engine, and it renders use of the module cleaner.
+ */
 static SDL_Surface * screen;
 
-// initialize and configure screen
 void configureScreen(){
 	if((SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) == -1)){
 		printf("Could not initialize SDL: %s.\n", SDL_GetError());
@@ -25,7 +35,6 @@ void configureScreen(){
 	SDL_WM_SetCaption(SCREEN_NAME, NULL);
 }
 
-// plot pixel to screen
 void drawPixel(int x, int y) {
 	x += IMAGE_WIDTH / 2;
 	y += IMAGE_HEIGHT / 2;
@@ -37,23 +46,19 @@ void drawPixel(int x, int y) {
 	*(Uint32 *)pixelAddress = TEST_COLOR;
 }
 
-// render screen, after pixel buffer has been internally updated
 void renderScreen(){
 	SDL_Flip(screen);
 }
 
-// fill the screen with black pixels
 void clearScreen(){
 	SDL_FillRect(screen, NULL, 0x000000);
 }
 
-// close screen, perform memory cleanup
 void quitScreen(){
 	SDL_Delay(QUIT_DELAY);
 	SDL_Quit();
 }
 
-// write the screen's pixels matrix to a BMP file named filename
 int writeScreen(const char * const filename){
 	return SDL_SaveBMP(screen, filename);
 }

@@ -1,8 +1,3 @@
-/*
- *  interpreter.c contains functions for evaluating strings containing commands
- *  and arguments in the graphics engine's scripting language.
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,30 +7,104 @@
 #include "src/screen.h"
 #include "src/interpreter/interpreter.h"
 
-#define COMMENT_CHAR '#'                // ignore lines beginning with this
+/*!
+ *  @brief Lines beginning with the COMMENT_CHAR char are ignored.
+ */
+#define COMMENT_CHAR '#'
 
-// chars indicating commands in a script file
+/*!
+ *  @brief Command for adding a Bezier curve to the points ::Matrix_t.
+ */
 #define ADD_BEZIER_CMD 'b'
+
+/*!
+ *  @brief Command for adding a circle to the points ::Matrix_t.
+ */
 #define ADD_CIRCLE_CMD 'c'
+
+/*!
+ *  @brief Command for adding a hermite curve to the points ::Matrix_t.
+ */
 #define ADD_HERMITE_CMD 'h'
+
+/*!
+ *  @brief Command for adding a line segment to the points ::Matrix_t.
+ */
 #define ADD_LINE_CMD 'l'
+
+/*!
+ *  @brief Command for adding a rectangular prism to the points ::Matrix_t.
+ */
 #define ADD_RECT_PRISM_CMD 'p'
+
+/*!
+ *  @brief Command for adding a sphere to the points ::Matrix_t.
+ */
 #define ADD_SPHERE_CMD 'm'
+
+/*!
+ *  @brief Command for adding a torus to the points ::Matrix_t.
+ */
 #define ADD_TORUS_CMD 'd'
+
+/*!
+ *  @brief Command for applying the current transformation ::Matrix_t to the
+ *      current points ::Matrix_t.
+ */
 #define APPLY_TRANSFORM_CMD 'a'
+
+/*!
+ *  @brief Command for clearing the current points ::Matrix_t.
+ */
 #define CLEAR_POINTS_CMD 'w'
+
+/*!
+ *  @brief Command for adding a scale matrix to the current transformation
+ *  ::Matrix_t.
+ */
 #define CREATE_SCALE_CMD 's'
+
+/*!
+ *  @brief Command for adding a translation matrix to the current transformation
+ *      ::Matrix_t.
+ */
 #define CREATE_TRANSLATION_CMD 't'
+
+/*!
+ *  @brief Command for adding a rotation (through the x-axis) matrix to the
+ *      current transformation ::Matrix_t.
+ */
 #define CREATE_ROT_X_CMD 'x'
+
+/*!
+ *  @brief Command for adding a rotation (through the y-axis) matrix to the
+ *      current transformation ::Matrix_t.
+ */
 #define CREATE_ROT_Y_CMD 'y'
+
+/*!
+ *  @brief Command for adding a rotation (through the z-axis) matrix to the
+ *      current transformation ::Matrix_t.
+ */
 #define CREATE_ROT_Z_CMD 'z'
+
+/*!
+ *  @brief Command for drawing the current points ::Matrix_t to the screen.
+ */
 #define DRAW_FRAME_CMD 'v'
+
+/*!
+ *  @brief Command for drawing the current points ::Matrix_t to the screen,
+ *      and saving the frame to a file.
+ */
 #define SAVE_FRAME_CMD 'g'
+
+/*!
+ *  @brief Command for setting the current transformation ::Matrix_t to an
+ *      identity matrix.
+ */
 #define SET_IDENTITY_CMD 'i'
 
-// evaluate the command located at command[0], accounting for the arguments,
-// if any are required, at command[1], and manipulate the Matrix_ts points and
-// transform accordingly; report back status of command evaluation.
 int evaluateCommand(char ** const command, Matrix_t ** points,
 	Matrix_t ** transform){
 	char cmdChar = command[0][0];
@@ -192,7 +261,6 @@ int evaluateCommand(char ** const command, Matrix_t ** points,
 	return CMD_VALID_EVAL;
 }
 
-// indicate whether or not a char's corresponding command requires arguments
 int argsRequired(char cmd){
 	return
 		cmd == ADD_BEZIER_CMD ||

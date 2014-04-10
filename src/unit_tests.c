@@ -1,5 +1,6 @@
-/*
- *  unit_tests.c contains unit-test for functions contained in matrix.c.
+/*!
+ *  @file: unit_tests.c
+ *  @brief Unit-test functions used to perform regression testing.
 */
 
 #include <stdio.h>
@@ -10,9 +11,42 @@
 #include "screen.h"
 #include "unit_tests.h"
 
+/*!
+ *  @brief Execute a unit-test function, and print an appropriate message.
+ *
+ *  Print a formatted message indicated whether the unit-test @p func executed
+ *  successfully (a return value of 1), or failed (return value of 0).
+ *
+ *  @param func A unit-test function to run: must have a return value of 1 on
+ *      success, and 0 on failure.
+ */
 #define TEST(func) \
 	printf("Testing %-30s %s.\n", #func ":", func?"Success":"Failure");
 
+/*!
+ *  @brief A helper macro for writing new unit tests.
+ *
+ *  Execute any code in ..., and display the results in the SDL screen; then,
+ *  write the ::Matrix_t @p matrix to a file located at path @p filename.  The
+ *  macro simplifies the process of authoring new unit-tests, which often
+ *  require visual verification before a given points ::Matrix_t is written to
+ *  a file and checked against during future unit-tests.
+ *
+ *  The following code sample will create a ::Matrix_t named @a points, add a
+ *  sphere of radius 100, centered on the @f$(0, 0, 0)@f$, display the results
+ *  in an SDL screen, then write @a points to a file named "testMyFunction.csv".
+ *
+ *  @code{.c}
+ *      static int testMyFunction(void){
+ *          SAVE(points, "testMyFunction.csv",
+ *              Matrix_t * points = createMatrix();
+ *              addSphere(points, 0, 0, 100);
+ *          )
+ *      }
+ *  @endcode
+ *
+ *  @param matrix
+ */
 #define SAVE(matrix, filename, ...) \
 	configureScreen();\
 	__VA_ARGS__\
@@ -22,8 +56,17 @@
 	writePointsToFile(matrix, filename);\
 	quitScreen()
 
-// return 1 if the Matrix_t named matrix is equivalent to the matrix points
-// stored in the file named filename; otherwise, return 0.
+/*!
+ *  @brief Indicate whether a ::Matrix_t matches that stored in a points CSV
+ *      file.
+ *
+ *  @param matrix The ::Matrix_t whose points will be compared.
+ *  @param filename The path of the points CSV file that a ::Matrix_t will be
+ *      generated from, and @p matrix compared to.
+ *
+ *  @return 1 if the points in @p matrix match those contained in the ::Matrix_t
+ *      generated from the CSV file.
+ */
 #define ASSERT_EQUAL(matrix, filename) \
 	do {\
 		Matrix_t * filePoints = readPointsFromFile(filename);\
@@ -32,26 +75,87 @@
 		return result;\
 	} while(0)
 
-static int testAddPoint();
-static int testAddEdge();
-static int testAddPolygons();
-static int testAddBezier();
-static int testAddHermite();
-static int testAddRectangularPrism();
-static int testAddSphere();
-static int testAddTorus();
-static int testMultiplyScalar();
-static int testMultiplyMatrices();
-static int testPointsFileIO();
-static int testCreateTranslation();
-static int testCreateScale();
-static int testCreateRotation();
-static int testCreateIdentity();
-static int testEqualMatrix();
-static int testAddPoint();
+/*!
+ *  @brief Test matrix.h addPoint().
+ */
+static int testAddPoint(void);
 
-// test addPoint()
-static int testAddPoint(){
+/*!
+ *  @brief Test matrix.h addEdge().
+ */
+static int testAddEdge(void);
+
+/*!
+ *  @brief Test matrix.h addCircle() and addPolygon().
+ */
+static int testAddPolygons(void);
+
+/*!
+ *  @brief Test matrix.h addBezier().
+ */
+static int testAddBezier(void);
+
+/*!
+ *  @brief Test matrix.h addHermite().
+ */
+static int testAddHermite(void);
+
+/*!
+ *  @brief Test matrix.h addRectangularPrism().
+ */
+static int testAddRectangularPrism(void);
+
+/*!
+ *  @brief Test matrix.h addSphere().
+ */
+static int testAddSphere(void);
+
+/*!
+ *  @brief Test matrix.h addTorus().
+ */
+static int testAddTorus(void);
+
+/*!
+ *  @brief Test matrix.h multiplyScalar().
+ */
+static int testMultiplyScalar(void);
+
+/*!
+ *  @brief Test matrix.h multiplyMatrix() and multiplyMatrices().
+ */
+static int testMultiplyMatrices(void);
+
+/*!
+ *  @brief Test matrix.h writePointsToFile() and readPointsFromFile().
+ */
+static int testPointsFileIO(void);
+
+/*!
+ *  @brief Test matrix.h createTranslation().
+ */
+static int testCreateTranslation(void);
+
+/*!
+ *  @brief Test matrix.h createScale().
+ */
+static int testCreateScale(void);
+
+/*!
+ *  @brief Test matrix.h createRotation().
+ */
+static int testCreateRotation(void);
+
+/*!
+ *  @brief Test matrix.h createIdentity().
+ */
+static int testCreateIdentity(void);
+
+/*!
+ *  @brief Test matrix.h equalMatrix().
+ */
+static int testEqualMatrix(void);
+
+static int testAddPoint(void){
 	Matrix_t * points = createMatrix();
 
 	addPoint(points, 0, 0, 0);
@@ -65,8 +169,7 @@ static int testAddPoint(){
 	ASSERT_EQUAL(points, "testAddPoint.csv");
 }
 
-// test addEdge()
-static int testAddEdge(){
+static int testAddEdge(void){
 	Matrix_t * points = createMatrix();
 	addEdge(points, 0, 0, 0, 100, 0, 100);
 	addEdge(points, 100, 0, 100, 100, 100, 100);
@@ -74,8 +177,7 @@ static int testAddEdge(){
 	ASSERT_EQUAL(points, "testAddEdge");
 }
 
-// test addPolygon(), addCircle()
-static int testAddPolygons(){
+static int testAddPolygons(void){
 	Matrix_t * points = createMatrix();
 	addCircle(points, 0, 0, 200);
 	addPolygon(points, 0, 0, 100, 8);
@@ -83,29 +185,25 @@ static int testAddPolygons(){
 	ASSERT_EQUAL(points, "testAddPolygons.csv");
 }
 
-// test addBezier()
-static int testAddBezier(){
+static int testAddBezier(void){
 	Matrix_t * points = createMatrix();
 	addBezier(points, 200, 250, 150, 50, 300, 250, 300, 250);
 	ASSERT_EQUAL(points, "testAddBezier.csv");
 }
 
-// test addHermite()
-static int testAddHermite(){
+static int testAddHermite(void){
 	Matrix_t * points = createMatrix();
 	addHermite(points, 150, 150, 150, 50, 350, 150, 350, 300);
 	ASSERT_EQUAL(points, "testAddHermite.csv");
 }
 
-// test addRectangularPrism()
-static int testAddRectangularPrism(){
+static int testAddRectangularPrism(void){
 	Matrix_t * points = createMatrix();
 	addRectangularPrism(points, 0, 0, 0, 100, 200, 300);
 	ASSERT_EQUAL(points, "testAddRectangularPrism.csv");
 }
 
-// test addSphere()
-static int testAddSphere(){
+static int testAddSphere(void){
 	Matrix_t * points = createMatrix();
 	addSphere(points, 0, 0, 100);
 	addSphere(points, 100, 0, 50);
@@ -113,16 +211,14 @@ static int testAddSphere(){
 	ASSERT_EQUAL(points, "testAddSphere.csv");
 }
 
-// test addTorus()
-static int testAddTorus(){
+static int testAddTorus(void){
 	Matrix_t * points = createMatrix();
 	addTorus(points, 0, 0, 50, 200);
 	addTorus(points, 0, 0, 20, 100);
 	ASSERT_EQUAL(points, "testAddTorus.csv");
 }
 
-// test multiplyScalar()
-static int testMultiplyScalar(){
+static int testMultiplyScalar(void){
 	Matrix_t * points = createMatrix();
 	addPoint(points, 11, 22, 33);
 	addPoint(points, 22, 33, 44);
@@ -141,8 +237,7 @@ static int testMultiplyScalar(){
 	return result;
 }
 
-// test multiplyMatrix() and multiplyMatrices()
-static int testMultiplyMatrices(){
+static int testMultiplyMatrices(void){
 	// matrix1, to be multiplied into matrix2
 	Matrix_t * m1 = createMatrix();
 	addPoint(m1, 11, 22, 33);
@@ -202,8 +297,7 @@ static int testMultiplyMatrices(){
 	return result1 && result2;
 }
 
-// test readPointsFromFile(), writePointsToFile()
-static int testPointsFileIO(){
+static int testPointsFileIO(void){
 	Matrix_t * points = createMatrix();
 	addPoint(points, 11, 22, 33);
 	addPoint(points, 22, 33, 44);
@@ -214,8 +308,7 @@ static int testPointsFileIO(){
 	ASSERT_EQUAL(points, "testPointsFileIO.csv");
 }
 
-// test createTranslation()
-static int testCreateTranslation(){
+static int testCreateTranslation(void){
 	Matrix_t * points = createMatrix(),
 		* translation = createTranslation(-50, -100, 0);
 	addTriangle(points, 0, 0, 0, 100, 0, 100, 100, 100, 200);
@@ -224,8 +317,7 @@ static int testCreateTranslation(){
 	ASSERT_EQUAL(points, "testCreateTranslation.csv");
 }
 
-// test createScale()
-static int testCreateScale(){
+static int testCreateScale(void){
 	Matrix_t * points = createMatrix(),
 		* scale = createScale(3, 3, 3);
 	addRectangularPrism(points, 0, 0, 0, 100, 100, 100);
@@ -234,8 +326,7 @@ static int testCreateScale(){
 	ASSERT_EQUAL(points, "testCreateScale.csv");
 }
 
-// test createRotation() through the X, Y, and Z axes
-static int testCreateRotation(){
+static int testCreateRotation(void){
 	Matrix_t * points = createMatrix(),
 		* rotX = createRotation(X_AXIS, 270),
 		* rotY = createRotation(Y_AXIS, 30),
@@ -246,8 +337,7 @@ static int testCreateRotation(){
 	ASSERT_EQUAL(points, "testCreateRotation.csv");
 }
 
-// test createIdentity()
-static int testCreateIdentity(){
+static int testCreateIdentity(void){
 	Matrix_t * identity = createIdentity();
 
 	Matrix_t * matrix = createMatrix();
@@ -261,8 +351,7 @@ static int testCreateIdentity(){
 	return result;
 }
 
-// test equalMatrix()
-static int testEqualMatrix(){
+static int testEqualMatrix(void){
 	Matrix_t * m1 = createMatrix();
 	addPoint(m1, 11, 22, 33);
 	addPoint(m1, 22, 33, 44);
@@ -280,8 +369,7 @@ static int testEqualMatrix(){
 	return result;
 }
 
-// run all unit tests, and print appropriate output.
-void unitTests(){
+void unitTests(void){
 	puts("Begin unit tests.\n");
 
 	TEST(testMultiplyScalar());

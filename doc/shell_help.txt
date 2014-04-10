@@ -1,15 +1,22 @@
 --Help--
 
+Note:
+The following command summary is brief and meant to serve as a refresher,
+rather than an informative guide. For detailed information about individual
+commands and their arguments, see "doc/interpreter.txt".
+
 Documentation format:
-	{description}: '{command char}' ([arguments])
+
+	{description}: '{command char}' [arguments]
 
 	{description}:  description of the command
 	{command char}: char used to invoke the command
 	[arguments]:    (optional) argument format string.
 
 	e.g.
-		save file: 's' \"%s %s\"
-		's' saves a file, and requires two string arguments.
+		save file: 'g' (%s)
+		'g' saves the current SDL frame to a file, and requires a single string
+		argument.
 
 add bezier: 'b' (%d %d %d %d %d %d %d %d)
 add circle: 'c' (%d %d %d)

@@ -1,6 +1,9 @@
-/*
- *  engine.c is the graphic engine's main file; contains functions for testing
- *  functionality and startup.
+/*!
+ *  @file engine.c
+ *  @brief The engine's main module.
+ *
+ *  engine.c is the graphics engine's main module, and contains functions for
+ *  initialization and setup.
 */
 
 #include <signal.h>
@@ -20,8 +23,37 @@
 #define TEST_CMD "--test"
 #define SCRIPT_CMD "--script"
 
+/*
+ *  @brief Establish a signal handler for the argument signal.
+ *
+ *  Establish a signal handler, or custom response to, a given signal. The only
+ *  current handler exits the engine successfully (with an error code of 0) on
+ *  a SIGINT.
+ *
+ *  @param sig The integer value of the signal.
+ */
 static void sigHandler(int sig);
-static void setup();
+
+/*
+ *  @brief Establish signal handlers and perform setup before the engine starts.
+ */
+static void setup(void);
+
+/*
+ *  @brief Handle command-line arguments.
+ *
+ *  Respond to any command-line arguments:
+ *      1. if no arguments are passed, start the engine's shell.
+ *      2. if the command is TEST_CMD, run all unit tests.
+ *      3. if the command is SCRIPT_CMD, evaluate the script file at the
+ *          location specified by the subsequent argument.
+ *
+ *  Exit with an error code of 1 should unrecognized or insufficient arguments
+ *  be received.
+ *
+ *  @param argc The number of command-line arguments, as seen by main().
+ *  @param argv The command-line argument strings, as seen by main().
+ */
 static void argumentHandler(int argc, char * argv[]);
 
 static void argumentHandler(int argc, char * argv[]){
@@ -45,14 +77,12 @@ static void argumentHandler(int argc, char * argv[]){
 		shell();
 }
 
-// establish signal handler for SIGINT
 static void sigHandler(int sig){
 	(void)sig;
 	exit(EXIT_SUCCESS);
 }
 
-// perform any necessary setup, before the engine runs
-static void setup(){
+static void setup(void){
 	signal(SIGINT, sigHandler);
 }
 

@@ -1,15 +1,16 @@
-/*
- *  utils.c contains processing functions to render lines and shapes.
-*/
-
 #include <stdio.h>
 
 #include "src/graphics.h"
 #include "src/screen.h"
 
+/*!
+ *  @brief Return the absolute value of a numeric value.
+ *
+ *  @param val The numeric value to be interpreted.
+ *  @return The absolute value of @p val.
+ */
 #define ABS(val) (val > 0?val:-val)
 
-// Bresenham rasterize line with endpoints (x1, y1) and (x2, y2)
 void drawLine(int x1, int y1, int x2, int y2){
 	int width = x2 - x1, height = y2 - y1;
 	int dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0;
