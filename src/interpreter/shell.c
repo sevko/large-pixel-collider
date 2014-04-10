@@ -15,34 +15,136 @@
 #include "src/interpreter/shell.h"
 #include "src/interpreter/shell_graphics.h"
 
+/*!
+ *  @brief The microsecond pause between the shell's ticks (during which it)
+ */
 #define TICK_PAUSE (1e6 / 60)
+
+/*!
+ *  @brief Indicate whether char is printable (alphanumeric, a symbol, etc).
+ *
+ *  @param key The char to check.
+ *
+ *  @return If @p key is printable, return 1; otherwise, return 0.
+ */
 #define PRINTABLE(key) (32 <= key && key <= 126)
 
-static void configureShell();
-static void freeShell();
+/*!
+ *  @brief Initialize all global variables, allocate memory for buffers. Must be
+ *      called before shell usage.
+ */
+static void configureShell(void);
+
+/*!
+ *  @brief Deallocate all the memory belonging to the shell. Should be called
+ *      after shell use, or memory leaks will occur.
+ */
+static void freeShell(void);
+
+/*!
+ *  @brief Insert a character at the current cursor position.
+ *
+ *  @param key The character to insert.
+ */
 static void insertChar(char key);
-static void backspace();
-static void deleteChar();
-static void evaluateNewline();
-static void scrollUp();
-static void scrollDown();
-static int moveLeft();
-static void moveRight();
-static void renderHelp();
 
-int g_curX, g_curY,     // cursor position in the buffer
-	g_currLineType;  // whether user is entering a command, or arguments
-char ** g_buffer;       // buffer for text entered by user
+/*!
+ *  @brief If possible (ie, the cursor is not at the beginning of the line),
+ *      delete the character before the current cursor position, and move the
+ *      cursor back.
+ */
+static void backspace(void);
 
-static int g_running;   // whether the shell is still running
+/*!
+ *  @brief Delete the character at the current cursor position.
+ */
+static void deleteChar(void);
 
-static int g_virtualY;  // last line scrolled to in the command-line history
-static char * g_tempCurrLine;   // store current (last) line when scrolling
+/*!
+ *  @brief Evaluate the text buffer after the user enters a new line.
+ *
+ *  1. If the line contains a command that requires no arguments, execute
+ *      the command.
+ *  2. If the line contains a command that requires arguments, set the flags
+ *      that indicate expected arguments.
+ *  3. If arguments are expected and the current line contains valid
+ *      arguments, evaluate the previously entered command.
+ */
+static void evaluateNewline(void);
 
+/*!
+ *  @brief Scroll up through the command line history, loading the currently
+ *      visible past entry into the user's command-line.
+ */
+static void scrollUp(void);
+
+/*!
+ *  @brief Scroll down through the command line history, loading the currently
+ *      visible, past entry into the user's command line.
+ */
+static void scrollDown(void);
+
+/*!
+ *  @brief If the cursor isn't at the beginning of the current line, move it
+ *      left.
+ *
+ *  @return 1 if the cursor was successfully moved (ie, wasn't at the beginning
+ *      of the line); 0 otherwise.
+ */
+static int moveLeft(void);
+
+/*!
+ *  @brief If the cursor isn't at the end of the current line, move it right.
+ */
+static void moveRight(void);
+
+/*!
+ *  @brief Add help information (from the file named HELP_FILE_PATH) to the
+ *      shell's visual buffer.
+ */
+static void renderHelp(void);
+
+/*!
+ *  @brief The x and y coordinates of the cursor relative to the g_buffer.
+ */
+int g_curX, g_curY;
+
+/*!
+ *  @brief Indicates the contents -- a command or arguments -- of the line
+ *      currently being written by the user.
+*/
+int g_currLineType;
+
+/*!
+ *  @brief Buffer for all commands entered by user.
+ */
+char ** g_buffer;
+
+/*!
+ *  @brief 1 if the shell is still running, 0 if not.
+ */
+static int g_running;
+
+/*!
+ *  @brief The last line scrolled to in the shell's command-line history.
+ */
+static int g_virtualY;
+
+/*!
+ *  @brief Buffer for the line being currently written, so as to preserve it
+ *      when scrolling through the command-line history.
+ */
+static char * g_tempCurrLine;
+
+/*!
+ *  @brief The two matrices that the user manipulates from the shell.
+ *
+ *  @a points contains the current points ::Matrix_t, while @a transform
+ *      contains the current transformation ::Matrix_t.
+ */
 static Matrix_t * points, * transform;
 
-// main shell loop
-void shell(){
+void shell(void){
 	configureShell();
 
 	int key;
@@ -90,8 +192,7 @@ void shell(){
 	freeShell();
 }
 
-// initialize all global variables, allocate g_buffer memory
-static void configureShell(){
+static void configureShell(void){
 	g_running = 1;
 	g_currLineType = LINE_TYPE_CMD;
 	g_curX = g_curY = 0;
@@ -110,8 +211,7 @@ static void configureShell(){
 	configureScreen();
 }
 
-// deallocate all memory used by shell
-static void freeShell(){
+static void freeShell(void){
 	int line;
 	for(line = 0; line <= g_curY; line++)
 		free(g_buffer[line]);
@@ -125,7 +225,6 @@ static void freeShell(){
 	quitScreen();
 }
 
-// insert char key at the current cursor position
 static void insertChar(char key){
 	int len = strlen(g_buffer[g_curY]);
 	g_buffer[g_curY] = realloc(g_buffer[g_curY], len + 2);
@@ -137,14 +236,12 @@ static void insertChar(char key){
 	g_buffer[g_curY][g_curX++] = key;
 }
 
-// delete the preceding character
-static void backspace(){
+static void backspace(void){
 	if(moveLeft())
 		deleteChar();
 }
 
-// deletes the character at the current cursor position
-static void deleteChar(){
+static void deleteChar(void){
 	int len = strlen(g_buffer[g_curY]);
 
 	int ind;
@@ -152,10 +249,7 @@ static void deleteChar(){
 		g_buffer[g_curY][ind] = g_buffer[g_curY][ind + 1];
 }
 
-// evaluate a line entered in the shell: if the line is a command and arguments
-// are necessary, set the appropriate flags; otherwise, evaluate the command,
-// with arguments if necessary.
-static void evaluateNewline(){
+static void evaluateNewline(void){
 	char * visualLine = malloc(strlen(g_buffer[g_curY]) + 1);
 	strcpy(visualLine, g_buffer[g_curY]);
 	addVisualLine(visualLine, g_currLineType);
@@ -209,8 +303,7 @@ static void evaluateNewline(){
 	g_buffer[g_curY][0] = '\0';
 }
 
-// scroll back through the shell's command history.
-static void scrollUp(){
+static void scrollUp(void){
 	// if the user hasn't scrolled yet
 	if(g_virtualY == -1){
 		g_virtualY = g_curY;
@@ -228,8 +321,7 @@ static void scrollUp(){
 	strcpy(g_buffer[g_curY], g_buffer[g_virtualY]);
 }
 
-// scroll forward through the shell's command history
-static void scrollDown(){
+static void scrollDown(void){
 	// if the user hasn't scrolled yet
 	if(g_virtualY == -1)
 		return;
@@ -256,9 +348,7 @@ static void scrollDown(){
 	}
 }
 
-// move cursor left if possible, and return int indicating success or failure
-// (mainly for use by delete())
-static int moveLeft(){
+static int moveLeft(void){
 	if(0 < g_curX){
 		g_curX--;
 		return 1;
@@ -267,14 +357,12 @@ static int moveLeft(){
 		return 0;
 }
 
-// move cursor right, if possible
-static void moveRight(){
+static void moveRight(void){
 	if(g_curX < (int)strlen(g_buffer[g_curY]))
 		g_curX++;
 }
 
-// print help information to shell console
-static void renderHelp(){
+static void renderHelp(void){
 	ScannedFile_t * file = readFile(HELP_FILE_PATH);
 	int line;
 	for(line = 0; line < file->numLines; line++){
