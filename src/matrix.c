@@ -17,7 +17,7 @@
 #define INTERPOL(a, b) (a + (b - a) * t1)
 
 //! The angle between the subsequent, rotated circles that compose a sphere.
-#define CIRCLE_STEP_SIZE 4 // angle between circles of a sphere/torus
+#define CIRCLE_STEP_SIZE 8 // angle between circles of a sphere/torus
 
 //! The number of steps taken in plotting Bezier and Hermite curves.
 #define CURVE_STEP_NUMBER 1e3
@@ -77,6 +77,29 @@ static void expandMatrix(Matrix_t * const matrix);
  */
 static double dotProduct(const Matrix_t * const m1, int row,
 	const Matrix_t * const m2, int col);
+
+/*
+ *  @brief Indicate whether or not a given triangle is visible to the camera.
+ *
+ *  Given the @f$(x, y, z)@f$ coordinates of the three vertices of a triangle,
+ *  calculate the triangle's surface normal to determine whether it's visible
+ *  to the camera.
+ *
+ *  @param x1 The x-coordinate of the triangle's first vertex.
+ *  @param y1 The y-coordinate of the triangle's first vertex.
+ *  @param z1 The z-coordinate of the triangle's first vertex.
+ *  @param x2 The x-coordinate of the triangle's second vertex.
+ *  @param y2 The y-coordinate of the triangle's second vertex.
+ *  @param z2 The z-coordinate of the triangle's second vertex.
+ *  @param x3 The x-coordinate of the triangle's third vertex.
+ *  @param y3 The y-coordinate of the triangle's third vertex.
+ *  @param z3 The z-coordinate of the triangle's third vertex.
+ *
+ *  @return 1 if the triangle specified by the three vertices is visible to
+ *      the camera; 0 otherwise.
+ */
+static int backfaceCull(double x1, double y1, double z1, double x2, double y2,
+	double z2, double x3, double y3, double z3);
 
 //! A struct to contain point coordinates.
 struct Matrix {
@@ -153,6 +176,23 @@ void addPolygon(Matrix_t * points, int oX, int oY, int radius, int numSides){
 
 	int segment;
 	for(segment = 0; segment < numSides; segment++){
+		addPoint(points, x + oX, y + oY, 0);
+		addPoint(points, x + oX, y + oY, 0);
+		float tempX = x;
+		x = (x - y * tanFactor) * radFactor;
+		y = (y + tempX * tanFactor) * radFactor;
+	}
+}
+
+void addHalfPolygon(Matrix_t * points, int oX, int oY, int radius,
+	int numSides){
+	double theta = M_PI / numSides;
+	double tanFactor = tan(theta), radFactor = cos(theta);
+	double x = radius, y = 0;
+	numSides = numSides / 2 + numSides % 2;
+
+	int segment;
+	for(segment = 0; segment < numSides * 2; segment++){
 		addPoint(points, x + oX, y + oY, 0);
 		addPoint(points, x + oX, y + oY, 0);
 		float tempX = x;
@@ -288,33 +328,44 @@ void addRectangularPrism(Matrix_t * points, double x, double y, double z,
 
 void addSphere(Matrix_t * points, double oX, double oY, double radius){
 	Matrix_t * sphere = generateSphere(oX, oY, radius);
-	int circlePts = sphere->numPoints / (180 / CIRCLE_STEP_SIZE);
+	int circlePts = sphere->numPoints / (360 / CIRCLE_STEP_SIZE);
 
 	int point;
-	for(point = 0; point < sphere->numPoints - circlePts - 1; point++)
+	// for(point = 0; point < sphere->numPoints - circlePts; point++)
+	for(point = 0; point < sphere->numPoints - circlePts; point++)
+		// addTriangle(points,
+			// sphere->points[X][point],
+			// sphere->points[Y][point],
+			// sphere->points[Z][point],
+			// sphere->points[X][point],
+			// sphere->points[Y][point],
+			// sphere->points[Z][point],
+			// sphere->points[X][point],
+			// sphere->points[Y][point],
+			// sphere->points[Z][point]);
 		addTriangle(points,
-			sphere->points[X][point],
-			sphere->points[Y][point],
-			sphere->points[Z][point],
 			sphere->points[X][point + 1],
 			sphere->points[Y][point + 1],
 			sphere->points[Z][point + 1],
+			sphere->points[X][point],
+			sphere->points[Y][point],
+			sphere->points[Z][point],
 			sphere->points[X][circlePts + point + 1],
 			sphere->points[Y][circlePts + point + 1],
 			sphere->points[Z][circlePts + point + 1]
 		);
 
-	for(; point < sphere->numPoints - 1; point++)
+	for(; point < sphere->numPoints; point++)
 		addTriangle(points,
-			sphere->points[X][point],
-			sphere->points[Y][point],
-			sphere->points[Z][point],
 			sphere->points[X][point + 1],
 			sphere->points[Y][point + 1],
 			sphere->points[Z][point + 1],
-			sphere->points[X][sphere->numPoints - point - 1],
-			sphere->points[Y][sphere->numPoints - point - 1],
-			sphere->points[Z][sphere->numPoints - point - 1]
+			sphere->points[X][point],
+			sphere->points[Y][point],
+			sphere->points[Z][point],
+			sphere->points[X][(point + 1) % circlePts],
+			sphere->points[Y][(point + 1) % circlePts],
+			sphere->points[Z][(point + 1) % circlePts]
 		);
 
 	freeMatrix(sphere);
@@ -323,34 +374,60 @@ void addSphere(Matrix_t * points, double oX, double oY, double radius){
 void addTorus(Matrix_t * points, double oX, double oY, double rad1,
 	double rad2){
 	Matrix_t * torus = generateTorus(oX, oY, rad1, rad2);
-	int torusPts = torus->numPoints / (360 / CIRCLE_STEP_SIZE);
+	int circlePts = torus->numPoints / (360 / CIRCLE_STEP_SIZE);
 
-	int point;
-	for(point = 0; point < torus->numPoints - torusPts - 1; point++)
+	int circle, point;
+	for(circle = 0; circle < 360 / CIRCLE_STEP_SIZE - 1; circle++){
+		int circleStart = circle * circlePts;
+		for(point = 0; point < circlePts - 1; point++)
+			addTriangle(points,
+				torus->points[X][circleStart + point + 1],
+				torus->points[Y][circleStart + point + 1],
+				torus->points[Z][circleStart + point + 1],
+				torus->points[X][circleStart + point],
+				torus->points[Y][circleStart + point],
+				torus->points[Z][circleStart + point],
+				torus->points[X][circleStart + circlePts + point + 1],
+				torus->points[Y][circleStart + circlePts + point + 1],
+				torus->points[Z][circleStart + circlePts + point + 1]
+			);
 		addTriangle(points,
-			torus->points[X][point],
-			torus->points[Y][point],
-			torus->points[Z][point],
+			torus->points[X][circleStart],
+			torus->points[Y][circleStart],
+			torus->points[Z][circleStart],
+			torus->points[X][circleStart + point],
+			torus->points[Y][circleStart + point],
+			torus->points[Z][circleStart + point],
+			torus->points[X][circleStart + point + 1],
+			torus->points[Y][circleStart + point + 1],
+			torus->points[Z][circleStart + point + 1]
+		);
+	}
+
+	int circleStart = torus->numPoints - circlePts;
+	for(point = 0; point < circlePts - 1; point++)
+		addTriangle(points,
+			torus->points[X][circleStart + point + 1],
+			torus->points[Y][circleStart + point + 1],
+			torus->points[Z][circleStart + point + 1],
+			torus->points[X][circleStart + point],
+			torus->points[Y][circleStart + point],
+			torus->points[Z][circleStart + point],
 			torus->points[X][point + 1],
 			torus->points[Y][point + 1],
-			torus->points[Z][point + 1],
-			torus->points[X][torusPts + point + 1],
-			torus->points[Y][torusPts + point + 1],
-			torus->points[Z][torusPts + point + 1]
+			torus->points[Z][point + 1]
 		);
-
-	for(; point < torus->numPoints - 1; point++)
-		addTriangle(points,
-			torus->points[X][point],
-			torus->points[Y][point],
-			torus->points[Z][point],
-			torus->points[X][point + 1],
-			torus->points[Y][point + 1],
-			torus->points[Z][point + 1],
-			torus->points[X][(point + 1) % torusPts],
-			torus->points[Y][(point + 1) % torusPts],
-			torus->points[Z][(point + 1) % torusPts]
-		);
+	addTriangle(points,
+		torus->points[X][circleStart],
+		torus->points[Y][circleStart],
+		torus->points[Z][circleStart],
+		torus->points[X][circleStart + point],
+		torus->points[Y][circleStart + point],
+		torus->points[Z][circleStart + point],
+		torus->points[X][0],
+		torus->points[Y][0],
+		torus->points[Z][0]
+	);
 
 	freeMatrix(torus);
 }
@@ -360,8 +437,8 @@ Matrix_t * generateSphere(double oX, double oY, double radius){
 		* xRot = createRotation(X_AXIS, CIRCLE_STEP_SIZE);
 
 	int degree;
-	for(degree = 0; degree < 180; degree += CIRCLE_STEP_SIZE){
-		addCircle(sphere, 0, 0, radius);
+	for(degree = 0; degree < 360; degree += CIRCLE_STEP_SIZE){
+		addHalfCircle(sphere, 0, 0, radius);
 		multiplyMatrix(xRot, sphere);
 	}
 
@@ -377,7 +454,7 @@ Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2){
 	Matrix_t * yRot = createRotation(Y_AXIS, CIRCLE_STEP_SIZE);
 
 	int degree;
-	for(degree = 0; degree < 360; degree += 4){
+	for(degree = 0; degree < 360; degree += CIRCLE_STEP_SIZE){
 		addCircle(torus, rad2, 0, rad1);
 		multiplyMatrix(yRot, torus);
 	}
@@ -395,12 +472,24 @@ void drawMatrix(const Matrix_t * const matrix){
 
 	int ptPair;
 	for(ptPair = 0; ptPair < matrix->numPoints - 2; ptPair += 3){
-		drawLine(matrix->points[X][ptPair], matrix->points[Y][ptPair],
-			matrix->points[X][ptPair + 1], matrix->points[Y][ptPair + 1]);
-		drawLine(matrix->points[X][ptPair], matrix->points[Y][ptPair],
-			matrix->points[X][ptPair + 2], matrix->points[Y][ptPair + 2]);
-		drawLine(matrix->points[X][ptPair + 1], matrix->points[Y][ptPair + 1],
-			matrix->points[X][ptPair + 2], matrix->points[Y][ptPair + 2]);
+		if(backfaceCull(
+			matrix->points[X][ptPair],
+			matrix->points[Y][ptPair],
+			matrix->points[Z][ptPair],
+			matrix->points[X][ptPair + 1],
+			matrix->points[Y][ptPair + 1],
+			matrix->points[Z][ptPair + 1],
+			matrix->points[X][ptPair + 2],
+			matrix->points[Y][ptPair + 2],
+			matrix->points[Z][ptPair + 2])){
+
+			drawLine(matrix->points[X][ptPair], matrix->points[Y][ptPair],
+				matrix->points[X][ptPair + 1], matrix->points[Y][ptPair + 1]);
+			drawLine(matrix->points[X][ptPair], matrix->points[Y][ptPair],
+				matrix->points[X][ptPair + 2], matrix->points[Y][ptPair + 2]);
+			drawLine(matrix->points[X][ptPair + 1], matrix->points[Y][ptPair + 1],
+				matrix->points[X][ptPair + 2], matrix->points[Y][ptPair + 2]);
+		}
 	}
 }
 
@@ -612,4 +701,24 @@ static double dotProduct(const Matrix_t * const m1, int row,
 		m1->points[row][1] * m2->points[Y][col] +
 		m1->points[row][2] * m2->points[Z][col] +
 		m1->points[row][3] * m2->points[W][col];
+}
+
+static int backfaceCull(double x1, double y1, double z1, double x2, double y2,
+	double z2, double x3, double y3, double z3){
+	double uX = x2 - x1;
+	double uY = y2 - y1;
+	double uZ = z2 - z1;
+
+	double vX = x3 - x1;
+	double vY = y3 - y1;
+	double vZ = z3 - z1;
+
+	double normalX = (uY * vZ) - (uZ * vY);
+	double normalY = (uZ * vX) - (uX * vZ);
+	double normalZ = (uX * vY) - (uY * vX);
+
+	int dotProduct = normalX * 0 + normalY * 0 + normalZ * -1;
+	// return 1;
+	// return (z1 >= 0 && z2 >= 0 && z3 >= 0);
+	return dotProduct < 0;
 }

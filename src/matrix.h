@@ -22,7 +22,10 @@
  *  @param radius The double radius of the circle.
  */
 #define addCircle(points, oX, oY, radius) \
-	addPolygon(points, oX, oY, radius, (radius / 2 ))
+	addPolygon(points, oX, oY, radius, (radius / 2))
+
+#define addHalfCircle(points, oX, oY, radius) \
+	addHalfPolygon(points, oX, oY, radius, (radius / 2))
 
 //! @brief Macro for the x-axis -- used as an argument to createRotation().
 #define X_AXIS 0
@@ -138,6 +141,9 @@ void addTriangle(Matrix_t * const matrix,  double x1, double y1, double z1,
  *  @param numSides The number of edges the polygon has.
  */
 void addPolygon(Matrix_t * points, int oX, int oY, int radius, int numSides);
+
+void addHalfPolygon(Matrix_t * points, int oX, int oY, int radius,
+	int numSides);
 
 /*!
  *  @brief Add the points of a Bezier curve to a ::Matrix_t.
