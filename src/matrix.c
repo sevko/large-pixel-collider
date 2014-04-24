@@ -169,30 +169,13 @@ void addTriangle(Matrix_t * const matrix,  double x1, double y1, double z1,
 	addPoint(matrix, x3, y3, z3);
 }
 
-void addPolygon(Matrix_t * points, int oX, int oY, int radius, int numSides){
-	double theta = 2 * M_PI / numSides;
+void addPolygonFull(Matrix_t * points, int oX, int oY, int radius, int
+	numSides, double theta){
 	double tanFactor = tan(theta), radFactor = cos(theta);
 	double x = radius, y = 0;
 
 	int segment;
 	for(segment = 0; segment < numSides; segment++){
-		addPoint(points, x + oX, y + oY, 0);
-		addPoint(points, x + oX, y + oY, 0);
-		float tempX = x;
-		x = (x - y * tanFactor) * radFactor;
-		y = (y + tempX * tanFactor) * radFactor;
-	}
-}
-
-void addHalfPolygon(Matrix_t * points, int oX, int oY, int radius,
-	int numSides){
-	double theta = M_PI / numSides;
-	double tanFactor = tan(theta), radFactor = cos(theta);
-	double x = radius, y = 0;
-	numSides = numSides / 2 + numSides % 2;
-
-	int segment;
-	for(segment = 0; segment < numSides * 2; segment++){
 		addPoint(points, x + oX, y + oY, 0);
 		addPoint(points, x + oX, y + oY, 0);
 		float tempX = x;
@@ -670,6 +653,7 @@ void writePointsToFile(Matrix_t * points, char * filename){
 	char * fullFilename = malloc(strlen(filename) + strlen(TEST_FILE_DIR) + 1);
 	strcpy(fullFilename, TEST_FILE_DIR);
 	strcat(fullFilename, filename);
+
 	FILE * file;
 	if((file = fopen(fullFilename, "w")) == NULL)
 		FATAL("Cannot open file %s.", fullFilename);
@@ -718,7 +702,5 @@ static int backfaceCull(double x1, double y1, double z1, double x2, double y2,
 	double normalZ = (uX * vY) - (uY * vX);
 
 	int dotProduct = normalX * 0 + normalY * 0 + normalZ * -1;
-	// return 1;
-	// return (z1 >= 0 && z2 >= 0 && z3 >= 0);
 	return dotProduct < 0;
 }

@@ -10,22 +10,50 @@
 
 #pragma once
 
+#include <math.h>
+
 /*!
  *  @brief Add a circle to a ::Matrix_t.
  *
  *  Add an approximated circle of points to ::Matrix_t @p points, by calling
- *  addPolygon with a large number of sides (@f$\frac{radius}{2}@f$).
+ *  addPolygonFull() with a large number of sides: (@f$\frac{radius}{2}@f$).
  *
- *  @param points The ::Matrix_t to add the circle's points to.
- *  @param oX The double x-coordinate of the circle's origin.
- *  @param oY The double y-coordinate of the circle's origin.
- *  @param radius The double radius of the circle.
+ *  @param points (::Matrix_t) The matrix to add the circle's points to.
+ *  @param oX (double) The x-coordinate of the circle's origin.
+ *  @param oY (double) The y-coordinate of the circle's origin.
+ *  @param radius (double) The radius of the circle.
  */
 #define addCircle(points, oX, oY, radius) \
-	addPolygon(points, oX, oY, radius, (radius / 2))
+	addPolygon(points, oX, oY, radius, radius / 2);
 
-#define addHalfCircle(points, oX, oY, radius) \
-	addHalfPolygon(points, oX, oY, radius, (radius / 2))
+/*!
+ *  @brief Add a half circle to a ::Matrix_t.
+ *
+ *  Add an approximated half-circle of points to ::Matrix_t @p points, by
+ *  calling addPolygonFull() with a large number of sides,
+ *  (@f$\frac{radius}{2}@f$), and half the angle used by addCircle().
+ *
+ *  @param points (::Matrix_t) The matrix to add the half-circle's points to.
+ *  @param oX (double) The x-coordinate of the half-circle's origin.
+ *  @param oY (double) The y-coordinate of the half-circle's origin.
+ *  @param radius (double) The radius of the half-circle.
+ */
+#define addHalfCircle(points, oX, oY, radius) {\
+		int numSides = (radius / 2);\
+		numSides += numSides % 2;\
+		addPolygonFull(points, oX, oY, radius, numSides, (2 * M_PI / radius));\
+	} while(0)
+
+/*!
+ *  @brief A wrapper for addPolygonFull(), with an implicit angle calculation.
+ *
+ *  @param points (::Matrix_t) The matrix to add the polygon's points to.
+ *  @param oX (double) The x-coordinate of the polygon's centroid.
+ *  @param oY (double) The y-coordinate of the polygon's centroid.
+ *  @param numSides (int) The number of sides the polygon will contain.
+ */
+#define addPolygon(points, oX, oY, radius, numSides) \
+	addPolygonFull(points, oX, oY, radius, numSides, 2 * M_PI / numSides)
 
 //! @brief Macro for the x-axis -- used as an argument to createRotation().
 #define X_AXIS 0
@@ -139,11 +167,11 @@ void addTriangle(Matrix_t * const matrix,  double x1, double y1, double z1,
  *  @param radius The distance between the centroid and any of the polygon's
  *      vertices.
  *  @param numSides The number of edges the polygon has.
+ *  @param theta The angle of the arc, centered on the origin, and extending
+ *      between subsequent vertices of the polygon.
  */
-void addPolygon(Matrix_t * points, int oX, int oY, int radius, int numSides);
-
-void addHalfPolygon(Matrix_t * points, int oX, int oY, int radius,
-	int numSides);
+void addPolygonFull(Matrix_t * points, int oX, int oY, int radius, int
+	numSides, double theta);
 
 /*!
  *  @brief Add the points of a Bezier curve to a ::Matrix_t.

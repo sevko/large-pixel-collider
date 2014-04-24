@@ -1,6 +1,6 @@
 SCRIPT_FILE = 
 PROJECT_NAME = engine
-FLAGS = -Ofast -Wall -Wextra -Werror -Wunreachable-code -I ./
+FLAGS = -Ofast -Wall -Wextra -Wunreachable-code -I ./
 CC = gcc $(FLAGS)
 LIBS = -lm $(shell sdl-config --libs) -lncurses
 SHELL_TERMINAL = gnome-terminal --title="Graphics Engine: Shell" \
@@ -28,7 +28,7 @@ bin/screen.o: src/screen.c
 bin/%.o: src/interpreter/%.c
 	$(CC) -o $@ -c $^
 
-run: all
+run: all kill
 	@if [ "$(SCRIPT_FILE)" != "" ]; then \
 		bin/$(PROJECT_NAME) --script $(SCRIPT_FILE); \
 	else \
@@ -39,7 +39,9 @@ test: all
 	@bin/engine --test
 
 kill:
-	@-killall -9 $(PROJECT_NAME)
+	@if [ "$(shell pgrep $(PROJECT_NAME))" != "" ]; then \
+		killall -9 $(PROJECT_NAME); \
+	fi
 
 clean:
 	@rm -rf bin
