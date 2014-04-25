@@ -24,7 +24,7 @@
  *  @param radius (double) The radius of the circle.
  */
 #define addCircle(points, oX, oY, radius) \
-	addPolygon(points, oX, oY, radius, radius / 2);
+	addPolygon(points, oX, oY, radius, (radius / 2));
 
 /*!
  *  @brief Add a half circle to a ::Matrix_t.

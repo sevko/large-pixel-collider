@@ -76,8 +76,7 @@ static void argumentHandler(int argc, char * argv[]){
 	}
 
 	else
-		test();
-		// shell();
+		shell();
 }
 
 static void sigHandler(int sig){
@@ -87,32 +86,6 @@ static void sigHandler(int sig){
 
 static void setup(void){
 	signal(SIGINT, sigHandler);
-}
-
-static void test(void){
-	configureScreen();
-	double rotAngle = 0.4;
-	Matrix_t * matrix = createMatrix(),
-		* xRot = createRotation(X_AXIS, rotAngle),
-		* yRot = createRotation(Y_AXIS, rotAngle),
-		* zRot = createRotation(Z_AXIS, rotAngle),
-		* scale = createScale(9, 9, 9);
-	addRectangularPrism(matrix, 0, 0, 0, 100, 100, 100);
-	addTorus(matrix, 0, 0, 100, 200);
-	addSphere(matrix, 0, 0, 300);
-	// multiplyMatrix(scale, matrix);
-
-	int tick;
-	for(tick = 0; tick < 1000; tick++){
-		multiplyMatrices(4, xRot, yRot, zRot, matrix);
-		clearScreen();
-		drawMatrix(matrix);
-		renderScreen();
-		// usleep(1e6 / 40);
-	}
-
-	freeMatrices(5, matrix, xRot, yRot, zRot, scale);
-	quitScreen();
 }
 
 int main(int argc, char * argv[]){

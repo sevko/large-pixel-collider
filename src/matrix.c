@@ -177,11 +177,11 @@ void addPolygonFull(Matrix_t * points, int oX, int oY, int radius, int
 	int segment;
 	for(segment = 0; segment < numSides; segment++){
 		addPoint(points, x + oX, y + oY, 0);
-		addPoint(points, x + oX, y + oY, 0);
 		float tempX = x;
 		x = (x - y * tanFactor) * radFactor;
 		y = (y + tempX * tanFactor) * radFactor;
 	}
+	addPoint(points, x + oX, y + oY, 0);
 }
 
 void addBezier(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
@@ -313,32 +313,36 @@ void addSphere(Matrix_t * points, double oX, double oY, double radius){
 	Matrix_t * sphere = generateSphere(oX, oY, radius);
 	int circlePts = sphere->numPoints / (360 / CIRCLE_STEP_SIZE);
 
-	int point;
-	// for(point = 0; point < sphere->numPoints - circlePts; point++)
-	for(point = 0; point < sphere->numPoints - circlePts; point++)
-		// addTriangle(points,
-			// sphere->points[X][point],
-			// sphere->points[Y][point],
-			// sphere->points[Z][point],
-			// sphere->points[X][point],
-			// sphere->points[Y][point],
-			// sphere->points[Z][point],
-			// sphere->points[X][point],
-			// sphere->points[Y][point],
-			// sphere->points[Z][point]);
+	int circle, point;
+	for(circle = 0; circle < 360 / CIRCLE_STEP_SIZE - 1; circle++){
+		int circleStart = circle * circlePts;
+		for(point = 0; point < circlePts - 1; point++)
+			addTriangle(points,
+				sphere->points[X][circleStart + point + 1],
+				sphere->points[Y][circleStart + point + 1],
+				sphere->points[Z][circleStart + point + 1],
+				sphere->points[X][circleStart + point],
+				sphere->points[Y][circleStart + point],
+				sphere->points[Z][circleStart + point],
+				sphere->points[X][circleStart + circlePts + point + 1],
+				sphere->points[Y][circleStart + circlePts + point + 1],
+				sphere->points[Z][circleStart + circlePts + point + 1]
+			);
 		addTriangle(points,
-			sphere->points[X][point + 1],
-			sphere->points[Y][point + 1],
-			sphere->points[Z][point + 1],
-			sphere->points[X][point],
-			sphere->points[Y][point],
-			sphere->points[Z][point],
-			sphere->points[X][circlePts + point + 1],
-			sphere->points[Y][circlePts + point + 1],
-			sphere->points[Z][circlePts + point + 1]
+			sphere->points[X][circleStart + point - 1],
+			sphere->points[Y][circleStart + point - 1],
+			sphere->points[Z][circleStart + point - 1],
+			sphere->points[X][circleStart + circlePts + point - 1],
+			sphere->points[Y][circleStart + circlePts + point - 1],
+			sphere->points[Z][circleStart + circlePts + point - 1],
+			sphere->points[X][circleStart + point],
+			sphere->points[Y][circleStart + point],
+			sphere->points[Z][circleStart + point]
 		);
+	}
 
-	for(; point < sphere->numPoints; point++)
+	for(point = sphere->numPoints - circlePts; point < sphere->numPoints - 1;
+		point++)
 		addTriangle(points,
 			sphere->points[X][point + 1],
 			sphere->points[Y][point + 1],
@@ -450,9 +454,6 @@ Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2){
 }
 
 void drawMatrix(const Matrix_t * const matrix){
-	if(matrix->numPoints < 3)
-		return;
-
 	int ptPair;
 	for(ptPair = 0; ptPair < matrix->numPoints - 2; ptPair += 3){
 		if(backfaceCull(
@@ -477,11 +478,8 @@ void drawMatrix(const Matrix_t * const matrix){
 }
 
 void drawMatrixLines(const Matrix_t * const matrix){
-	if(matrix->numPoints < 2)
-		return;
-
 	int ptPair;
-	for(ptPair = 0; ptPair < matrix->numPoints; ptPair += 2)
+	for(ptPair = 0; ptPair < matrix->numPoints - 1; ptPair += 2)
 		drawLine(matrix->points[X][ptPair], matrix->points[Y][ptPair],
 			matrix->points[X][ptPair + 1], matrix->points[Y][ptPair + 1]);
 }
