@@ -55,6 +55,63 @@
 #define addPolygon(points, oX, oY, radius, numSides) \
 	addPolygonFull(points, oX, oY, radius, numSides, 2 * M_PI / numSides)
 
+/*!
+ *  @brief Add a three-coordinate geometric point to a matrix.
+ *
+ *  The point's @a w coordinate defaults to 1.
+ *
+ *  @param points (Matrix_t *) The matrix to add the point to.
+ *  @param x (double) The x-coordinate of the point.
+ *  @param y (double) The z-coordinate of the point.
+ *  @param z (double) The y-coordinate of the point.
+ */
+#define addPoint1(points, x, y, z) addPoint(points, x, y, z, 1)
+
+/*!
+ *  @brief Add a point with a specific w-coordinate to a matrix.
+ *
+ *  A specific w-coordinate is often required when creating transformation
+ *  matrices.
+ *
+ *  @param points (Matrix_t *) The matrix to add the point to.
+ *  @param x (double) The x-coordinate of the point.
+ *  @param y (double) The z-coordinate of the point.
+ *  @param z (double) The y-coordinate of the point.
+ *  @param w (double) The w-coordinate of the point.
+ */
+#define addPoint2(points, x, y, z, w) addPoint(points, x, y, z, w)
+
+/*!
+ *  @brief Helper macro for the overloaded addPoint().
+ *
+ *  Replaces the addPoint() macro with addPoint1() or addPoint2(), depending
+ *  on the number of arguments.
+ *
+ *  @param arg1 Placeholder for an argument.
+ *  @param arg2 Placeholder for an argument.
+ *  @param arg3 Placeholder for an argument.
+ *  @param arg4 Placeholder for an argument.
+ *  @param func_name The macro to replace addPoint() with.
+ *  @param ... Any subsequent arguments.
+ */
+#define ADD_POINT_VA_MACRO(arg1, arg2, arg3, arg4, arg5, func_name, ...) \
+	func_name
+
+/*!
+ *  @brief Overloaded addPoint(), which allows an optional @a w coordinate.
+ *
+ *  Uses ADD_POINT_VA_MACRO to select an appropriate function-macro
+ *  (addPoint1() or addPoint2()) based on the number of arguments.
+ *
+ *  @code
+ *      // The following macro-function calls are both valid.
+ *      addPoint(matrix, 10, 20, 30);
+ *      addPoint(matrix, 10, 20, 30, 40);
+ *  @code
+ */
+#define addPoint(...) \
+	ADD_POINT_VA_MACRO(__VA_ARGS__, addPoint2, addPoint1)(__VA_ARGS__)
+
 //! @brief Macro for the x-axis -- used as an argument to createRotation().
 #define X_AXIS 0
 
@@ -110,18 +167,7 @@ void freeMatrix(Matrix_t * matrix);
  *  @param y The double y-coordinate of the point.
  *  @param z The double z-coordinate of the point.
  */
-void addPoint(Matrix_t * const matrix, double x, double y, double z);
-
-/*!
- *  @brief Add a point with a custom w coordinate to a ::Matrix_t.
- *
- *  @param matrix A pointer to the ::Matrix_t to add the point to.
- *  @param x The double x-coordinate of the point.
- *  @param y The double y-coordinate of the point.
- *  @param z The double z-coordinate of the point.
- *  @param w The double w-coordinate of the point.
- */
-void addTransformPoint(Matrix_t * const matrix, double x, double y, double z,
+void (addPoint)(Matrix_t * const matrix, double x, double y, double z,
 	double w);
 
 /*!

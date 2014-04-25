@@ -31,28 +31,28 @@
  *  Replaces the drawPixel() macro with drawPixel1() or drawPixel2(), depending
  *  on the number of received arguments.
  *
- *  @param _1 Placeholder for an argument.
- *  @param _2 Placeholder for an argument.
- *  @param _3 Placeholder for an argument.
- *  @param NAME The macro to replace drawPixel() with.
+ *  @param arg1 Placeholder for an argument.
+ *  @param arg2 Placeholder for an argument.
+ *  @param arg3 Placeholder for an argument.
+ *  @param func_name The macro to replace drawPixel() with.
  *  @param ... Any subsequent arguments.
  */
-#define VA_MACRO(_1, _2, _3, NAME, ...) NAME
+#define DRAW_PIXEL_VA_MACRO(arg1, arg2, arg3, func_name, ...) func_name
 
 /*!
  *  @brief Overloaded drawPixel(), which allows an optional color argument.
  *
- *  Uses VA_MACRO to select an appropriate macro (drawPixel or drawPixel2) for
- *  the number of arguments (2, or 3 if a color is specified).
+ *  Uses DRAW_PIXEL_VA_MACRO to select an appropriate macro (drawPixel or
+ *  drawPixel2) for the number of arguments (2, or 3 if a color is specified).
  *
  *  @code
- *      // the following macro-function calls are both valid.
+ *      // The following macro-function calls are both valid.
  *      drawPixel(10, 30);
  *      drawPixel(40, 50, 0xFFFFFF);
  *  @code
  */
 #define drawPixel(...) \
-	VA_MACRO(__VA_ARGS__, drawPixel2, drawPixel1)(__VA_ARGS__)
+	DRAW_PIXEL_VA_MACRO(__VA_ARGS__, drawPixel2, drawPixel1)(__VA_ARGS__)
 
 /*!
  *  @brief Initialize the SDL screen.

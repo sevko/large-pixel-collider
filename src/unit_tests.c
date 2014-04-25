@@ -251,10 +251,10 @@ static int testMultiplyScalar(void){
 	addPoint(points, 44, 55, 66);
 
 	Matrix_t * product = createMatrix();
-	addTransformPoint(product, 33, 66, 99, 3);
-	addTransformPoint(product, 66, 99, 132, 3);
-	addTransformPoint(product, 99, 132, 165, 3);
-	addTransformPoint(product, 132, 165, 198, 3);
+	addPoint(product, 33, 66, 99, 3);
+	addPoint(product, 66, 99, 132, 3);
+	addPoint(product, 99, 132, 165, 3);
+	addPoint(product, 132, 165, 198, 3);
 
 	multiplyScalar(3, points);
 	int result = equalMatrix(points, product);
@@ -279,10 +279,10 @@ static int testMultiplyMatrices(void){
 
 	// resultant matrix
 	Matrix_t * product1 = createMatrix();
-	addTransformPoint(product1, 3916, 5742, 7568, 166);
-	addTransformPoint(product1, 4642, 6831, 9020, 199);
-	addTransformPoint(product1, 5368, 7920, 10472, 232);
-	addTransformPoint(product1, 6094, 9009, 11924, 265);
+	addPoint(product1, 3916, 5742, 7568, 166);
+	addPoint(product1, 4642, 6831, 9020, 199);
+	addPoint(product1, 5368, 7920, 10472, 232);
+	addPoint(product1, 6094, 9009, 11924, 265);
 
 	multiplyMatrix(m1, m2);
 	int result1 = equalMatrix(m2, product1);
@@ -310,10 +310,10 @@ static int testMultiplyMatrices(void){
 	addPoint(m5, 44, 55, 66);
 
 	Matrix_t * product2 = createMatrix();
-	addTransformPoint(product2, 429748, 512160, 594572, 7492);
-	addTransformPoint(product2, 619960, 738672, 857384, 10792);
-	addTransformPoint(product2, 810172, 965184, 1120196, 14092);
-	addTransformPoint(product2, 1000384, 1191696, 1383008, 17392);
+	addPoint(product2, 429748, 512160, 594572, 7492);
+	addPoint(product2, 619960, 738672, 857384, 10792);
+	addPoint(product2, 810172, 965184, 1120196, 14092);
+	addPoint(product2, 1000384, 1191696, 1383008, 17392);
 
 	multiplyMatrices(3, m3, m4, m5);
 	int result2 = equalMatrix(m5, product2);
@@ -366,10 +366,10 @@ static int testCreateIdentity(void){
 	Matrix_t * identity = createIdentity();
 
 	Matrix_t * matrix = createMatrix();
-	addTransformPoint(matrix, 1, 0, 0, 0);
-	addTransformPoint(matrix, 0, 1, 0, 0);
-	addTransformPoint(matrix, 0, 0, 1, 0);
-	addTransformPoint(matrix, 0, 0, 0, 1);
+	addPoint(matrix, 1, 0, 0, 0);
+	addPoint(matrix, 0, 1, 0, 0);
+	addPoint(matrix, 0, 0, 1, 0);
+	addPoint(matrix, 0, 0, 0, 1);
 
 	int result = equalMatrix(identity, matrix);
 	freeMatrices(2, identity, matrix);

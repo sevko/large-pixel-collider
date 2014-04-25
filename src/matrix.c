@@ -139,15 +139,7 @@ void freeMatrix(Matrix_t * matrix){
 	free(matrix);
 }
 
-void addPoint(Matrix_t * const matrix, double x, double y, double z){
-	expandMatrix(matrix);
-	matrix->points[X][matrix->numPoints - 1] = x;
-	matrix->points[Y][matrix->numPoints - 1] = y;
-	matrix->points[Z][matrix->numPoints - 1] = z;
-	matrix->points[W][matrix->numPoints - 1] = 1;
-}
-
-void addTransformPoint(Matrix_t * const matrix, double x, double y, double z,
+void (addPoint)(Matrix_t * const matrix, double x, double y, double z,
 	double w){
 	expandMatrix(matrix);
 	matrix->points[X][matrix->numPoints - 1] = x;
@@ -527,10 +519,10 @@ void multiplyMatrix(Matrix_t * const m1, Matrix_t * const m2){
 
 Matrix_t * createIdentity(void){
 	Matrix_t * identity = createMatrix();
-	addTransformPoint(identity, 1, 0, 0, 0);
-	addTransformPoint(identity, 0, 1, 0, 0);
-	addTransformPoint(identity, 0, 0, 1, 0);
-	addTransformPoint(identity, 0, 0, 0, 1);
+	addPoint(identity, 1, 0, 0, 0);
+	addPoint(identity, 0, 1, 0, 0);
+	addPoint(identity, 0, 0, 1, 0);
+	addPoint(identity, 0, 0, 0, 1);
 	return identity;
 }
 
@@ -544,10 +536,10 @@ Matrix_t * createTranslation(double dx, double dy, double dz){
 
 Matrix_t * createScale(double dx, double dy, double dz){
 	Matrix_t * scale = createMatrix();
-	addTransformPoint(scale, dx, 0, 0, 0);
-	addTransformPoint(scale, 0, dy, 0, 0);
-	addTransformPoint(scale, 0, 0, dz, 0);
-	addTransformPoint(scale, 0, 0, 0, 1);
+	addPoint(scale, dx, 0, 0, 0);
+	addPoint(scale, 0, dy, 0, 0);
+	addPoint(scale, 0, 0, dz, 0);
+	addPoint(scale, 0, 0, 0, 1);
 	return scale;
 }
 
@@ -557,24 +549,24 @@ Matrix_t * createRotation(int axis, double angle){
 	double radAngle = angle * RAD;
 	double sinA = sin(radAngle), cosA = cos(radAngle);
 	if(axis == X_AXIS){
-		addTransformPoint(rotation, 1, 0, 0, 0);
-		addTransformPoint(rotation, 0, cosA, sinA, 0);
-		addTransformPoint(rotation, 0, -sinA, cosA, 0);
+		addPoint(rotation, 1, 0, 0, 0);
+		addPoint(rotation, 0, cosA, sinA, 0);
+		addPoint(rotation, 0, -sinA, cosA, 0);
 	}
 
 	else if(axis == Y_AXIS){
-		addTransformPoint(rotation, cosA, 0, sinA, 0);
-		addTransformPoint(rotation, 0, 1, 0, 0);
-		addTransformPoint(rotation, -sinA, 0, cosA, 0);
+		addPoint(rotation, cosA, 0, sinA, 0);
+		addPoint(rotation, 0, 1, 0, 0);
+		addPoint(rotation, -sinA, 0, cosA, 0);
 	}
 
 	else if(axis == Z_AXIS){
-		addTransformPoint(rotation, cosA, sinA, 0, 0);
-		addTransformPoint(rotation, -sinA, cosA, 0, 0);
-		addTransformPoint(rotation, 0, 0, 1, 0);
+		addPoint(rotation, cosA, sinA, 0, 0);
+		addPoint(rotation, -sinA, cosA, 0, 0);
+		addPoint(rotation, 0, 0, 1, 0);
 	}
 
-	addTransformPoint(rotation, 0, 0, 0, 1);
+	addPoint(rotation, 0, 0, 0, 1);
 	return rotation;
 }
 
