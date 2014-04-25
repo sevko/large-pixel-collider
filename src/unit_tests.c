@@ -3,6 +3,7 @@
  *  @brief Unit-test functions used to perform regression testing.
  */
 
+#include <ncurses.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -14,14 +15,25 @@
 /*!
  *  @brief Execute a unit-test function, and print an appropriate message.
  *
- *  Print a formatted message indicated whether the unit-test @p func executed
- *  successfully (a return value of 1), or failed (return value of 0).
+ *  Print a formatted message indicating whether the unit-test @p func executed
+ *  successfully (a return value of 1), or failed (return value of 0). If
+ *  possible, display the success/failure message with an appropriate color,
+ *  using the TERM_COLOR_* macros.
  *
  *  @param func A unit-test function to run: must have a return value of 1 on
  *      success, and 0 on failure.
  */
 #define TEST(func) \
-	printf("Testing %-30s %s.\n", #func ":", func?"Success":"Failure");
+	do {\
+		int testResult = func;\
+		if(hasColors)\
+			printf("Testing %-30s %s%s%s\n", #func ":", \
+				TERM_COLOR_SUCCESS, testResult?"Success.":"Failure.\tx",\
+				TERM_COLOR_NORMAL);\
+		else\
+			printf("Testing %-30s %s\n", #func ":",\
+				testResult?"Success.":"Failure.\tx");\
+	} while(0)
 
 /*!
  *  @brief A helper macro for writing new unit tests.
@@ -48,13 +60,15 @@
  *  @param matrix
  */
 #define SAVE(matrix, filename, ...) \
-	configureScreen();\
-	__VA_ARGS__\
-	drawMatrix(matrix);\
-	renderScreen();\
-	usleep(4e6);\
-	writePointsToFile(matrix, filename);\
-	quitScreen()
+	do {\
+		configureScreen();\
+		__VA_ARGS__\
+		drawMatrix(matrix);\
+		renderScreen();\
+		usleep(4e6);\
+		writePointsToFile(matrix, filename);\
+		quitScreen();\
+	} while(0)
 
 /*!
  *  @brief Indicate whether a ::Matrix_t matches that stored in a points CSV
@@ -74,6 +88,18 @@
 		freeMatrices(2, matrix, filePoints);\
 		return result;\
 	} while(0)
+
+//! The terminal escape code to set a foreground color for a success message.
+#define TERM_COLOR_SUCCESS "\033[38;5;34m"
+
+//! The terminal escape code to set a foreground color for a failure message.
+#define TERM_COLOR_FAILURE "\033[38;5;160m"
+
+//! The terminal escape code to set a foreground color for an important message.
+#define TERM_COLOR_HEADER "\033[38;5;33m"
+
+//! The terminal escape code to reset the terminal's foreground color.
+#define TERM_COLOR_NORMAL "\033[0;00m"
 
 /*!
  *  @brief Test matrix.h addPoint().
@@ -181,7 +207,6 @@ static int testAddPolygons(void){
 	Matrix_t * points = createMatrix();
 	addCircle(points, 0, 0, 200);
 	addPolygon(points, 0, 0, 100, 8);
-
 	ASSERT_EQUAL(points, "testAddPolygons.csv");
 }
 
@@ -370,7 +395,15 @@ static int testEqualMatrix(void){
 }
 
 void unitTests(void){
-	puts("Begin unit tests.\n");
+	initscr();
+	int hasColors = has_colors();
+	endwin();
+
+	if(hasColors)
+		printf("%sBegin unit tests.%s\n\n", TERM_COLOR_HEADER,
+			TERM_COLOR_NORMAL);
+	else
+		puts("Begin unit tests.\n");
 
 	TEST(testMultiplyScalar());
 	TEST(testMultiplyMatrices());
@@ -389,5 +422,9 @@ void unitTests(void){
 	TEST(testAddEdge());
 	TEST(testCreateIdentity());
 
-	puts("\nUnit tests completed successfully.");
+	if(hasColors)
+		printf("\n%sUnit tests completed successfully.%s\n", TERM_COLOR_HEADER,
+			TERM_COLOR_NORMAL);
+	else
+		puts("\nUnit tests completed successfully.");
 }
