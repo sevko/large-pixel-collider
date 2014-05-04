@@ -1,7 +1,7 @@
 #include <SDL.h>
 
 #include "src/globals.h"
-#include "src/screen.h"
+#include "src/graphics/screen.h"
 
 /*!
  *  The millisecond delay before the SDL screen quits after quitScreen() is

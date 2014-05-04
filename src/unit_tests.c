@@ -7,10 +7,9 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "globals.h"
-#include "matrix.h"
-#include "screen.h"
-#include "unit_tests.h"
+#include "src/globals.h"
+#include "src/unit_tests.h"
+#include "src/graphics/matrix.h"
 
 /*!
  *  @brief Execute a unit-test function, and print an appropriate message.

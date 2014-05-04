@@ -1,4 +1,4 @@
-SCRIPT_FILE = 
+SCRIPT_FILE =
 PROJECT_NAME = engine
 FLAGS = -Ofast -Wall -Wextra -Wunreachable-code -I ./
 CC = gcc $(FLAGS)
@@ -22,10 +22,13 @@ bin/$(PROJECT_NAME): $(OBJ)
 bin/%.o: src/%.c
 	$(CC) -o $@ -c $^
 
-bin/screen.o: src/screen.c
+bin/screen.o: src/graphics/screen.c
 	$(CC) -o $@ -c $^ $(shell sdl-config --cflags)
 
 bin/%.o: src/interpreter/%.c
+	$(CC) -o $@ -c $^
+
+bin/%.o: src/graphics/%.c
 	$(CC) -o $@ -c $^
 
 run: all kill

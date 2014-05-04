@@ -3,8 +3,8 @@
 #include <string.h>
 
 #include "src/globals.h"
-#include "src/matrix.h"
-#include "src/screen.h"
+#include "src/graphics/screen.h"
+#include "src/graphics/matrix.h"
 #include "src/interpreter/interpreter.h"
 
 //! Lines beginning with the COMMENT_CHAR char are ignored.

@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include "src/graphics.h"
-#include "src/screen.h"
+#include "src/graphics/graphics.h"
+#include "src/graphics/screen.h"
 
 /*!
  *  @brief Return the absolute value of a numeric value.

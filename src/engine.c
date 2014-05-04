@@ -13,12 +13,12 @@
 #include <unistd.h>
 
 #include "src/globals.h"
-#include "src/graphics.h"
-#include "src/matrix.h"
-#include "src/screen.h"
+#include "src/graphics/screen.h"
+#include "src/unit_tests.h"
+#include "src/graphics/graphics.h"
+#include "src/graphics/matrix.h"
 #include "src/interpreter/file_parser.h"
 #include "src/interpreter/shell.h"
-#include "src/unit_tests.h"
 
 #define TEST_CMD "--test"
 #define SCRIPT_CMD "--script"

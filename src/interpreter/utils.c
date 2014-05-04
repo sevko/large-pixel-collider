@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "globals.h"
-#include "utils.h"
+#include "src/globals.h"
+#include "src/interpreter/utils.h"
 
 ScannedFile_t * readFile(const char * const filePath){
 	FILE * file = fopen(filePath, "r");

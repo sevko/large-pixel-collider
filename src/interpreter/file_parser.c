@@ -3,11 +3,10 @@
 #include <unistd.h>
 
 #include "src/globals.h"
-#include "src/screen.h"
-#include "src/utils.h"
+#include "src/graphics/screen.h"
 #include "src/interpreter/file_parser.h"
 #include "src/interpreter/interpreter.h"
-
+#include "src/interpreter/utils.h"
 
 /*!
  * Microseconds to wait before the file parser exits after successful script

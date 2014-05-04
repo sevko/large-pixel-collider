@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "src/matrix.h"
 #include "src/globals.h"
-#include "src/graphics.h"
+#include "src/graphics/matrix.h"
+#include "src/graphics/graphics.h"
 
 /*!
  *  @brief Return the linear interpolation of numeric values @p a and @p b.

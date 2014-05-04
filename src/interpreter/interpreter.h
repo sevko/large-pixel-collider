@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "src/matrix.h"
+#include "src/graphics/matrix.h"
 
 /*!
  *  Returned by evaluateCommand() if a command was "special," or specific to

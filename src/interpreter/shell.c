@@ -4,8 +4,8 @@
 #include <unistd.h>
 
 #include "src/globals.h"
-#include "src/screen.h"
-#include "src/utils.h"
+#include "src/graphics/screen.h"
+#include "src/interpreter/utils.h"
 #include "src/interpreter/interpreter.h"
 #include "src/interpreter/shell.h"
 #include "src/interpreter/shell_graphics.h"
