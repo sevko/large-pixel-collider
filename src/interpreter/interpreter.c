@@ -6,6 +6,7 @@
 #include "src/graphics/screen.h"
 #include "src/graphics/matrix.h"
 #include "src/interpreter/interpreter.h"
+#include "src/interpreter/stack/stack.h"
 
 //! Lines beginning with the COMMENT_CHAR char are ignored.
 #define COMMENT_CHAR '#'
@@ -70,6 +71,15 @@
 //! Command for drawing the current points ::Matrix_t to the screen.
 #define DRAW_FRAME_CMD 'v'
 
+//! Command for moving the current coordinates ::Stack_t origin.
+#define MOVE_ORIGIN_CMD '?'
+
+//! Command for popping a coordinate system off coordinates ::Stack_t.
+#define POP_COORDINATES_CMD '.'
+
+//! Command for pushing a new coordinate system onto the coordinates ::Stack_t.
+#define PUSH_COORDINATES_CMD ','
+
 /*!
  *  Command for drawing the current points ::Matrix_t to the screen, and saving
  *  the frame to a file.
@@ -83,8 +93,10 @@
 #define SET_IDENTITY_CMD 'i'
 
 int evaluateCommand(char ** const command, Matrix_t ** points,
-	Matrix_t ** transform){
+	Matrix_t ** transform, Stack_t * coordStack){
 	char cmdChar = command[0][0];
+
+	Point_t * origin = peek(coordStack);
 
 	int len = strlen(command[0]);
 	if(cmdChar == '\n' || len == 0 || cmdChar == COMMENT_CHAR)
@@ -98,14 +110,16 @@ int evaluateCommand(char ** const command, Matrix_t ** points,
 		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf %lf %lf",
 			&x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3) < 8)
 			return CMD_INVALID_ARGS;
-		addBezier(*points, x0, y0, x1, y1, x2, y2, x3, y3);
+		addBezier(*points, x0 + origin->x, y0 + origin->y, x1 + origin->x,
+				y1 + origin->y, x2 + origin->x, y2 + origin->y, x3 + origin->x,
+				y3 + origin->y);
 	}
 
 	else if(cmdChar == ADD_CIRCLE_CMD){
 		double oX, oY, radius;
 		if(sscanf(command[1], "%lf %lf %lf", &oX, &oY, &radius) < 3)
 			return CMD_INVALID_ARGS;
-		addCircle(*points, oX, oY, radius);
+		addCircle(*points, oX + origin->x, oY + origin->y, radius);
 	}
 
 	else if(cmdChar == ADD_HERMITE_CMD){
@@ -113,7 +127,9 @@ int evaluateCommand(char ** const command, Matrix_t ** points,
 		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf %lf %lf",
 			&x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3) < 8)
 			return CMD_INVALID_ARGS;
-		addHermite(*points, x0, y0, x1, y1, x2, y2, x3, y3);
+		addHermite(*points, x0 + origin->x, y0 + origin->y, x1 + origin->x,
+				y1 + origin->y, x2 + origin->x, y2 + origin->y, x3 + origin->x,
+				y3 + origin->y);
 	}
 
 	else if(cmdChar == ADD_LINE_CMD){
@@ -121,7 +137,8 @@ int evaluateCommand(char ** const command, Matrix_t ** points,
 		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf",
 			&x1, &y1, &z1, &x2, &y2, &z2) < 6)
 			return CMD_INVALID_ARGS;
-		addEdge(*points, x1, y1, z1, x2, y2, z2);
+		addEdge(*points, x1 + origin->x, y1 + origin->y, z1 + origin->z,
+				x2 + origin->x, y2 + origin->y, z2 + origin->z);
 	}
 
 	else if(cmdChar == ADD_RECT_PRISM_CMD){
@@ -129,21 +146,22 @@ int evaluateCommand(char ** const command, Matrix_t ** points,
 		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf",
 			&x, &y, &z, &width, &height, &depth) < 6)
 			return CMD_INVALID_ARGS;
-		addRectangularPrism(*points, x, y, z, width, height, depth);
+		addRectangularPrism(*points, x + origin->x, y + origin->y, z +
+				origin->z, width, height, depth);
 	}
 
 	else if(cmdChar == ADD_SPHERE_CMD){
 		double x, y, radius;
 		if(sscanf(command[1], "%lf %lf %lf", &x, &y, &radius) < 3)
 			return CMD_INVALID_ARGS;
-		addSphere(*points, x, y, radius);
+		addSphere(*points, x + origin->x, y + origin->y, radius);
 	}
 
 	else if(cmdChar == ADD_TORUS_CMD){
 		double x, y, rad1, rad2;
 		if(sscanf(command[1], "%lf %lf %lf %lf", &x, &y, &rad1, &rad2) < 4)
 			return CMD_INVALID_ARGS;
-		addTorus(*points, x, y, rad1, rad2);
+		addTorus(*points, x + origin->x, y + origin->y, rad1, rad2);
 	}
 
 	else if(cmdChar == APPLY_TRANSFORM_CMD)
@@ -207,6 +225,29 @@ int evaluateCommand(char ** const command, Matrix_t ** points,
 	else if(cmdChar == HELP_CMD || cmdChar == EXIT_CMD )
 		return CMD_SPECIAL;
 
+	else if(cmdChar == MOVE_ORIGIN_CMD){
+		double ox, oy, oz;
+		if(sscanf(command[1], "%lf %lf %lf", &ox, &oy, &oz) < 3)
+			return CMD_INVALID_ARGS;
+		origin = pop(coordStack);
+		origin->x = ox;
+		origin->y = oy;
+		origin->z = oz;
+		push(coordStack, origin);
+	}
+
+	else if(cmdChar == POP_COORDINATES_CMD)
+		free(pop(coordStack));
+
+	else if(cmdChar == PUSH_COORDINATES_CMD){
+		Point_t * newTopOrigin = malloc(sizeof(Point_t)),
+				* topOrigin = (Point_t *)peek(coordStack);
+		newTopOrigin->x = topOrigin->x;
+		newTopOrigin->y = topOrigin->y;
+		newTopOrigin->z = topOrigin->z;
+		push(coordStack, newTopOrigin);
+	}
+
 	else if(cmdChar == SAVE_FRAME_CMD){
 		clearScreen();
 		drawMatrix(*points);
@@ -252,5 +293,6 @@ int argsRequired(char cmd){
 		cmd == CREATE_ROT_X_CMD ||
 		cmd == CREATE_ROT_Y_CMD ||
 		cmd == CREATE_ROT_Z_CMD ||
+		cmd == MOVE_ORIGIN_CMD ||
 		cmd == SAVE_FRAME_CMD;
 }

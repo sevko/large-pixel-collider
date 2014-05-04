@@ -77,8 +77,7 @@ static void argumentHandler(int argc, char * argv[]){
 	}
 
 	else
-		test();
-		// shell();
+		shell();
 }
 
 static void sigHandler(int sig){

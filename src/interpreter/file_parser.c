@@ -7,6 +7,7 @@
 #include "src/interpreter/file_parser.h"
 #include "src/interpreter/interpreter.h"
 #include "src/interpreter/utils.h"
+#include "src/interpreter/stack/stack.h"
 
 /*!
  * Microseconds to wait before the file parser exits after successful script
@@ -18,11 +19,12 @@ void readScriptFile(const char * const filePath){
 	ScannedFile_t * script = readFile(filePath);
 	configureScreen();
 	Matrix_t * points = createMatrix(), * transform = createIdentity();
+	Stack_t * coordStack = createStack();
 
 	int line;
 	for(line = 0; line < script->numLines; line++){
 		int status = evaluateCommand(&script->buffer[line], &points,
-			&transform);
+			&transform, coordStack);
 		if(status != CMD_VALID_EVAL){
 			switch(status){
 				case CMD_INVALID_CMD:

@@ -52,3 +52,7 @@
 
 //! A typedef'd stack struct.
 typedef SingleLList_t Stack_t;
+
+typedef struct {
+	double x, y, z;
+} Point_t;

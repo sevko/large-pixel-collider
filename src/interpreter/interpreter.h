@@ -7,6 +7,7 @@
 #pragma once
 
 #include "src/graphics/matrix.h"
+#include "src/interpreter/stack/stack.h"
 
 /*!
  *  Returned by evaluateCommand() if a command was "special," or specific to
@@ -57,16 +58,15 @@
  *      char, which is necessary in case arguments are required and the
  *      subsequent line in the script's line buffer consequently needs be
  *      accessed.
- *  @param points A pointer to a pointer to the points ::Matrix_t, which may or
- *      may not be modified by the command.
- *  @param transform A pointer to a pointer to the transform ::Matrix_t, which
- *      may or may not be modified by the command.
+ *  @param points A pointer to a pointer to the points ::Matrix_t.
+ *  @param transform A pointer to a pointer to the transform ::Matrix_t
+ *  @param coordStack A pointer to the coordinates ::Stack_t coordStack.
  *
  *  @return Return CMD_SPECIAL, CMD_VALID_EVAL, CMD_INVALID_CMD, or
  *      CMD_INVALID_ARGS to indicate the status of the command evaluation.
  */
 int evaluateCommand(char ** const command, Matrix_t ** points,
-	Matrix_t ** transform);
+	Matrix_t ** transform, Stack_t * coordStack);
 
 /*!
  *  @brief Indicate whether the command requires arguments.

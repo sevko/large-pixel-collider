@@ -9,6 +9,7 @@
 #include "src/interpreter/interpreter.h"
 #include "src/interpreter/shell.h"
 #include "src/interpreter/shell_graphics.h"
+#include "src/interpreter/stack/stack.h"
 
 /*!
  *  @brief Indicate whether char is printable (alphanumeric, a symbol, etc).
@@ -134,6 +135,8 @@ static char * g_tempCurrLine;
  */
 static Matrix_t * points, * transform;
 
+static Stack_t * g_coordStack;
+
 void shell(void){
 	configureShell();
 
@@ -195,6 +198,13 @@ static void configureShell(void){
 	points = createMatrix();
 	transform = createIdentity();
 
+	g_coordStack = createStack();
+	Point_t * origin = malloc(sizeof(Point_t));
+	origin->x = 0;
+	origin->y = 0;
+	origin->z = 0;
+	push(g_coordStack, origin);
+
 	configureGraphicsShell();
 	renderShell();
 	configureScreen();
@@ -253,7 +263,8 @@ static void evaluateNewline(void){
 		else
 			lnWithCmd = g_curY - 1;
 
-		int status = evaluateCommand(&g_buffer[lnWithCmd], &points, &transform);
+		int status = evaluateCommand(&g_buffer[lnWithCmd], &points, &transform,
+				g_coordStack);
 		if(status != CMD_VALID_EVAL){
 			if(status == CMD_SPECIAL){
 				if(g_buffer[lnWithCmd][0] == EXIT_CMD)
