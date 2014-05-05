@@ -124,8 +124,12 @@ void test(){
 	freeStack(stack);
 }
 
-int main(int argc, char * argv[]){
-	setup();
-	argumentHandler(argc, argv);
-	return EXIT_SUCCESS;
+void engineDriver(){
+	printf("Hello, world!\n");
 }
+
+// int main(int argc, char * argv[]){
+	// setup();
+	// argumentHandler(argc, argv);
+	// return EXIT_SUCCESS;
+// }
