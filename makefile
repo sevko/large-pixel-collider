@@ -1,14 +1,16 @@
 SCRIPT_FILE =
 PROJECT_NAME = engine
 FLAGS = -Ofast -Wall -Wextra -Wunreachable-code -I ./
-C_COMPILER = gcc $(FLAGS)
-CC = @echo "\tCC $@" && $(C_COMPILER)
 LIBS = -lm $(shell sdl-config --libs) -lncurses
+C_COMPILER = gcc $(FLAGS)
+
+CC = @echo "\tCC $@" && $(C_COMPILER)
 SHELL_TERMINAL = gnome-terminal --title="Graphics Engine: Shell" \
 	--geometry=78x49+1000 --profile=Default -e
 
 PARSER_DEP = bin/y.tab.o bin/lex.yy.o
 SRC = $(shell find src lib -name "*.c" -printf "%p ")
+HEADERS = $(shell find src lib -name "*.h" -printf "%p ")
 OBJ = $(patsubst %.c, bin/%.o, $(foreach srcFile, $(SRC), $(notdir $(srcFile))))
 
 .PHONY: all run test kill clean install
@@ -37,7 +39,7 @@ bin/lex.yy.c: lib/mdl.l
 	@flex --outfile=$@ -I lib/mdl.l
 
 bin/y.tab.c: lib/mdl.y
-	bison --output-file=$@ -d -y lib/mdl.y
+	@bison --output-file=$@ -d -y lib/mdl.y
 
 bin/%.o: lib/%.c
 	$(CC) -I bin -w -o $@ -c $^
@@ -52,7 +54,7 @@ run: all kill
 	@if [ "$(SCRIPT_FILE)" != "" ]; then \
 		bin/$(PROJECT_NAME) --script $(SCRIPT_FILE); \
 	else \
-		$(SHELL_TERMINAL) bin/$(PROJECT_NAME); \
+		bin/$(PROJECT_NAME); \
 	fi
 
 test: all

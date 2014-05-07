@@ -8,6 +8,9 @@
 #include "src/interpreter/interpreter.h"
 #include "src/interpreter/stack/stack.h"
 
+#include "lib/parser.h"
+#include "bin/y.tab.h"
+
 //! Lines beginning with the COMMENT_CHAR char are ignored.
 #define COMMENT_CHAR '#'
 
@@ -33,8 +36,8 @@
 #define ADD_TORUS_CMD 'd'
 
 /*!
- *  Command for applying the current transformation ::Matrix_t to the current
- *  points ::Matrix_t.
+ *	Command for applying the current transformation ::Matrix_t to the current
+ *	points ::Matrix_t.
  */
 #define APPLY_TRANSFORM_CMD 'a'
 
@@ -45,26 +48,26 @@
 #define CREATE_SCALE_CMD 's'
 
 /*!
- *  Command for adding a translation matrix to the current transformation
- *  ::Matrix_t.
+ *	Command for adding a translation matrix to the current transformation
+ *	::Matrix_t.
  */
 #define CREATE_TRANSLATION_CMD 't'
 
 /*!
- *  Command for adding a rotation (through the x-axis) matrix to the current
- *  transformation ::Matrix_t.
+ *	Command for adding a rotation (through the x-axis) matrix to the current
+ *	transformation ::Matrix_t.
  */
 #define CREATE_ROT_X_CMD 'x'
 
 /*!
- *  Command for adding a rotation (through the y-axis) matrix to the current
- *  transformation ::Matrix_t.
+ *	Command for adding a rotation (through the y-axis) matrix to the current
+ *	transformation ::Matrix_t.
  */
 #define CREATE_ROT_Y_CMD 'y'
 
 /*!
- *  Command for adding a rotation (through the z-axis) matrix to the current
- *  transformation ::Matrix_t.
+ *	Command for adding a rotation (through the z-axis) matrix to the current
+ *	transformation ::Matrix_t.
  */
 #define CREATE_ROT_Z_CMD 'z'
 
@@ -81,16 +84,19 @@
 #define PUSH_COORDINATES_CMD ','
 
 /*!
- *  Command for drawing the current points ::Matrix_t to the screen, and saving
- *  the frame to a file.
+ *	Command for drawing the current points ::Matrix_t to the screen, and saving
+ *	the frame to a file.
  */
 #define SAVE_FRAME_CMD 'g'
 
 /*!
- *  Command for setting the current transformation ::Matrix_t to an identity
- *  matrix.
+ *	Command for setting the current transformation ::Matrix_t to an identity
+ *	matrix.
  */
 #define SET_IDENTITY_CMD 'i'
+
+extern int lastop;
+extern struct command op[MAX_COMMANDS];
 
 int evaluateCommand(char ** const command, Matrix_t ** points,
 	Matrix_t ** transform, Stack_t * coordStack){
@@ -295,4 +301,76 @@ int argsRequired(char cmd){
 		cmd == CREATE_ROT_Z_CMD ||
 		cmd == MOVE_ORIGIN_CMD ||
 		cmd == SAVE_FRAME_CMD;
+}
+
+void evaluateMDLScript(Matrix_t ** points, Matrix_t ** transform,
+	Stack_t * coordStack){
+	Point_t * origin = peek(coordStack);
+
+	int cmdNum;
+	for(cmdNum = 0; cmdNum < lastop; cmdNum++){
+		Command_t * cmd = &op[cmdNum];
+		int opCode = cmd->opcode;
+
+		if(opCode == SPHERE){
+			struct sym_sphere * sphere = (struct sym_sphere *)&(cmd->op.sphere);
+			addSphere(*points,
+				origin->x + sphere->d[0],
+				origin->y + sphere->d[1],
+				sphere->r);
+		}
+
+		else if(opCode == BOX){
+			struct sym_box * box = (struct sym_box *)&(cmd->op.box);
+			addRectangularPrism(*points,
+				origin->x + box->d0[0],
+				origin->y + box->d0[1],
+				origin->z + box->d0[2],
+				origin->x + box->d1[0],
+				origin->y + box->d1[1],
+				origin->z + box->d1[2]);
+		}
+
+		else if(opCode == PUSH){
+			Point_t * newTopOrigin = malloc(sizeof(Point_t)),
+				* topOrigin = (Point_t *)peek(coordStack);
+			newTopOrigin->x = topOrigin->x;
+			newTopOrigin->y = topOrigin->y;
+			newTopOrigin->z = topOrigin->z;
+			push(coordStack, newTopOrigin);
+		}
+
+		else if(opCode == POP)
+			free(pop(coordStack));
+
+		else if(opCode == MOVE){
+			origin = pop(coordStack);
+			struct sym_move * move = (struct sym_move *)&(cmd->op.move);
+			origin->x = move->d[0];
+			origin->y = move->d[1];
+			origin->z = move->d[2];
+			push(coordStack, origin);
+		}
+
+		else if(opCode == SCALE){
+			Matrix_t * scale = createScale(cmd->op.scale.d[0],
+				cmd->op.scale.d[1], cmd->op.scale.d[2]);
+			multiplyMatrix(scale, *transform);
+			freeMatrix(scale);
+		}
+
+		else if(opCode == ROTATE){
+			printf("%f\n%f\n\n", cmd->op.rotate.axis, cmd->op.rotate.degrees);
+			Matrix_t * rotation = createRotation((int)cmd->op.rotate.axis,
+				cmd->op.rotate.degrees);
+			multiplyMatrix(rotation, *points);
+			freeMatrix(rotation);
+		}
+
+		else if(opCode == DISPLAY){
+			clearScreen();
+			drawMatrix(*points);
+			renderScreen();
+		}
+	}
 }

@@ -776,30 +776,3 @@ int yywrap()
 {
   return 1;
 }
-
-
-extern FILE *yyin;
-
-
-int main(int argc, char **argv)
-{
-  int i;
-  i = 1;
-
-  if (argc > 1)
-    {
-      yyin = fopen(argv[1],"r");
-      if ( argc == 3 && strncmp(argv[2], "-l", 2) == 0) {
-	printf("lines");
-	i = 0;
-      }
-    }
-  yyparse();
-  //COMMENT OUT PRINT_PCODE AND UNCOMMENT
-  //MY_MAIN IN ORDER TO RUN YOUR CODE
-  print_pcode();
-  engineDriver();
-  //my_main();
-
-  return 0;    
-}

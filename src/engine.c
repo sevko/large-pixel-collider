@@ -21,6 +21,8 @@
 #include "src/interpreter/shell.h"
 #include "src/interpreter/stack/stack.h"
 
+#include "lib/parser.h"
+
 #define TEST_CMD "--test"
 #define SCRIPT_CMD "--script"
 
@@ -65,8 +67,10 @@ static void argumentHandler(int argc, char * argv[]){
 			unitTests();
 
 		else if(strcmp(SCRIPT_CMD, argv[1]) == 0){
-			if(argc == 3)
-				readScriptFile(argv[2]);
+			if(argc == 3){
+				// readScriptFile(argv[2]);
+				readMDLFile(argv[2]);
+			}
 
 			else
 				FATAL("--script flag requires argument.");
@@ -124,12 +128,8 @@ void test(){
 	freeStack(stack);
 }
 
-void engineDriver(){
-	printf("Hello, world!\n");
+int main(int argc, char * argv[]){
+	setup();
+	argumentHandler(argc, argv);
+	return EXIT_SUCCESS;
 }
-
-// int main(int argc, char * argv[]){
-	// setup();
-	// argumentHandler(argc, argv);
-	// return EXIT_SUCCESS;
-// }

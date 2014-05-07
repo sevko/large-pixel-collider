@@ -77,3 +77,17 @@ int evaluateCommand(char ** const command, Matrix_t ** points,
  *      otherwise, return 0.
  */
 int argsRequired(char cmd);
+
+/*
+ * @brief Evaluate the MDL script loaded in memory.
+ *
+ * Evaluate the MDL script file read and parsed by ::file_parser::readMDLFile(),
+ * stored in memory in the @a op commands array.
+ *
+ *     accessed.
+ * @param points A pointer to a pointer to the points ::Matrix_t.
+ * @param transform A pointer to a pointer to the transform ::Matrix_t
+ * @param coordStack A pointer to the coordinates ::Stack_t coordStack.
+ */
+void evaluateMDLScript(Matrix_t ** points, Matrix_t ** transform,
+	Stack_t * coordStack);

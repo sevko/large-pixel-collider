@@ -9,13 +9,6 @@
 #include "src/interpreter/stack/single_linked_list.h"
 
 /*
- * @brief Allocate a ::Stack_t, and initialize member variables.
- *
- * @return A pointer to the newly created ::Stack_t.
- */
-#define createStack() createList()
-
-/*
  * @brief Return the data pointer contained by the top element of a ::Stack_t.
  *
  * @param stack (::Stack_t *)
@@ -56,3 +49,13 @@ typedef SingleLList_t Stack_t;
 typedef struct {
 	double x, y, z;
 } Point_t;
+
+/*
+ * @brief Allocate a ::Stack_t, and initialize member variables.
+ *
+ * The newly created ::Stack_t contains a starting origin ::Point_t @a
+ * (0, 0, 0).
+ *
+ * @return A pointer to the newly created ::Stack_t.
+ */
+Stack_t * createStack();

@@ -15,6 +15,25 @@
  */
 #define PARSER_EXIT_PAUSE 5e6
 
+extern FILE * yyin;
+extern int yyparse(void);
+
+void readMDLFile(const char * const filePath){
+	configureScreen();
+	Matrix_t * points = createMatrix(), * transform = createIdentity();
+	Stack_t * coordStack = createStack();
+
+	yyin = fopen(filePath, "r");
+	yyparse();
+	fclose(yyin);
+	evaluateMDLScript(&points, &transform, coordStack);
+
+	usleep(PARSER_EXIT_PAUSE);
+	freeMatrices(2, points, transform);
+	freeStack(coordStack);
+	quitScreen();
+}
+
 void readScriptFile(const char * const filePath){
 	ScannedFile_t * script = readFile(filePath);
 	configureScreen();
@@ -47,6 +66,7 @@ void readScriptFile(const char * const filePath){
 
 	usleep(PARSER_EXIT_PAUSE);
 	freeMatrices(2, points, transform);
+	freeStack(coordStack);
 	quitScreen();
 	freeFile(script);
 }

@@ -199,11 +199,6 @@ static void configureShell(void){
 	transform = createIdentity();
 
 	g_coordStack = createStack();
-	Point_t * origin = malloc(sizeof(Point_t));
-	origin->x = 0;
-	origin->y = 0;
-	origin->z = 0;
-	push(g_coordStack, origin);
 
 	configureGraphicsShell();
 	renderShell();
@@ -221,6 +216,7 @@ static void freeShell(void){
 	freeMatrices(2, points, transform);
 
 	freeGraphicsShell();
+	freeStack(g_coordStack);
 	quitScreen();
 }
 
