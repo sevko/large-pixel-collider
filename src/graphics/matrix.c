@@ -140,6 +140,7 @@ void (addPoint)(Matrix_t * const matrix, double x, double y, double z,
 
 void addEdge(Matrix_t * const matrix, double x1, double y1, double z1,
 	double x2, double y2, double z2){
+	addPoint(matrix, x1, y1 + 0.1, z1);
 	addPoint(matrix, x1, y1, z1);
 	addPoint(matrix, x2, y2, z2);
 }

@@ -26,7 +26,7 @@ void readMDLFile(const char * const filePath){
 	yyin = fopen(filePath, "r");
 	yyparse();
 	fclose(yyin);
-	evaluateMDLScript(&points, &transform, coordStack);
+	evaluateMDLScript(&points, coordStack);
 
 	usleep(PARSER_EXIT_PAUSE);
 	freeMatrices(2, points, transform);

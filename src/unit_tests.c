@@ -10,6 +10,7 @@
 #include "src/globals.h"
 #include "src/unit_tests.h"
 #include "src/graphics/matrix.h"
+#include "src/graphics/screen.h"
 
 /*!
  *  @brief Execute a unit-test function, and print an appropriate message.
@@ -26,9 +27,9 @@
 	do {\
 		int testResult = func;\
 		if(hasColors)\
-			printf("Testing %-30s %s%s%s\n", #func ":", \
-				TERM_COLOR_SUCCESS, testResult?"Success.":"Failure.\tx",\
-				TERM_COLOR_NORMAL);\
+			printf("Testing %-30s %s%s\n", #func ":",\
+				testResult? TERM_COLOR_SUCCESS "Success.":\
+					TERM_COLOR_FAILURE "Failure.\tx", TERM_COLOR_NORMAL);\
 		else\
 			printf("Testing %-30s %s\n", #func ":",\
 				testResult?"Success.":"Failure.\tx");\
@@ -199,7 +200,7 @@ static int testAddEdge(void){
 	addEdge(points, 0, 0, 0, 100, 0, 100);
 	addEdge(points, 100, 0, 100, 100, 100, 100);
 	addEdge(points, 100, 100, 100, 0, 0, 0);
-	ASSERT_EQUAL(points, "testAddEdge");
+	ASSERT_EQUAL(points, "testAddEdge.csv");
 }
 
 static int testAddPolygons(void){

@@ -16,31 +16,31 @@ struct command
   int opcode;
   union
   {
-    struct sym_light {
+    struct symLight {
       SYMTAB *p;
       double c[4];
     } light;
-    struct sym_ambient {
+    struct symAmbient {
       double c[4];
     } ambient;
-    struct sym_constants {
+    struct symConstants {
       SYMTAB *p;
       /* each triple holds ka kd and ks for red green and blue
 	 respectively */
     } constants;
-    struct sym_save_coordinate_system {
+    struct symSave_coordinate_system {
       SYMTAB *p;
     } save_coordinate_system;
-    struct sym_camera {
+    struct symCamera {
       double eye[4],aim[4];
     } camera;
-    struct  sym_sphere {
+    struct  symSphere {
       SYMTAB *constants;
       double d[4];
       double r;
       SYMTAB *cs;
     } sphere;
-    struct sym_texture {
+    struct symTexture {
       SYMTAB *constants;
       double d0[3];
       double d1[3];
@@ -49,72 +49,72 @@ struct command
       SYMTAB *p;
       SYMTAB *cs;
     } texture;
-    struct sym_torus {
+    struct symTorus {
       SYMTAB *constants;
       double d[4];
       double r0,r1;
       SYMTAB *cs;
     } torus;
-    struct sym_box {
+    struct symBox {
       SYMTAB *constants;
       double d0[4],d1[4];
       SYMTAB *cs;
     } box;
-    struct sym_line {
+    struct symLine {
       SYMTAB *constants;
       double p0[4],p1[4];
       SYMTAB *cs0,*cs1;
     } line;
-    struct sym_mesh {
+    struct symMesh {
       SYMTAB *constants;
       char name[255];
       SYMTAB *cs; 
     } mesh;
-    struct sym_set {
+    struct symSet {
       SYMTAB *p;
       double val;
     } set;
-    struct sym_move {
+    struct symMove {
       double d[4];
       SYMTAB *p;
     } move;
-    struct sym_scale {
+    struct symScale {
       double d[4];
       SYMTAB *p;
     } scale;
-    struct sym_rotate {
+    struct symRotate {
       double axis;
       double degrees;
       SYMTAB *p;
     } rotate;
-    struct sym_basename {
+    struct symBasename {
       SYMTAB *p;
     } basename;
-    struct sym_save_knobs {
+    struct symSave_knobs {
       SYMTAB *p;
     } save_knobs;
-    struct sym_tween {
+    struct symTween {
       double start_frame, end_frame;
       SYMTAB *knob_list0;
       SYMTAB *knob_list1;
     } tween;
-    struct sym_frames {
+    struct symFrames {
       double num_frames;
     }frames;
-    struct sym_vary {
+    struct symVary {
       SYMTAB *p;
       double start_frame, end_frame, start_val, end_val;
     } vary;
-    struct sym_save {
+    struct symSave {
       SYMTAB *p;
     } save;
-    struct sym_shading {
+    struct symShading {
       SYMTAB *p;
     } shading;
-    struct sym_setknobs {
+    struct symSetknobs {
       double value;
     } setknobs;
-    struct sym_focal {
+    struct symFocal {
       double value;
     } focal;
   } op;

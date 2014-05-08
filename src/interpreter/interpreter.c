@@ -301,24 +301,14 @@ int argsRequired(char cmd){
 		cmd == SAVE_FRAME_CMD;
 }
 
-void evaluateMDLScript(Matrix_t ** points, Matrix_t ** transform,
-	Stack_t * coordStack){
-
+void evaluateMDLScript(Matrix_t ** points, Stack_t * coordStack){
 	int cmdNum;
 	for(cmdNum = 0; cmdNum < lastop; cmdNum++){
 		Command_t * cmd = &op[cmdNum];
 		int opCode = cmd->opcode;
 
-		if(opCode == SPHERE){
-			struct sym_sphere * sphere = &(cmd->op.sphere);
-			addSphere(*points, sphere->d[0], sphere->d[1], sphere->r);
-			multiplyMatrix(peek(coordStack), *points);
-			drawMatrix(*points);
-			CLEAR(*points);
-		}
-
-		else if(opCode == BOX){
-			struct sym_box * box = &(cmd->op.box);
+		if(opCode == BOX){
+			struct symBox * box = &(cmd->op.box);
 			addRectangularPrism(*points, box->d0[0], box->d0[1], box->d0[2],
 				box->d1[0], box->d1[1], box->d1[2]);
 			multiplyMatrix(peek(coordStack), *points);
@@ -326,37 +316,65 @@ void evaluateMDLScript(Matrix_t ** points, Matrix_t ** transform,
 			CLEAR(*points);
 		}
 
-		else if(opCode == PUSH)
-			push(coordStack, copyMatrix(peek(coordStack)));
+		else if(opCode == DISPLAY)
+			renderScreen();
 
-		else if(opCode == POP)
-			freeMatrix(pop(coordStack));
+		else if(opCode == LINE){
+			struct symLine * line = &(cmd->op.line);
+			addEdge(*points, line->p0[0], line->p0[1], line->p0[2], line->p1[0],
+				line->p1[1], line->p1[2]);
+			multiplyMatrix(peek(coordStack), *points);
+			drawMatrix(*points);
+			CLEAR(*points);
+		}
 
 		else if(opCode == MOVE){
-			struct sym_move * move = &(cmd->op.move);
+			struct symMove * move = &(cmd->op.move);
 			Matrix_t * translation = createTranslation(move->d[0], move->d[1],
 				move->d[2]);
 			multiplyMatrix(translation, peek(coordStack));
 			freeMatrix(translation);
 		}
 
-		else if(opCode == SCALE){
-			struct sym_scale * symScale = &(cmd->op.scale);
-			Matrix_t * scale = createScale(symScale->d[0],
-				symScale->d[1], symScale->d[2]);
-			multiplyMatrix(scale, peek(coordStack));
-			freeMatrix(scale);
-		}
+		else if(opCode == POP)
+			freeMatrix(pop(coordStack));
+
+		else if(opCode == PUSH)
+			push(coordStack, copyMatrix(peek(coordStack)));
 
 		else if(opCode == ROTATE){
-			struct sym_rotate * symRotation = &(cmd->op.rotate);
+			struct symRotate * symRotation = &(cmd->op.rotate);
 			Matrix_t * rotation = createRotation((int)symRotation->axis,
 				symRotation->degrees);
 			multiplyMatrix(rotation, peek(coordStack));
 			freeMatrix(rotation);
 		}
 
-		else if(opCode == DISPLAY)
-			renderScreen();
+		else if(opCode == SAVE)
+			writeScreen(cmd->op.save.p->name);
+
+		else if(opCode == SCALE){
+			struct symScale * symScale = &(cmd->op.scale);
+			Matrix_t * scale = createScale(symScale->d[0],
+				symScale->d[1], symScale->d[2]);
+			multiplyMatrix(scale, peek(coordStack));
+			freeMatrix(scale);
+		}
+
+		else if(opCode == SPHERE){
+			struct symSphere * sphere = &(cmd->op.sphere);
+			addSphere(*points, sphere->d[0], sphere->d[1], sphere->r);
+			multiplyMatrix(peek(coordStack), *points);
+			drawMatrix(*points);
+			CLEAR(*points);
+		}
+
+		else if(opCode == TORUS){
+			struct symTorus * torus = &(cmd->op.torus);
+			addTorus(*points, torus->d[0], torus->d[1], torus->r0, torus->r1);
+			multiplyMatrix(peek(coordStack), *points);
+			drawMatrix(*points);
+			CLEAR(*points);
+		}
 	}
 }

@@ -64,6 +64,8 @@
  *
  *  @return Return CMD_SPECIAL, CMD_VALID_EVAL, CMD_INVALID_CMD, or
  *      CMD_INVALID_ARGS to indicate the status of the command evaluation.
+ *
+ *  @deprecated ::evaluateMDLScript() should be used.
  */
 int evaluateCommand(char ** const command, Matrix_t ** points,
 	Matrix_t ** transform, Stack_t * coordStack);
@@ -89,5 +91,4 @@ int argsRequired(char cmd);
  * @param transform A pointer to a pointer to the transform ::Matrix_t
  * @param coordStack A pointer to the coordinates ::Stack_t coordStack.
  */
-void evaluateMDLScript(Matrix_t ** points, Matrix_t ** transform,
-	Stack_t * coordStack);
+void evaluateMDLScript(Matrix_t ** points, Stack_t * coordStack);
