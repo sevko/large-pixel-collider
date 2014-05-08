@@ -1,0 +1,55 @@
+push
+move .1 0.2 3.4
+move -.1 -0.2 -3.4
+move 1 2 3 fred
+camera 1 2 3 10 20 30 
+light f 1 2 3 4 5 6
+pop
+move 2 3 4 other
+sphere 10 10 10 5
+sphere 10 10 10 5 SYSTEM
+sphere k1 10 10 410 5 
+sphere k3 10 10 410 5 s2 
+constants MYLIGHTS 2 3 4 5 6 7 8 9 10
+save_coord_system foody
+sphere k2 10 10 10 5 
+torus 10 10 10 5 33
+torus 10 10 10 5 23 SYSTEM
+torus both_kons3 10 10 4 5 2 both_cs
+torus k1 10 10 41 5 22
+sphere 1 2 3 4
+box 1 2 3 10 20 30
+box bcons 1 2 3 10 20 30
+box 1 2 3 10 20 30 acs
+box bcons 1 2 3 10 20 30 both_cs
+line 1 2 3 10 20 30
+line 1 2 3 cs0 10 20 30
+line 1 2 3 10 20 30 cs1
+line 1 2 3 csb1 10 20 30 csb11
+line lkon 1 2 3 10 20 30
+line lkon 1 2 3 csb1 10 20 30
+line lkon 1 2 3 10 20 30 ccsss
+line lkon 1 2 3 zzccscscs 10 20 30  cscscsc
+mesh :filename1
+mesh kons :filename2
+scale .2 3.2 4.2 kooo
+rotate y 34
+rotate z 22 knobby
+scale .2 3.2 4.2 koooll
+set testknobw .65
+basename hello
+save_knobs freddy
+tween 5 10 list1 list2
+push
+pop
+save somefile
+generate_rayfiles
+shading wireframe
+shading phong
+shading raytrace
+shading goroud
+focal 0.5
+setknobs .2
+display
+constants RGBTEST 2 3 4 5 6 7 8 9 10 101 102 103
+ambient 10 20 30
