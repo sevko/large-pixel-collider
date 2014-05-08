@@ -12,6 +12,12 @@
 
 #include <math.h>
 
+#define CLEAR(matrix_pointer) \
+	do {\
+		freeMatrix(matrix_pointer);\
+		matrix_pointer = createMatrix();\
+	} while(0)
+
 /*!
  *  @brief Add a circle to a ::Matrix_t.
  *
@@ -133,8 +139,15 @@
 //! The index of the w-coordinate of a point in ::Matrix_t::points.
 #define W 3
 
-//! A typedef'd struct of point coordinates.
-typedef struct Matrix Matrix_t;
+//! A struct to contain point coordinates.
+typedef struct Matrix {
+	/*! A @f$4xn@f$ matrix of @a n points, with four double values each: the @a
+	 * x-, @a y-, and @a z- coordinates, and a fourth placeholder value, @a w,
+	 * to facilitate transformation matrix mathematics.
+	*/
+	double * points[4];
+	int numPoints;  //!< The number of points contained in this Matrix.
+} Matrix_t;
 
 /*!
  *  @brief Allocate memory for a ::Matrix_t.
@@ -420,6 +433,16 @@ void printMatrix(const Matrix_t * const matrix);
  *      with equal coordinate values, return 1; else, return 0.
  */
 int equalMatrix(Matrix_t * m1, Matrix_t * m2);
+
+/*
+ * @brief Return a deep-copy of a ::Matrix_t.
+ *
+ * @param matrix The matrix whose points will be copied.
+ *
+ * @return A pointer to the new, copied ::Matrix_t with identical contents to
+ *      @p matrix.
+ */
+Matrix_t * copyMatrix(const Matrix_t * const matrix);
 
 /*!
  *  @brief Scan the point coordinates contained in a formatted CSV file into a

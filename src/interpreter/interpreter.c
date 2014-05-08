@@ -6,6 +6,7 @@
 #include "src/graphics/screen.h"
 #include "src/graphics/matrix.h"
 #include "src/interpreter/interpreter.h"
+#include "src/interpreter/stack/point.h"
 #include "src/interpreter/stack/stack.h"
 
 #include "lib/parser.h"
@@ -102,7 +103,7 @@ int evaluateCommand(char ** const command, Matrix_t ** points,
 	Matrix_t ** transform, Stack_t * coordStack){
 	char cmdChar = command[0][0];
 
-	Point_t * origin = peek(coordStack);
+	Matrix_t * origin = peek(coordStack);
 
 	int len = strlen(command[0]);
 	if(cmdChar == '\n' || len == 0 || cmdChar == COMMENT_CHAR)
@@ -116,16 +117,16 @@ int evaluateCommand(char ** const command, Matrix_t ** points,
 		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf %lf %lf",
 			&x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3) < 8)
 			return CMD_INVALID_ARGS;
-		addBezier(*points, x0 + origin->x, y0 + origin->y, x1 + origin->x,
-				y1 + origin->y, x2 + origin->x, y2 + origin->y, x3 + origin->x,
-				y3 + origin->y);
+		addBezier(*points, x0 + GET_X(origin), y0 + GET_Y(origin), x1 + GET_X(origin),
+				y1 + GET_Y(origin), x2 + GET_X(origin), y2 + GET_Y(origin), x3 + GET_X(origin),
+				y3 + GET_Y(origin));
 	}
 
 	else if(cmdChar == ADD_CIRCLE_CMD){
 		double oX, oY, radius;
 		if(sscanf(command[1], "%lf %lf %lf", &oX, &oY, &radius) < 3)
 			return CMD_INVALID_ARGS;
-		addCircle(*points, oX + origin->x, oY + origin->y, radius);
+		addCircle(*points, oX + GET_X(origin), oY + GET_Y(origin), radius);
 	}
 
 	else if(cmdChar == ADD_HERMITE_CMD){
@@ -133,9 +134,9 @@ int evaluateCommand(char ** const command, Matrix_t ** points,
 		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf %lf %lf",
 			&x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3) < 8)
 			return CMD_INVALID_ARGS;
-		addHermite(*points, x0 + origin->x, y0 + origin->y, x1 + origin->x,
-				y1 + origin->y, x2 + origin->x, y2 + origin->y, x3 + origin->x,
-				y3 + origin->y);
+		addHermite(*points, x0 + GET_X(origin), y0 + GET_Y(origin), x1 + GET_X(origin),
+				y1 + GET_Y(origin), x2 + GET_X(origin), y2 + GET_Y(origin), x3 + GET_X(origin),
+				y3 + GET_Y(origin));
 	}
 
 	else if(cmdChar == ADD_LINE_CMD){
@@ -143,8 +144,8 @@ int evaluateCommand(char ** const command, Matrix_t ** points,
 		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf",
 			&x1, &y1, &z1, &x2, &y2, &z2) < 6)
 			return CMD_INVALID_ARGS;
-		addEdge(*points, x1 + origin->x, y1 + origin->y, z1 + origin->z,
-				x2 + origin->x, y2 + origin->y, z2 + origin->z);
+		addEdge(*points, x1 + GET_X(origin), y1 + GET_Y(origin), z1 + GET_Z(origin),
+				x2 + GET_X(origin), y2 + GET_Y(origin), z2 + GET_Z(origin));
 	}
 
 	else if(cmdChar == ADD_RECT_PRISM_CMD){
@@ -152,31 +153,29 @@ int evaluateCommand(char ** const command, Matrix_t ** points,
 		if(sscanf(command[1], "%lf %lf %lf %lf %lf %lf",
 			&x, &y, &z, &width, &height, &depth) < 6)
 			return CMD_INVALID_ARGS;
-		addRectangularPrism(*points, x + origin->x, y + origin->y, z +
-				origin->z, width, height, depth);
+		addRectangularPrism(*points, x + GET_X(origin), y + GET_Y(origin), z +
+				GET_Z(origin), width, height, depth);
 	}
 
 	else if(cmdChar == ADD_SPHERE_CMD){
 		double x, y, radius;
 		if(sscanf(command[1], "%lf %lf %lf", &x, &y, &radius) < 3)
 			return CMD_INVALID_ARGS;
-		addSphere(*points, x + origin->x, y + origin->y, radius);
+		addSphere(*points, x + GET_X(origin), y + GET_Y(origin), radius);
 	}
 
 	else if(cmdChar == ADD_TORUS_CMD){
 		double x, y, rad1, rad2;
 		if(sscanf(command[1], "%lf %lf %lf %lf", &x, &y, &rad1, &rad2) < 4)
 			return CMD_INVALID_ARGS;
-		addTorus(*points, x + origin->x, y + origin->y, rad1, rad2);
+		addTorus(*points, x + GET_X(origin), y + GET_Y(origin), rad1, rad2);
 	}
 
 	else if(cmdChar == APPLY_TRANSFORM_CMD)
 		multiplyMatrix(*transform, *points);
 
-	else if(cmdChar == CLEAR_POINTS_CMD){
-		freeMatrix(*points);
-		*points = createMatrix();
-	}
+	else if(cmdChar == CLEAR_POINTS_CMD)
+		CLEAR(*points);
 
 	else if(cmdChar == CREATE_ROT_X_CMD || cmdChar == CREATE_ROT_Y_CMD ||
 		cmdChar == CREATE_ROT_Z_CMD ){
@@ -236,9 +235,9 @@ int evaluateCommand(char ** const command, Matrix_t ** points,
 		if(sscanf(command[1], "%lf %lf %lf", &ox, &oy, &oz) < 3)
 			return CMD_INVALID_ARGS;
 		origin = pop(coordStack);
-		origin->x = ox;
-		origin->y = oy;
-		origin->z = oz;
+		GET_X(origin) = ox;
+		GET_Y(origin) = oy;
+		GET_Z(origin) = oz;
 		push(coordStack, origin);
 	}
 
@@ -246,11 +245,10 @@ int evaluateCommand(char ** const command, Matrix_t ** points,
 		free(pop(coordStack));
 
 	else if(cmdChar == PUSH_COORDINATES_CMD){
-		Point_t * newTopOrigin = malloc(sizeof(Point_t)),
-				* topOrigin = (Point_t *)peek(coordStack);
-		newTopOrigin->x = topOrigin->x;
-		newTopOrigin->y = topOrigin->y;
-		newTopOrigin->z = topOrigin->z;
+		Matrix_t * newTopOrigin = createMatrix(),
+			* topOrigin = (Matrix_t *)peek(coordStack);
+		addPoint(newTopOrigin, topOrigin->points[X][0],
+			topOrigin->points[Y][0], topOrigin->points[Z][0]);
 		push(coordStack, newTopOrigin);
 	}
 
@@ -305,7 +303,6 @@ int argsRequired(char cmd){
 
 void evaluateMDLScript(Matrix_t ** points, Matrix_t ** transform,
 	Stack_t * coordStack){
-	Point_t * origin = peek(coordStack);
 
 	int cmdNum;
 	for(cmdNum = 0; cmdNum < lastop; cmdNum++){
@@ -313,64 +310,53 @@ void evaluateMDLScript(Matrix_t ** points, Matrix_t ** transform,
 		int opCode = cmd->opcode;
 
 		if(opCode == SPHERE){
-			struct sym_sphere * sphere = (struct sym_sphere *)&(cmd->op.sphere);
-			addSphere(*points,
-				origin->x + sphere->d[0],
-				origin->y + sphere->d[1],
-				sphere->r);
+			struct sym_sphere * sphere = &(cmd->op.sphere);
+			addSphere(*points, sphere->d[0], sphere->d[1], sphere->r);
+			multiplyMatrix(peek(coordStack), *points);
+			drawMatrix(*points);
+			CLEAR(*points);
 		}
 
 		else if(opCode == BOX){
-			struct sym_box * box = (struct sym_box *)&(cmd->op.box);
-			addRectangularPrism(*points,
-				origin->x + box->d0[0],
-				origin->y + box->d0[1],
-				origin->z + box->d0[2],
-				origin->x + box->d1[0],
-				origin->y + box->d1[1],
-				origin->z + box->d1[2]);
+			struct sym_box * box = &(cmd->op.box);
+			addRectangularPrism(*points, box->d0[0], box->d0[1], box->d0[2],
+				box->d1[0], box->d1[1], box->d1[2]);
+			multiplyMatrix(peek(coordStack), *points);
+			drawMatrix(*points);
+			CLEAR(*points);
 		}
 
-		else if(opCode == PUSH){
-			Point_t * newTopOrigin = malloc(sizeof(Point_t)),
-				* topOrigin = (Point_t *)peek(coordStack);
-			newTopOrigin->x = topOrigin->x;
-			newTopOrigin->y = topOrigin->y;
-			newTopOrigin->z = topOrigin->z;
-			push(coordStack, newTopOrigin);
-		}
+		else if(opCode == PUSH)
+			push(coordStack, copyMatrix(peek(coordStack)));
 
 		else if(opCode == POP)
-			free(pop(coordStack));
+			freeMatrix(pop(coordStack));
 
 		else if(opCode == MOVE){
-			origin = pop(coordStack);
-			struct sym_move * move = (struct sym_move *)&(cmd->op.move);
-			origin->x = move->d[0];
-			origin->y = move->d[1];
-			origin->z = move->d[2];
-			push(coordStack, origin);
+			struct sym_move * move = &(cmd->op.move);
+			Matrix_t * translation = createTranslation(move->d[0], move->d[1],
+				move->d[2]);
+			multiplyMatrix(translation, peek(coordStack));
+			freeMatrix(translation);
 		}
 
 		else if(opCode == SCALE){
-			Matrix_t * scale = createScale(cmd->op.scale.d[0],
-				cmd->op.scale.d[1], cmd->op.scale.d[2]);
-			multiplyMatrix(scale, *transform);
+			struct sym_scale * symScale = &(cmd->op.scale);
+			Matrix_t * scale = createScale(symScale->d[0],
+				symScale->d[1], symScale->d[2]);
+			multiplyMatrix(scale, peek(coordStack));
 			freeMatrix(scale);
 		}
 
 		else if(opCode == ROTATE){
-			printf("%f\n%f\n\n", cmd->op.rotate.axis, cmd->op.rotate.degrees);
-			Matrix_t * rotation = createRotation((int)cmd->op.rotate.axis,
-				cmd->op.rotate.degrees);
-			multiplyMatrix(rotation, *points);
+			struct sym_rotate * symRotation = &(cmd->op.rotate);
+			Matrix_t * rotation = createRotation((int)symRotation->axis,
+				symRotation->degrees);
+			multiplyMatrix(rotation, peek(coordStack));
 			freeMatrix(rotation);
 		}
 
-		else if(opCode == DISPLAY){
-			clearScreen();
-			drawMatrix(*points);
+		else if(opCode == DISPLAY)
 			renderScreen();
-		}
 	}
 }

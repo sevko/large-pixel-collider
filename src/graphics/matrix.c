@@ -101,16 +101,6 @@ static double dotProduct(const Matrix_t * const m1, int row,
 static int backfaceCull(double x1, double y1, double z1, double x2, double y2,
 	double z2, double x3, double y3, double z3);
 
-//! A struct to contain point coordinates.
-struct Matrix {
-	/*! A @f$4xn@f$ matrix of @a n points, with four double values each: the @a
-	 * x-, @a y-, and @a z- coordinates, and a fourth placeholder value, @a w,
-	 * to facilitate transformation matrix mathematics.
-	*/
-	double * points[4];
-	int numPoints;  //!< The number of points contained in this Matrix.
-};
-
 Matrix_t * createMatrix(void){
 	Matrix_t * const matrix = malloc(sizeof(Matrix_t));
 	matrix->numPoints = 0;
@@ -605,6 +595,17 @@ int equalMatrix(Matrix_t * m1, Matrix_t * m2){
 			return 0;
 
 	return 1;
+}
+
+Matrix_t * copyMatrix(const Matrix_t * const matrix){
+	Matrix_t * copyMatrix = createMatrix();
+
+	int point;
+	for(point = 0; point < matrix->numPoints; point++)
+		addPoint(copyMatrix, matrix->points[X][point], matrix->points[Y][point],
+			matrix->points[Z][point], matrix->points[W][point]);
+
+	return copyMatrix;
 }
 
 Matrix_t * readPointsFromFile(char * filename){

@@ -43,18 +43,13 @@
  */
 #define freeStack(stack) freeList(stack)
 
-//! A typedef'd stack struct.
+//! A wrapper stack representation of a linked-list.
 typedef SingleLList_t Stack_t;
-
-typedef struct {
-	double x, y, z;
-} Point_t;
 
 /*
  * @brief Allocate a ::Stack_t, and initialize member variables.
  *
- * The newly created ::Stack_t contains a starting origin ::Point_t @a
- * (0, 0, 0).
+ * The newly created ::Stack_t contains an identity ::Matrix_t.
  *
  * @return A pointer to the newly created ::Stack_t.
  */

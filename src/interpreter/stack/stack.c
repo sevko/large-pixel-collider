@@ -2,14 +2,10 @@
 #include <stdlib.h>
 
 #include "stack.h"
+#include "src/graphics/matrix.h"
 
 Stack_t * createStack(){
 	Stack_t * stack = createList();
-	Point_t * origin = malloc(sizeof(Point_t));
-	origin->x = 0;
-	origin->y = 0;
-	origin->z = 0;
-	push(stack, origin);
-
+	push(stack, createIdentity());
 	return stack;
 }
