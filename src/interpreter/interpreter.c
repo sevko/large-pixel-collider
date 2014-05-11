@@ -332,8 +332,9 @@ void evaluateMDLScript(Matrix_t ** points, Stack_t * coordStack){
 			struct symMove * move = &(cmd->op.move);
 			Matrix_t * translation = createTranslation(move->d[0], move->d[1],
 				move->d[2]);
-			multiplyMatrix(translation, peek(coordStack));
-			freeMatrix(translation);
+			multiplyMatrix(peek(coordStack), translation);
+			freeMatrix(pop(coordStack));
+			push(coordStack, translation);
 		}
 
 		else if(opCode == POP)
@@ -344,10 +345,27 @@ void evaluateMDLScript(Matrix_t ** points, Stack_t * coordStack){
 
 		else if(opCode == ROTATE){
 			struct symRotate * symRotation = &(cmd->op.rotate);
-			Matrix_t * rotation = createRotation((int)symRotation->axis,
+
+			int axis;
+			switch((int)symRotation->axis){
+				case 0:
+					axis = 2;
+					break;
+
+				case 1:
+					axis = 0;
+					break;
+
+				case 2:
+					axis = 1;
+					break;
+			}
+
+			Matrix_t * rotation = createRotation(axis,
 				symRotation->degrees);
-			multiplyMatrix(rotation, peek(coordStack));
-			freeMatrix(rotation);
+			multiplyMatrix(peek(coordStack), rotation);
+			freeMatrix(pop(coordStack));
+			push(coordStack, rotation);
 		}
 
 		else if(opCode == SAVE)
@@ -357,8 +375,9 @@ void evaluateMDLScript(Matrix_t ** points, Stack_t * coordStack){
 			struct symScale * symScale = &(cmd->op.scale);
 			Matrix_t * scale = createScale(symScale->d[0],
 				symScale->d[1], symScale->d[2]);
-			multiplyMatrix(scale, peek(coordStack));
-			freeMatrix(scale);
+			multiplyMatrix(peek(coordStack), scale);
+			freeMatrix(pop(coordStack));
+			push(coordStack, scale);
 		}
 
 		else if(opCode == SPHERE){
