@@ -345,23 +345,7 @@ void evaluateMDLScript(Matrix_t ** points, Stack_t * coordStack){
 
 		else if(opCode == ROTATE){
 			struct symRotate * symRotation = &(cmd->op.rotate);
-
-			int axis;
-			switch((int)symRotation->axis){
-				case 0:
-					axis = 2;
-					break;
-
-				case 1:
-					axis = 0;
-					break;
-
-				case 2:
-					axis = 1;
-					break;
-			}
-
-			Matrix_t * rotation = createRotation(axis,
+			Matrix_t * rotation = createRotation((int)symRotation->axis,
 				symRotation->degrees);
 			multiplyMatrix(peek(coordStack), rotation);
 			freeMatrix(pop(coordStack));

@@ -93,41 +93,6 @@ static void setup(void){
 	signal(SIGINT, sigHandler);
 }
 
-void test(){
-	char * s1 = malloc(100); strcpy(s1, "111111111");
-	char * s2 = malloc(100); strcpy(s2, "222222222");
-	char * s3 = malloc(100); strcpy(s3, "333333333");
-	char * s4 = malloc(100); strcpy(s4, "444444444");
-	char * s5 = malloc(100); strcpy(s5, "555555555");
-	char * s6 = malloc(100); strcpy(s6, "666666666");
-	char * s7 = malloc(100); strcpy(s7, "777777777");
-	char * s8 = malloc(100); strcpy(s8, "888888888");
-	char * s9 = malloc(100); strcpy(s9, "999999999");
-
-	Stack_t * stack = createStack();
-	push(stack, s1);
-	push(stack, s2);
-	push(stack, s3);
-	push(stack, s4);
-	push(stack, s5);
-	push(stack, s6);
-	push(stack, s7);
-	push(stack, s8);
-	push(stack, s9);
-
-	char * popped = pop(stack); printf("%s\n", popped); free(popped);
-	popped = pop(stack); printf("%s\n", popped); free(popped);
-	popped = pop(stack); printf("%s\n", popped); free(popped);
-	popped = pop(stack); printf("%s\n", popped); free(popped);
-	popped = pop(stack); printf("%s\n", popped); free(popped);
-	popped = pop(stack); printf("%s\n", popped); free(popped);
-	popped = pop(stack); printf("%s\n", popped); free(popped);
-	popped = pop(stack); printf("%s\n", popped); free(popped);
-	popped = pop(stack); printf("%s\n", popped); free(popped);
-
-	freeStack(stack);
-}
-
 int main(int argc, char * argv[]){
 	setup();
 	argumentHandler(argc, argv);
