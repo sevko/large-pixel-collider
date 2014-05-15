@@ -15,16 +15,83 @@
 extern int lastop;
 extern struct command op[MAX_COMMANDS];
 
+// A representation of a variable's value over a number of frames.
+typedef struct {
+	char * name; // The name of the variable.
+	double * gradient; // The values of the variable per frame.
+} VariableGradient_t;
+
+// The MDL script's variable values per frame.
+static VariableGradient_t ** g_variableGradients;
+static int g_frames; // The number of frames used by the MDL script.
+
+/*
+ * @brief Create a ::VariableGradient_t for a given `vary` command.
+ *
+ * @param startFrame The number of the frame during which varying begins.
+ * @param endFrame The number of the frame during which varying ends.
+ * @param startVal The starting value of the variable.
+ * @param endVal The ending value of the variable.
+ * @param varName The name of the variable.
+ *
+ * @return A pointer to the ::VariableGradient_t generated for the given
+ *      variable.
+ */
+static VariableGradient_t * createGradient(int startFrame, int endFrame,
+		double startVal, double endVal, char * varName);
+
+int initializeVariables(){
+	int cmdNum;
+	for(cmdNum = 0; cmdNum < lastop; cmdNum++){
+		Command_t * cmd = &op[cmdNum];
+		int opCode = cmd->opcode;
+
+		if(opCode == FRAMES){
+			g_frames = cmd->op.frames.num_frames;
+			break;
+		}
+
+		else if(opCode == VARY){
+			ERROR("Command %d: `vary` command called but no `frames`"
+					"specified.", cmdNum);
+			return 0;
+		}
+	}
+
+	int numVariables = 0;
+	for(cmdNum = 0; cmdNum < lastop; cmdNum++){
+		Command_t * cmd = &op[cmdNum];
+		int opCode = cmd->opcode;
+
+		if(opCode == VARY){
+			struct symVary * var = &(cmd->op.vary);
+			g_variableGradients = realloc(g_variableGradients,
+					(numVariables + 1) * sizeof(VariableGradient_t *));
+			g_variableGradients[numVariables++] = createGradient(
+					var->start_frame, var->end_frame, var->start_val,
+					var->end_val, var->p->name);
+		}
+	}
+
+	int variable;
+	for(variable = 0; variable < numVariables; variable++){
+		printf("%s:", g_variableGradients[variable]->name);
+		int frame;
+		for(frame = 0; frame < g_frames; frame++)
+			printf(" %f", g_variableGradients[variable]->gradient[frame]);
+		puts("");
+	}
+
+	return 1;
+}
+
 void evaluateMDLScript(Matrix_t ** points, Stack_t * coordStack){
 	int cmdNum;
 	for(cmdNum = 0; cmdNum < lastop; cmdNum++){
 		Command_t * cmd = &op[cmdNum];
 		int opCode = cmd->opcode;
 
-		if(opCode == BASENAME)
-			printf("Basename: %s\n", op[cmdNum].op.basename.p->name);
-
-		else if(opCode == BOX){
+		if(opCode == BOX){
 			struct symBox * box = &(cmd->op.box);
 			addRectangularPrism(*points, box->d0[0], box->d0[1], box->d0[2],
 				box->d1[0], box->d1[1], box->d1[2]);
@@ -35,9 +102,6 @@ void evaluateMDLScript(Matrix_t ** points, Stack_t * coordStack){
 
 		else if(opCode == DISPLAY)
 			renderScreen();
-
-		else if(opCode == FRAMES)
-			printf("Num frames: %4.0f\n",op[cmdNum].op.frames.num_frames);
 
 		else if(opCode == LINE){
 			struct symLine * line = &(cmd->op.line);
@@ -99,12 +163,28 @@ void evaluateMDLScript(Matrix_t ** points, Stack_t * coordStack){
 			drawMatrix(*points);
 			CLEAR(*points);
 		}
-
-		else if(opCode == VARY)
-			printf("Vary: %4.0f %4.0f, %4.0f %4.0f\n",
-				op[cmdNum].op.vary.start_frame,
-				op[cmdNum].op.vary.end_frame,
-				op[cmdNum].op.vary.start_val,
-				op[cmdNum].op.vary.end_val);
 	}
+}
+
+static VariableGradient_t * createGradient(int startFrame, int endFrame,
+		double startVal, double endVal, char * varName){
+	VariableGradient_t * gradient = malloc(sizeof(VariableGradient_t));
+	gradient->name = varName;
+	gradient->gradient = malloc(g_frames * sizeof(double));
+
+	double deltaVarPerFrame = (endVal - startVal) / (endFrame - startFrame);
+
+	int frame;
+	for(frame = 0; frame <= startFrame; frame++)
+		gradient->gradient[frame] = startVal;
+
+	for(; frame <= endFrame; frame++){
+		startVal += deltaVarPerFrame;
+		gradient->gradient[frame] = startVal;
+	}
+
+	for(; frame < g_frames; frame++)
+		gradient->gradient[frame] = endVal;
+
+	return gradient;
 }

@@ -19,17 +19,20 @@ extern FILE * yyin;
 extern int yyparse(void);
 
 void readMDLFile(const char * const filePath){
-	configureScreen();
 	Matrix_t * points = createMatrix(), * transform = createIdentity();
 	Stack_t * coordStack = createStack();
 
 	yyin = fopen(filePath, "r");
 	yyparse();
 	fclose(yyin);
-	evaluateMDLScript(&points, coordStack);
 
-	usleep(PARSER_EXIT_PAUSE);
+	if(initializeVariables()){
+		configureScreen();
+		evaluateMDLScript(&points, coordStack);
+		usleep(PARSER_EXIT_PAUSE);
+		quitScreen();
+	}
+
 	freeMatrices(2, points, transform);
 	freeStack(coordStack);
-	quitScreen();
 }
