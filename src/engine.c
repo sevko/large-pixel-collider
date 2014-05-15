@@ -18,7 +18,6 @@
 #include "src/graphics/graphics.h"
 #include "src/graphics/matrix.h"
 #include "src/interpreter/file_parser.h"
-#include "src/interpreter/shell.h"
 #include "src/interpreter/stack/stack.h"
 
 #include "lib/parser.h"
@@ -79,9 +78,6 @@ static void argumentHandler(int argc, char * argv[]){
 		else
 			FATAL("Argument not recognized.");
 	}
-
-	else
-		shell();
 }
 
 static void sigHandler(int sig){
