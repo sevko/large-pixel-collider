@@ -24,8 +24,5 @@ int initializeVariables(void);
  *
  * Evaluate the MDL script file read and parsed by ::file_parser::readMDLFile(),
  * stored in memory in the @a op commands array.
- *
- * @param points A pointer to a pointer to the points ::Matrix_t.
- * @param coordStack A pointer to the coordinates ::Stack_t coordStack.
  */
-void evaluateMDLScript(Matrix_t ** points, Stack_t * coordStack);
+void evaluateMDLScript(void);

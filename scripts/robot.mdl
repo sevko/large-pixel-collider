@@ -1,28 +1,30 @@
+frames 100
+vary angle 0 99 0 1
+
 //body
 push
 move 250 200 0
-//rotate y 30
-//rotate x 20
-rotate y 30
+rotate y 30 angle
+rotate x 20 angle
 box -75 100 40 150 200 80
-display
+
 //head
 push
 move 0 151 0
+
 //"eyeball"
-//rotate y 90
 sphere 0 0 0 50
-display
+
 //left arm
 pop
 push
 move 75 100 0
 box 0 0 20 40 180 40
-display
+
 //right arm
 pop
 push
-rotate x 30
+rotate x 30 angle
 move -75 100 0
 box 0 0 0 -40 180 40
 display
