@@ -74,5 +74,7 @@ void * removeAfter(SingleLList_t * const list, ListElement_t * const elem);
  * @brief Deallocate all pointers encapsulated by a ::SingleLList_t.
  *
  * @param list The ::SingleLList_t to deallocate.
+ * @param freeElement A pointer to a function used to free the objects pointed
+ *      to by @p list's elements' void data pointers.
  */
-void freeList(SingleLList_t * const list);
+void freeList(SingleLList_t * const list, void (* freeElement)(void * element));

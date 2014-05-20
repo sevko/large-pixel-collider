@@ -1,30 +1,36 @@
-frames 100
-vary angle 0 99 0 1
+frames 40
+vary angle 0 39 0 1
+vary ratio 0 39 0 1
+vary dimension 0 39 0 1
 
 //body
 push
-move 250 200 0
+move 250 200 0 dimension
 rotate y 30 angle
 rotate x 20 angle
+scale 1 1 1 ratio
 box -75 100 40 150 200 80
 
 //head
 push
-move 0 151 0
+move 0 151 0 dimension
 
 //"eyeball"
+scale 1 1 1 ratio
 sphere 0 0 0 50
 
 //left arm
 pop
 push
-move 75 100 0
+scale 1 1 1 ratio
+move 75 100 0 dimension
 box 0 0 20 40 180 40
 
 //right arm
 pop
 push
+scale 1 1 1 ratio
 rotate x 30 angle
-move -75 100 0
+move -75 100 0 dimension
 box 0 0 0 -40 180 40
 display

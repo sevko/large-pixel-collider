@@ -6,7 +6,6 @@
 #include "src/graphics/screen.h"
 #include "src/interpreter/file_parser.h"
 #include "src/interpreter/interpreter.h"
-#include "src/interpreter/utils.h"
 #include "src/interpreter/stack/stack.h"
 
 /*!

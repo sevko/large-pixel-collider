@@ -39,9 +39,10 @@
 /*
  * @brief Deallocate all pointers encapsulated by a ::Stack_t.
  *
- * @param stack (::Stack_t *) A pointer to the @p stack to be deallocated.
+ * @param stack (::Stack_t *) See ::freeList().
+ * @param freeElement (void (*)(void *)) See ::freeList().
  */
-#define freeStack(stack) freeList(stack)
+#define freeStack(stack, freeElement) freeList(stack, freeElement)
 
 //! A wrapper stack representation of a linked-list.
 typedef SingleLList_t Stack_t;

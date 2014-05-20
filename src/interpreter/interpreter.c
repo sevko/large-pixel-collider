@@ -52,6 +52,13 @@ static VariableGradient_t * findVariable(char * name);
 static VariableGradient_t * createGradient(int startFrame, int endFrame,
 		double startVal, double endVal, char * varName);
 
+/*
+ * @brief Deallocate all memory belonging to a ::VariableGradient_t.
+ *
+ * @param gradient A pointer to the ::VariableGradient_t to deallocate.
+*/
+static void freeGradient(VariableGradient_t * gradient);
+
 int initializeVariables(){
 	int cmdNum;
 	for(cmdNum = 0; cmdNum < lastop; cmdNum++){
@@ -85,30 +92,17 @@ int initializeVariables(){
 		}
 	}
 
-	// int var;
-	// for(var = 0; var < g_numVariables; var++){
-		// printf("%s:", g_variableGradients[var]->name);
-		// int frame;
-		// for(frame = 0; frame < g_numFrames; frame++)
-			// printf(" %f", g_variableGradients[var]->gradient[frame]);
-		// puts("");
-	// }
-
 	return 1;
 }
 
 void evaluateMDLScript(){
 	int frame;
 	for(frame = 0; frame < g_numFrames; frame++){
-		printf("Frame: %d\n", frame);
 		Matrix_t * points = createMatrix();
 		Stack_t * coordStack = createStack();
 
 		int cmdNum;
 		for(cmdNum = 0; cmdNum < lastop; cmdNum++){
-			printf("\tCommand: %d.\n", cmdNum);
-			printf("\tCommand: %d.\n", (&op[cmdNum])->opcode);
-
 			Command_t * cmd = &op[cmdNum];
 			int opCode = cmd->opcode;
 
@@ -213,8 +207,13 @@ void evaluateMDLScript(){
 		usleep(1e6 / 20);
 		clearScreen();
 		freeMatrix(points);
-		freeStack(coordStack);
+		freeStack(coordStack, &freeMatrixFromVoid);
 	}
+
+	int gradient;
+	for(gradient = 0; gradient < g_numVariables; gradient++)
+		freeGradient(g_variableGradients[gradient]);
+	free(g_variableGradients);
 }
 
 static VariableGradient_t * findVariable(char * name){
@@ -227,6 +226,14 @@ static VariableGradient_t * findVariable(char * name){
 
 static VariableGradient_t * createGradient(int startFrame, int endFrame,
 		double startVal, double endVal, char * varName){
+	if(startFrame < 0)
+		FATAL("The starting frame cannot be negative.");
+	else if(g_numFrames <= endFrame)
+		FATAL("The ending frame must be less than the number of frames.");
+	else if(endFrame < startFrame)
+		FATAL("The ending frame must be greater than or equal to the starting"
+				"frame.");
+
 	VariableGradient_t * gradient = malloc(sizeof(VariableGradient_t));
 	gradient->name = varName;
 	gradient->gradient = malloc(g_numFrames * sizeof(double));
@@ -246,4 +253,10 @@ static VariableGradient_t * createGradient(int startFrame, int endFrame,
 		gradient->gradient[frame] = endVal;
 
 	return gradient;
+}
+
+static void freeGradient(VariableGradient_t * gradient){
+	free(gradient->name);
+	free(gradient->gradient);
+	free(gradient);
 }

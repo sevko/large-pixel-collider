@@ -75,11 +75,11 @@ void * removeAfter(SingleLList_t * const list, ListElement_t * const elem){
 	return data;
 }
 
-void freeList(SingleLList_t * const list){
+void freeList(SingleLList_t * const list, void (* freeElement)(void * element)){
 	ListElement_t * currElem = list->head;
 	while(currElem != NULL){
 		ListElement_t * tmpNextElem = currElem->nextElement;
-		free(currElem->data);
+		freeElement(currElem->data);
 		free(currElem);
 		currElem = tmpNextElem;
 	}

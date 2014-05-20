@@ -172,6 +172,17 @@ void freeMatrices(int numMatrices, ...);
  */
 void freeMatrix(Matrix_t * matrix);
 
+/*
+ * @brief Free a ::Matrix_t from a void pointer.
+ *
+ * Used to facilitate freeing matrices from a ::Stack_t using the module's
+ * inbuilt ::freeStack() macro, which requires a @p freeElement(void *)
+ * function; note the generalized void pointer
+ *
+ * @param matrix A void pointer to a ::Matrix_t to be deallocated.
+*/
+void freeMatrixFromVoid(void * matrix);
+
 /*!
  *  @brief Add a point to a ::Matrix_t.
  *

@@ -66,10 +66,8 @@ static void argumentHandler(int argc, char * argv[]){
 			unitTests();
 
 		else if(strcmp(SCRIPT_CMD, argv[1]) == 0){
-			if(argc == 3){
-				// readScriptFile(argv[2]);
+			if(argc == 3)
 				readMDLFile(argv[2]);
-			}
 
 			else
 				FATAL("--script flag requires argument.");
@@ -78,6 +76,8 @@ static void argumentHandler(int argc, char * argv[]){
 		else
 			FATAL("Argument not recognized.");
 	}
+	else
+		puts("No arguments given. Exiting.");
 }
 
 static void sigHandler(int sig){

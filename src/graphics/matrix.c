@@ -129,6 +129,10 @@ void freeMatrix(Matrix_t * matrix){
 	free(matrix);
 }
 
+void freeMatrixFromVoid(void * matrix){
+	freeMatrix((Matrix_t *)matrix);
+}
+
 void (addPoint)(Matrix_t * const matrix, double x, double y, double z,
 	double w){
 	expandMatrix(matrix);
