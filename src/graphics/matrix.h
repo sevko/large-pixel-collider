@@ -61,62 +61,56 @@
 #define addPolygon(points, oX, oY, radius, numSides) \
 	addPolygonFull(points, oX, oY, radius, numSides, 2 * M_PI / numSides)
 
-/*!
- *  @brief Add a three-coordinate geometric point to a matrix.
- *
- *  The point's @a w coordinate defaults to 1.
- *
- *  @param points (Matrix_t *) The matrix to add the point to.
- *  @param x (double) The x-coordinate of the point.
- *  @param y (double) The z-coordinate of the point.
- *  @param z (double) The y-coordinate of the point.
- */
-#define addPoint1(points, x, y, z) addPoint(points, x, y, z, 1)
+/*
+ * @brief Create a point with a specific w-coordinate.
+
+ * @param x See ::createPoint().
+ * @param y See ::createPoint().
+ * @param z See ::createPoint().
+ * @param w See ::createPoint().
+*/
+#define createPoint2(x, y, z, w) createPoint(x, y, z, w)
+
+/*
+ * @brief Create a point with a w-coordinate of 1.
+
+ * @param x See ::createPoint().
+ * @param y See ::createPoint().
+ * @param z See ::createPoint().
+*/
+#define createPoint1(x, y, z) createPoint(x, y, z, 1)
 
 /*!
- *  @brief Add a point with a specific w-coordinate to a matrix.
+ *  @brief Helper macro for the overloaded ::createPoint().
  *
- *  A specific w-coordinate is often required when creating transformation
- *  matrices.
- *
- *  @param points (Matrix_t *) The matrix to add the point to.
- *  @param x (double) The x-coordinate of the point.
- *  @param y (double) The z-coordinate of the point.
- *  @param z (double) The y-coordinate of the point.
- *  @param w (double) The w-coordinate of the point.
- */
-#define addPoint2(points, x, y, z, w) addPoint(points, x, y, z, w)
-
-/*!
- *  @brief Helper macro for the overloaded addPoint().
- *
- *  Replaces the addPoint() macro with addPoint1() or addPoint2(), depending
- *  on the number of arguments.
+ *  Replaces the ::createPoint() macro with ::createPoint1() or
+ *  ::createPoint2(), depending on the number of received arguments.
  *
  *  @param arg1 Placeholder for an argument.
  *  @param arg2 Placeholder for an argument.
  *  @param arg3 Placeholder for an argument.
  *  @param arg4 Placeholder for an argument.
- *  @param func_name The macro to replace addPoint() with.
+ *  @param func_name The macro to replace ::createPoint() with.
  *  @param ... Any subsequent arguments.
  */
-#define ADD_POINT_VA_MACRO(arg1, arg2, arg3, arg4, arg5, func_name, ...) \
+#define CREATE_POINT_VA_MACRO(arg1, arg2, arg3, arg4, func_name, ...) \
 	func_name
 
 /*!
- *  @brief Overloaded addPoint(), which allows an optional @a w coordinate.
+ *  @brief Overloaded :;createPoint(), which allows an optional color argument.
  *
- *  Uses ADD_POINT_VA_MACRO to select an appropriate function-macro
- *  (addPoint1() or addPoint2()) based on the number of arguments.
+ *  Uses ::CREATE_POINT_VA_MACRO() to select an appropriate macro
+ *  (::createPoint1() or ::createPoint2) for the number of arguments (3, or 4
+ *  if a w-coordinate is specified).
  *
  *  @code
  *      // The following macro-function calls are both valid.
- *      addPoint(matrix, 10, 20, 30);
- *      addPoint(matrix, 10, 20, 30, 40);
+ *      createPoint(10, 20, 30);
+ *      createPoint(10, 20, 30, 40);
  *  @code
  */
-#define addPoint(...) \
-	ADD_POINT_VA_MACRO(__VA_ARGS__, addPoint2, addPoint1)(__VA_ARGS__)
+#define createPoint(...) \
+	CREATE_POINT_VA_MACRO(__VA_ARGS__, createPoint2, createPoint1)(__VA_ARGS__)
 
 //! @brief Macro for the x-axis -- used as an argument to createRotation().
 #define X_AXIS 0
@@ -139,13 +133,15 @@
 //! The index of the w-coordinate of a point in ::Matrix_t::points.
 #define W 3
 
+typedef double Point_t;
+
 //! A struct to contain point coordinates.
 typedef struct Matrix {
 	/*! A @f$4xn@f$ matrix of @a n points, with four double values each: the @a
 	 * x-, @a y-, and @a z- coordinates, and a fourth placeholder value, @a w,
 	 * to facilitate transformation matrix mathematics.
 	*/
-	double * points[4];
+	Point_t ** points;
 	int numPoints;  //!< The number of points contained in this Matrix.
 } Matrix_t;
 
@@ -183,6 +179,18 @@ void freeMatrix(Matrix_t * matrix);
 */
 void freeMatrixFromVoid(void * matrix);
 
+/*
+ * @brief Allocate and return a ::Point_t.
+ *
+ * @param x The x-coordinate of the point.
+ * @param y The y-coordinate of the point.
+ * @param z The z-coordinate of the point.
+ * @param w The w-coordinate of the point.
+ *
+ * @return A pointer to the new ::Point_t.
+*/
+Point_t * (createPoint)(double x, double y, double z, double w);
+
 /*!
  *  @brief Add a point to a ::Matrix_t.
  *
@@ -191,8 +199,7 @@ void freeMatrixFromVoid(void * matrix);
  *  @param y The double y-coordinate of the point.
  *  @param z The double z-coordinate of the point.
  */
-void (addPoint)(Matrix_t * const matrix, double x, double y, double z,
-	double w);
+void (addPoint)(Matrix_t * const matrix, Point_t * point);
 
 /*!
  *  @brief Add a line's endpoints to a ::Matrix_t.
