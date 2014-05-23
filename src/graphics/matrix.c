@@ -303,7 +303,7 @@ void addSphere(Matrix_t * points, double oX, double oY, double radius){
 	int circle, point;
 	for(circle = 0; circle < 360 / CIRCLE_STEP_SIZE - 1; circle++){
 		int circleStart = circle * circlePts;
-		for(point = 0; point < circlePts - 1; point++)
+		for(point = 0; point < circlePts - 1; point++){
 			addTriangle(points,
 				sphere->points[X][circleStart + point + 1],
 				sphere->points[Y][circleStart + point + 1],
@@ -315,6 +315,18 @@ void addSphere(Matrix_t * points, double oX, double oY, double radius){
 				sphere->points[Y][circleStart + circlePts + point + 1],
 				sphere->points[Z][circleStart + circlePts + point + 1]
 			);
+			addTriangle(points,
+				sphere->points[X][circleStart + point],
+				sphere->points[Y][circleStart + point],
+				sphere->points[Z][circleStart + point],
+				sphere->points[X][circleStart + circlePts + point],
+				sphere->points[Y][circleStart + circlePts + point],
+				sphere->points[Z][circleStart + circlePts + point],
+				sphere->points[X][circleStart + circlePts + point + 1],
+				sphere->points[Y][circleStart + circlePts + point + 1],
+				sphere->points[Z][circleStart + circlePts + point + 1]
+			);
+		}
 		addTriangle(points,
 			sphere->points[X][circleStart + point - 1],
 			sphere->points[Y][circleStart + point - 1],
@@ -453,7 +465,7 @@ void drawMatrix(const Matrix_t * const matrix){
 			y3 = matrix->points[Y][ptPair + 2],
 			z3 = matrix->points[Z][ptPair + 2];
 		if(backfaceCull(x1, y1, z1, x2, y2, z2, x3, y3, z3))
-			scanlineRender(x1, y1, x2, y2, x3, y3);
+			scanlineRender(x1, y1, x2, y2, x3, y3, TEST_COLOR);
 	}
 }
 

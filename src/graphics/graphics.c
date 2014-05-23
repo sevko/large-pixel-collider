@@ -58,20 +58,21 @@ void drawLine(int x1, int y1, int x2, int y2, int color){
 }
 
 void scanlineRender(double x1, double y1, double x2, double y2, double x3,
-	double y3){
+	double y3, int color){
 	double * pts;
-	if(y1 > y2 && y1 > y3){
+	if(y1 >= y2 && y1 >= y3){
 		if(y3 > y2)
 			pts = (double []){x1, y1, x3, y3, x2, y2};
 		else
 			pts = (double []){x1, y1, x2, y2, x3, y3};
 	}
 
-	else if(y2 > y1 && y2 > y3)
+	else if(y2 >= y1 && y2 >= y3){
 		if(y3 > y1)
 			pts = (double []){x2, y2, x3, y3, x1, y1};
 		else
 			pts = (double []){x2, y2, x1, y1, x3, y3};
+	}
 
 	else {
 		if(y2 > y1)
@@ -87,7 +88,7 @@ void scanlineRender(double x1, double y1, double x2, double y2, double x3,
 		mainY = pts[5];
 
 	while(pts[5] < pts[3]){
-		drawLine(pts[4], pts[5], mainX, mainY);
+		drawLine(pts[4], pts[5], mainX, mainY, color);
 
 		pts[4] += m1;
 		pts[5]++;
@@ -97,7 +98,7 @@ void scanlineRender(double x1, double y1, double x2, double y2, double x3,
 	}
 
 	while(pts[3] < pts[1]){
-		drawLine(pts[2], pts[3], mainX, mainY);
+		drawLine(pts[2], pts[3], mainX, mainY, color);
 
 		pts[2] += m2;
 		pts[3]++;
@@ -105,4 +106,5 @@ void scanlineRender(double x1, double y1, double x2, double y2, double x3,
 		mainX += m3;
 		mainY++;
 	}
+
 }

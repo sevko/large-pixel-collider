@@ -85,6 +85,7 @@ void (drawLine)(int x1, int y1, int x2, int y2, int color);
  * @param y2 The y-coordinate of the second vertex.
  * @param x3 The x-coordinate of the third vertex.
  * @param y3 The y-coordinate of the third vertex.
+ * @param color The color of the filled triangle.
 */
 void scanlineRender(double x1, double y1, double x2, double y2, double x3,
-	double y3);
+	double y3, int color);
