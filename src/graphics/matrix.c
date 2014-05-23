@@ -327,21 +327,10 @@ void addSphere(Matrix_t * points, double oX, double oY, double radius){
 				sphere->points[Z][circleStart + circlePts + point + 1]
 			);
 		}
-		addTriangle(points,
-			sphere->points[X][circleStart + point - 1],
-			sphere->points[Y][circleStart + point - 1],
-			sphere->points[Z][circleStart + point - 1],
-			sphere->points[X][circleStart + circlePts + point - 1],
-			sphere->points[Y][circleStart + circlePts + point - 1],
-			sphere->points[Z][circleStart + circlePts + point - 1],
-			sphere->points[X][circleStart + point],
-			sphere->points[Y][circleStart + point],
-			sphere->points[Z][circleStart + point]
-		);
 	}
 
 	for(point = sphere->numPoints - circlePts; point < sphere->numPoints - 1;
-		point++)
+		point++){
 		addTriangle(points,
 			sphere->points[X][point + 1],
 			sphere->points[Y][point + 1],
@@ -353,6 +342,18 @@ void addSphere(Matrix_t * points, double oX, double oY, double radius){
 			sphere->points[Y][(point + 1) % circlePts],
 			sphere->points[Z][(point + 1) % circlePts]
 		);
+		addTriangle(points,
+			sphere->points[X][(point + 1) % circlePts],
+			sphere->points[Y][(point + 1) % circlePts],
+			sphere->points[Z][(point + 1) % circlePts],
+			sphere->points[X][point],
+			sphere->points[Y][point],
+			sphere->points[Z][point],
+			sphere->points[X][point % circlePts],
+			sphere->points[Y][point % circlePts],
+			sphere->points[Z][point % circlePts]
+		);
+	}
 
 	freeMatrix(sphere);
 }
@@ -453,6 +454,8 @@ Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2){
 }
 
 void drawMatrix(const Matrix_t * const matrix){
+	int color = 0;
+	int colors[] = {0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF};
 	int ptPair;
 	for(ptPair = 0; ptPair < matrix->numPoints - 2; ptPair += 3){
 		double x1 = matrix->points[X][ptPair],
@@ -464,8 +467,9 @@ void drawMatrix(const Matrix_t * const matrix){
 			x3 = matrix->points[X][ptPair + 2],
 			y3 = matrix->points[Y][ptPair + 2],
 			z3 = matrix->points[Z][ptPair + 2];
+		color++;
 		if(backfaceCull(x1, y1, z1, x2, y2, z2, x3, y3, z3))
-			scanlineRender(x1, y1, x2, y2, x3, y3, TEST_COLOR);
+			scanlineRender(x1, y1, x2, y2, x3, y3, colors[color % 5]);
 	}
 }
 

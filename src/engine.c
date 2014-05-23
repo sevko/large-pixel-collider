@@ -61,32 +61,32 @@ static void argumentHandler(int argc, char * argv[]);
 void test(){
 	configureScreen();
 
-	// Matrix_t * pts = createMatrix();
-	// addSphere(pts, 0, 0, 40);
-	// multiplyMatrix(createScale(6, 6, 6), pts);
-	// Matrix_t * rotX = createRotation(X, 1),
-		// * rotY = createRotation(Y, 1),
-		// * rotZ = createRotation(Z, 1);
-	// int tick;
-	// for(tick = 0; tick < 1000; tick++){
-		// clearScreen();
-		// multiplyMatrices(4, rotX, rotY, rotZ, pts);
-		// drawMatrix(pts);
-		// renderScreen();
-		// usleep(1e6 / 30);
-	// }
-
-	int degree;
-	for(degree = 0; degree >= 0; degree++){
+	Matrix_t * pts = createMatrix();
+	addSphere(pts, 0, 0, 20);
+	multiplyMatrix(createScale(10, 10, 10), pts);
+	Matrix_t * rotX = createRotation(X, 1),
+		* rotY = createRotation(Y, 1),
+		* rotZ = createRotation(Z, 1);
+	int tick;
+	for(tick = 0; tick < 1000; tick++){
 		clearScreen();
-		Matrix_t * pts = createMatrix();
-		// addTriangle(pts, 0, 0, 0, 200, 0, 0, 200, -200, 0);
-		addTriangle(pts, 0, 0, 0, 200, 0, 0, 200 * cos(degree * M_PI / 180), 200 *
-			sin(degree * M_PI / 180), 0);
+		multiplyMatrices(4, rotX, rotY, rotZ, pts);
 		drawMatrix(pts);
 		renderScreen();
-		// usleep(1e6 / 120);
+		usleep(1e6 / 50);
 	}
+
+	// int degree;
+	// for(degree = 0; degree >= 0; degree++){
+		// clearScreen();
+		// Matrix_t * pts = createMatrix();
+		// // addTriangle(pts, 0, 0, 0, 200, 0, 0, 200, -200, 0);
+		// addTriangle(pts, 0, 0, 0, 200, 0, 0, 200 * cos(degree * M_PI / 180),
+			// 200 * sin(degree * M_PI / 180), 0);
+		// drawMatrix(pts);
+		// renderScreen();
+		// // usleep(1e6 / 120);
+	// }
 
 	quitScreen();
 }
