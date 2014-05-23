@@ -11,7 +11,7 @@
  */
 #define ABS(val) (val > 0?val:-val)
 
-void drawLine(int x1, int y1, int x2, int y2){
+void drawLine(int x1, int y1, int x2, int y2, int color){
 	int width = x2 - x1, height = y2 - y1;
 	int dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0;
 
@@ -25,7 +25,7 @@ void drawLine(int x1, int y1, int x2, int y2){
 	else
 		dy1 = 1;
 
-	// unsigned arithmetic is faster
+	// Unsigned arithmetic is faster than signed.
 	unsigned int longDist = ABS(width);
 	unsigned int shortDist = ABS(height);
 
@@ -43,7 +43,7 @@ void drawLine(int x1, int y1, int x2, int y2){
 
 	unsigned int numerator = longDist >> 1, pixel;
 	for(pixel = 0; pixel <= longDist; pixel++){
-		drawPixel(x1, y1);
+		drawPixel(x1, y1, color);
 		numerator += shortDist;
 		if(numerator >= longDist){
 			numerator -= longDist;

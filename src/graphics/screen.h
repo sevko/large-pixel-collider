@@ -5,8 +5,7 @@
 
 #pragma once
 
-//! The default color of pixels plotted with drawPixel().
-#define TEST_COLOR 0x00FF0000
+#include "src/globals.h"
 
 /*!
  *  @brief Draw a pixel at @a (@p x, @p y) with color TEST_COLOR.
@@ -42,7 +41,7 @@
 /*!
  *  @brief Overloaded drawPixel(), which allows an optional color argument.
  *
- *  Uses DRAW_PIXEL_VA_MACRO to select an appropriate macro (drawPixel or
+ *  Uses DRAW_PIXEL_VA_MACRO to select an appropriate macro (drawPixel1 or
  *  drawPixel2) for the number of arguments (2, or 3 if a color is specified).
  *
  *  @code
