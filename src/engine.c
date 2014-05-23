@@ -58,7 +58,24 @@ static void setup(void);
  */
 static void argumentHandler(int argc, char * argv[]);
 
-void test();
+void test(){
+	configureScreen();
+	Matrix_t * pts = createMatrix();
+	addSphere(pts, 0, 0, 40);
+	multiplyMatrix(createScale(6, 6, 6), pts);
+	Matrix_t * rotX = createRotation(X, 1),
+		* rotY = createRotation(Y, 1),
+		* rotZ = createRotation(Z, 1);
+	int tick;
+	for(tick = 0; tick < 1000; tick++){
+		clearScreen();
+		multiplyMatrices(4, rotX, rotY, rotZ, pts);
+		drawMatrix(pts);
+		renderScreen();
+		usleep(1e6 / 60);
+	}
+	quitScreen();
+}
 
 static void argumentHandler(int argc, char * argv[]){
 	if(1 < argc){
@@ -77,7 +94,8 @@ static void argumentHandler(int argc, char * argv[]){
 			FATAL("Argument not recognized.");
 	}
 	else
-		puts("No arguments given. Exiting.");
+		// puts("No arguments given. Exiting.");
+		test();
 }
 
 static void sigHandler(int sig){

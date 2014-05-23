@@ -56,3 +56,53 @@ void drawLine(int x1, int y1, int x2, int y2){
 		}
 	}
 }
+
+void scanlineRender(double x1, double y1, double x2, double y2, double x3,
+	double y3){
+	double * pts;
+	if(y1 > y2 && y1 > y3){
+		if(y3 > y2)
+			pts = (double []){x1, y1, x3, y3, x2, y2};
+		else
+			pts = (double []){x1, y1, x2, y2, x3, y3};
+	}
+
+	else if(y2 > y1 && y2 > y3)
+		if(y3 > y1)
+			pts = (double []){x2, y2, x3, y3, x1, y1};
+		else
+			pts = (double []){x2, y2, x1, y1, x3, y3};
+
+	else {
+		if(y2 > y1)
+			pts = (double []){x3, y3, x2, y2, x1, y1};
+		else
+			pts = (double []){x3, y3, x1, y1, x2, y2};
+	}
+
+	double m1 = (pts[3] - pts[5] != 0)?(pts[2] - pts[4]) / (pts[3] - pts[5]):0,
+		m2 = (pts[1] - pts[3] != 0)?(pts[0] - pts[2]) / (pts[1] - pts[3]):0,
+		m3 = (pts[1] - pts[5] != 0)?(pts[0] - pts[4]) / (pts[1] - pts[5]):0;
+	double mainX = pts[4],
+		mainY = pts[5];
+
+	while(pts[5] < pts[3]){
+		drawLine(pts[4], pts[5], mainX, mainY);
+
+		pts[4] += m1;
+		pts[5]++;
+
+		mainX += m3;
+		mainY++;
+	}
+
+	while(pts[3] < pts[1]){
+		drawLine(pts[2], pts[3], mainX, mainY);
+
+		pts[2] += m2;
+		pts[3]++;
+
+		mainX += m3;
+		mainY++;
+	}
+}

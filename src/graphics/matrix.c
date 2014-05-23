@@ -443,24 +443,17 @@ Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2){
 void drawMatrix(const Matrix_t * const matrix){
 	int ptPair;
 	for(ptPair = 0; ptPair < matrix->numPoints - 2; ptPair += 3){
-		if(backfaceCull(
-			matrix->points[X][ptPair],
-			matrix->points[Y][ptPair],
-			matrix->points[Z][ptPair],
-			matrix->points[X][ptPair + 1],
-			matrix->points[Y][ptPair + 1],
-			matrix->points[Z][ptPair + 1],
-			matrix->points[X][ptPair + 2],
-			matrix->points[Y][ptPair + 2],
-			matrix->points[Z][ptPair + 2])){
-
-			drawLine(matrix->points[X][ptPair], matrix->points[Y][ptPair],
-				matrix->points[X][ptPair + 1], matrix->points[Y][ptPair + 1]);
-			drawLine(matrix->points[X][ptPair], matrix->points[Y][ptPair],
-				matrix->points[X][ptPair + 2], matrix->points[Y][ptPair + 2]);
-			drawLine(matrix->points[X][ptPair + 1], matrix->points[Y][ptPair + 1],
-				matrix->points[X][ptPair + 2], matrix->points[Y][ptPair + 2]);
-		}
+		double x1 = matrix->points[X][ptPair],
+			y1 = matrix->points[Y][ptPair],
+			z1 = matrix->points[Z][ptPair],
+			x2 = matrix->points[X][ptPair + 1],
+			y2 = matrix->points[Y][ptPair + 1],
+			z2 = matrix->points[Z][ptPair + 1],
+			x3 = matrix->points[X][ptPair + 2],
+			y3 = matrix->points[Y][ptPair + 2],
+			z3 = matrix->points[Z][ptPair + 2];
+		if(backfaceCull(x1, y1, z1, x2, y2, z2, x3, y3, z3))
+			scanlineRender(x1, y1, x2, y2, x3, y3);
 	}
 }
 

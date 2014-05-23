@@ -21,3 +21,16 @@
  *  @param y2 The y-coordinate of the second endpoint.
  */
 void drawLine(int x1, int y1, int x2, int y2);
+
+/*
+ * @brief Fill a triangle using scanline-rendering.
+ *
+ * @param x1 The x-coordinate of the first vertex.
+ * @param y1 The y-coordinate of the first vertex.
+ * @param x2 The x-coordinate of the second vertex.
+ * @param y2 The y-coordinate of the second vertex.
+ * @param x3 The x-coordinate of the third vertex.
+ * @param y3 The y-coordinate of the third vertex.
+*/
+void scanlineRender(double x1, double y1, double x2, double y2, double x3,
+	double y3);
