@@ -140,7 +140,7 @@ void evaluateMDLScript(){
 					dz *= scale;
 				}
 
-				Matrix_t * translation = createTranslation(dx, dy, dz);
+				Matrix_t * translation = createTranslation(POINT(dx, dy, dz));
 				multiplyMatrix(peek(coordStack), translation);
 				freeMatrix(pop(coordStack));
 				push(coordStack, translation);
@@ -182,7 +182,7 @@ void evaluateMDLScript(){
 					dz *= scale;
 				}
 
-				Matrix_t * scale = createScale(dx, dy, dz);
+				Matrix_t * scale = createScale(POINT(dx, dy, dz));
 				multiplyMatrix(peek(coordStack), scale);
 				freeMatrix(pop(coordStack));
 				push(coordStack, scale);

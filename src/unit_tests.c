@@ -335,7 +335,7 @@ static int testPointsFileIO(void){
 
 static int testCreateTranslation(void){
 	Matrix_t * points = createMatrix(),
-		* translation = createTranslation(-50, -100, 0);
+		* translation = createTranslation(POINT(-50, -100, 0));
 	addTriangle(points, POINT(0, 0, 0), POINT(100, 0, 100),
 		POINT(100, 100, 200));
 	multiplyMatrix(translation, points);
@@ -345,8 +345,8 @@ static int testCreateTranslation(void){
 
 static int testCreateScale(void){
 	Matrix_t * points = createMatrix(),
-		* scale = createScale(3, 3, 3);
-	addRectangularPrism(points, POINT(0, 0, 0), (double[]){100, 100, 100});
+		* scale = createScale(POINT(3, 3, 3));
+	addRectangularPrism(points, POINT(0, 0, 0), POINT(100, 100, 100));
 	multiplyMatrix(scale, points);
 	freeMatrix(scale);
 	ASSERT_EQUAL(points, "testCreateScale.csv");
@@ -407,22 +407,22 @@ void unitTests(void){
 	else
 		puts("Begin unit tests.\n");
 
-	// TEST(testMultiplyScalar());
-	// TEST(testMultiplyMatrices());
-	// TEST(testEqualMatrix());
-	// TEST(testPointsFileIO());
-	// TEST(testAddPoint());
-	// TEST(testAddPolygons());
-	// TEST(testAddBezier());
-	// TEST(testAddHermite());
-	// TEST(testAddRectangularPrism());
-	TEST(testAddSphere());
+	TEST(testMultiplyScalar());
+	TEST(testMultiplyMatrices());
+	TEST(testEqualMatrix());
+	TEST(testPointsFileIO());
+	TEST(testAddPoint());
+	TEST(testAddPolygons());
+	TEST(testAddBezier());
+	TEST(testAddHermite());
+	TEST(testAddRectangularPrism());
+	// TEST(testAddSphere());
 	// TEST(testAddTorus());
-	// TEST(testCreateTranslation());
-	// TEST(testCreateScale());
-	// TEST(testCreateRotation());
-	// TEST(testAddEdge());
-	// TEST(testCreateIdentity());
+	TEST(testCreateTranslation());
+	TEST(testCreateScale());
+	TEST(testCreateRotation());
+	TEST(testAddEdge());
+	TEST(testCreateIdentity());
 
 	if(hasColors)
 		printf("\n%sUnit tests completed successfully.%s\n", TERM_COLOR_HEADER,

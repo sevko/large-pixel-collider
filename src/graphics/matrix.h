@@ -63,22 +63,17 @@
 
 /*
  * @brief Create a point with a specific w-coordinate.
-
- * @param x See ::createPoint().
- * @param y See ::createPoint().
- * @param z See ::createPoint().
- * @param w See ::createPoint().
+ *
+ * @params See ::createPoint().
 */
-#define createPoint2(x, y, z, w) (double []){x, y, z, w}
+#define POINT2(x, y, z, w) (double []){x, y, z, w}
 
 /*
  * @brief Create a point with a w-coordinate of 1.
-
- * @param x See ::createPoint().
- * @param y See ::createPoint().
- * @param z See ::createPoint().
+ *
+ * @params See ::createPoint().
 */
-#define createPoint1(x, y, z) (double []){x, y, z, 1}
+#define POINT1(x, y, z) (double []){x, y, z, 1}
 
 /*!
  *  @brief Helper macro for the overloaded ::createPoint().
@@ -110,7 +105,7 @@
  *  @code
  */
 #define POINT(...) \
-	CREATE_POINT_VA_MACRO(__VA_ARGS__, createPoint2, createPoint1)(__VA_ARGS__)
+	CREATE_POINT_VA_MACRO(__VA_ARGS__, POINT2, POINT1)(__VA_ARGS__)
 
 #define COPY_POINT(pt) (POINT(pt[X], pt[Y], pt[Z], pt[W]))
 
@@ -397,7 +392,7 @@ Matrix_t * createIdentity(void);
  *
  *  @return A @a 4x4 translaton ::Matrix_t.
  */
-Matrix_t * createTranslation(double dx, double dy, double dz);
+Matrix_t * createTranslation(Point_t *delta);
 
 /*!
  *  @brief Return a matrix used for scaling.
@@ -411,7 +406,7 @@ Matrix_t * createTranslation(double dx, double dy, double dz);
  *
  *  @return A @a 4x4 scale ::Matrix_t.
  */
-Matrix_t * createScale(double dx, double dy, double dz);
+Matrix_t * createScale(Point_t *delta);
 
 /*!
  *  @brief Return a matrix used for rotation.

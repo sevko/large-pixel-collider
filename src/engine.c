@@ -63,7 +63,8 @@ void test(){
 
 	Matrix_t * pts = createMatrix();
 	addSphere(pts, 0, 0, 20);
-	multiplyMatrix(createScale(10, 10, 10), pts);
+	addTorus(pts, 0, 0, 50, 120);
+	// multiplyMatrix(createScale(POINT(10, 10, 10)), pts);
 	Matrix_t * rotX = createRotation(X, 1),
 		* rotY = createRotation(Y, 1),
 		* rotZ = createRotation(Z, 1);

@@ -98,8 +98,7 @@ static double dotProduct(const Matrix_t * const m1, int row,
  *  @return 1 if the triangle specified by the three vertices is visible to
  *      the camera; 0 otherwise.
  */
-static int backfaceCull(double x1, double y1, double z1, double x2, double y2,
-	double z2, double x3, double y3, double z3);
+static int backfaceCull(Point_t *p1, Point_t *p2, Point_t *p3);
 
 Matrix_t * createMatrix(void){
 	Matrix_t * const matrix = malloc(sizeof(Matrix_t));
@@ -351,7 +350,7 @@ Matrix_t * generateSphere(double oX, double oY, double radius){
 		multiplyMatrix(xRot, sphere);
 	}
 
-	Matrix_t * translation = createTranslation(oX, oY, 0);
+	Matrix_t * translation = createTranslation(POINT(oX, oY, 0));
 	multiplyMatrix(translation, sphere);
 
 	freeMatrices(2, xRot, translation);
@@ -368,7 +367,7 @@ Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2){
 		multiplyMatrix(yRot, torus);
 	}
 
-	Matrix_t * translation = createTranslation(oX, oY, 0);
+	Matrix_t * translation = createTranslation(POINT(oX, oY, 0));
 	multiplyMatrix(translation, torus);
 
 	freeMatrices(2, yRot, translation);
@@ -380,6 +379,9 @@ void drawMatrix(const Matrix_t * const matrix){
 	int colors[] = {0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF};
 	int ptPair;
 	for(ptPair = 0; ptPair < matrix->numPoints - 2; ptPair += 3){
+		Point_t *p1 = matrix->points[ptPair],
+			*p2 = matrix->points[ptPair + 1],
+			*p3 = matrix->points[ptPair + 2];
 		double x1 = matrix->points[ptPair][X],
 			y1 = matrix->points[ptPair][Y],
 			z1 = matrix->points[ptPair][Z],
@@ -390,7 +392,7 @@ void drawMatrix(const Matrix_t * const matrix){
 			y3 = matrix->points[ptPair + 2][Y],
 			z3 = matrix->points[ptPair + 2][Z];
 		color++;
-		if(backfaceCull(x1, y1, z1, x2, y2, z2, x3, y3, z3))
+		if(backfaceCull(p1, p2, p3))
 			scanlineRender(x1, y1, x2, y2, x3, y3, colors[color % 5]);
 	}
 }
@@ -452,19 +454,19 @@ Matrix_t * createIdentity(void){
 	return identity;
 }
 
-Matrix_t * createTranslation(double dx, double dy, double dz){
+Matrix_t * createTranslation(Point_t *delta){
 	Matrix_t * translation = createIdentity();
-	translation->points[W][X] = dx;
-	translation->points[W][Y] = dy;
-	translation->points[W][Z] = dz;
+	translation->points[W][X] = delta[X];
+	translation->points[W][Y] = delta[Y];
+	translation->points[W][Z] = delta[Z];
 	return translation;
 }
 
-Matrix_t * createScale(double dx, double dy, double dz){
+Matrix_t * createScale(Point_t *delta){
 	Matrix_t * scale = createMatrix();
-	addPoint(scale, POINT(dx, 0, 0, 0));
-	addPoint(scale, POINT(0, dy, 0, 0));
-	addPoint(scale, POINT(0, 0, dz, 0));
+	addPoint(scale, POINT(delta[X], 0, 0, 0));
+	addPoint(scale, POINT(0, delta[Y], 0, 0));
+	addPoint(scale, POINT(0, 0, delta[Z], 0));
 	addPoint(scale, POINT(0, 0, 0, 1));
 	return scale;
 }
@@ -617,19 +619,13 @@ static double dotProduct(const Matrix_t * const m1, int row,
 		m1->points[3][row] * m2->points[col][W];
 }
 
-static int backfaceCull(double x1, double y1, double z1, double x2, double y2,
-	double z2, double x3, double y3, double z3){
-	double uX = x2 - x1;
-	double uY = y2 - y1;
-	double uZ = z2 - z1;
+static int backfaceCull(Point_t *p1, Point_t *p2, Point_t *p3){
+	Point_t * u = POINT(p2[X] - p1[X], p2[Y] - p1[Y], p2[Z] - p1[Z]);
+	Point_t * v = POINT(p3[X] - p1[X], p3[Y] - p1[Y], p3[Z] - p1[Z]);
 
-	double vX = x3 - x1;
-	double vY = y3 - y1;
-	double vZ = z3 - z1;
-
-	double normalX = (uY * vZ) - (uZ * vY);
-	double normalY = (uZ * vX) - (uX * vZ);
-	double normalZ = (uX * vY) - (uY * vX);
+	double normalX = (u[Y] * v[Z]) - (u[Z] * v[Y]);
+	double normalY = (u[Z] * v[X]) - (u[X] * v[Z]);
+	double normalZ = (u[X] * v[Y]) - (u[Y] * v[X]);
 
 	int dotProduct = normalX * 0 + normalY * 0 + normalZ * -1;
 	return dotProduct < 0;
