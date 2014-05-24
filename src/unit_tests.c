@@ -224,7 +224,7 @@ static int testAddHermite(void){
 
 static int testAddRectangularPrism(void){
 	Matrix_t * points = createMatrix();
-	addRectangularPrism(points, 0, 0, 0, 100, 200, 300);
+	addRectangularPrism(points, POINT(0, 0, 0), (double[]){100, 200, 300});
 	ASSERT_EQUAL(points, "testAddRectangularPrism.csv");
 }
 
@@ -346,7 +346,7 @@ static int testCreateTranslation(void){
 static int testCreateScale(void){
 	Matrix_t * points = createMatrix(),
 		* scale = createScale(3, 3, 3);
-	addRectangularPrism(points, 0, 0, 0, 100, 100, 100);
+	addRectangularPrism(points, POINT(0, 0, 0), (double[]){100, 100, 100});
 	multiplyMatrix(scale, points);
 	freeMatrix(scale);
 	ASSERT_EQUAL(points, "testCreateScale.csv");
@@ -357,7 +357,7 @@ static int testCreateRotation(void){
 		* rotX = createRotation(X_AXIS, 270),
 		* rotY = createRotation(Y_AXIS, 30),
 		* rotZ = createRotation(Z_AXIS, 45);
-	addRectangularPrism(points, 0, 0, 0, 20, 100, 300);
+	addRectangularPrism(points, POINT(0, 0, 0), (double[]){20, 100, 300});
 	multiplyMatrices(4, rotX, rotY, rotZ, points);
 	freeMatrices(3, rotX, rotY, rotZ);
 	ASSERT_EQUAL(points, "testCreateRotation.csv");
@@ -407,15 +407,15 @@ void unitTests(void){
 	else
 		puts("Begin unit tests.\n");
 
-	TEST(testMultiplyScalar());
-	TEST(testMultiplyMatrices());
-	TEST(testEqualMatrix());
-	TEST(testPointsFileIO());
-	TEST(testAddPoint());
-	TEST(testAddPolygons());
-	TEST(testAddBezier());
-	TEST(testAddHermite());
-	TEST(testAddRectangularPrism());
+	// TEST(testMultiplyScalar());
+	// TEST(testMultiplyMatrices());
+	// TEST(testEqualMatrix());
+	// TEST(testPointsFileIO());
+	// TEST(testAddPoint());
+	// TEST(testAddPolygons());
+	// TEST(testAddBezier());
+	// TEST(testAddHermite());
+	// TEST(testAddRectangularPrism());
 	TEST(testAddSphere());
 	// TEST(testAddTorus());
 	// TEST(testCreateTranslation());

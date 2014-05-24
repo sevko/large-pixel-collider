@@ -108,8 +108,9 @@ void evaluateMDLScript(){
 
 			if(opCode == BOX){
 				struct symBox * box = &(cmd->op.box);
-				addRectangularPrism(points, box->d0[0], box->d0[1], box->d0[2],
-					box->d1[0], box->d1[1], box->d1[2]);
+				addRectangularPrism(points,
+					POINT(box->d0[0], box->d0[1], box->d0[2]),
+					POINT(box->d1[0], box->d1[1], box->d1[2]));
 				multiplyMatrix(peek(coordStack), points);
 				drawMatrix(points);
 				CLEAR(points);

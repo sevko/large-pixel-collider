@@ -69,7 +69,7 @@
  * @param z See ::createPoint().
  * @param w See ::createPoint().
 */
-#define createPoint2(x, y, z, w) createPoint(x, y, z, w)
+#define createPoint2(x, y, z, w) (double []){x, y, z, w}
 
 /*
  * @brief Create a point with a w-coordinate of 1.
@@ -78,7 +78,7 @@
  * @param y See ::createPoint().
  * @param z See ::createPoint().
 */
-#define createPoint1(x, y, z) createPoint(x, y, z, 1)
+#define createPoint1(x, y, z) (double []){x, y, z, 1}
 
 /*!
  *  @brief Helper macro for the overloaded ::createPoint().
@@ -191,7 +191,7 @@ void freeMatrixFromVoid(void * matrix);
  *
  * @return A pointer to the new ::Point_t.
 */
-Point_t * (createPoint)(double x, double y, double z, double w);
+Point_t * createPoint(Point_t * pt);
 
 /*!
  *  @brief Add a point to a ::Matrix_t.
@@ -201,7 +201,7 @@ Point_t * (createPoint)(double x, double y, double z, double w);
  *  @param y The double y-coordinate of the point.
  *  @param z The double z-coordinate of the point.
  */
-void (addPoint)(Matrix_t * const matrix, Point_t * point);
+void addPoint(Matrix_t * const matrix, Point_t * point);
 
 /*!
  *  @brief Add a line's endpoints to a ::Matrix_t.
@@ -294,8 +294,7 @@ void addHermite(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
  *  @param height The height (y-axis) of the rectangle.
  *  @param depth The depth (z-axis) of the rectangle.
  */
-void addRectangularPrism(Matrix_t * points, double x, double y, double z,
-	double width, double height, double depth);
+void addRectangularPrism(Matrix_t *pts, Point_t *p1, Point_t *p2);
 
 /*!
  *  @brief Add the points of a sphere to a ::Matrix_t.
