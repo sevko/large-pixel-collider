@@ -66,14 +66,21 @@
  *
  * @params See ::createPoint().
 */
-#define POINT2(x, y, z, w) (double []){x, y, z, w}
+#define POINT4(x, y, z, w) ((double []){x, y, z, w})
 
 /*
  * @brief Create a point with a w-coordinate of 1.
  *
  * @params See ::createPoint().
 */
-#define POINT1(x, y, z) (double []){x, y, z, 1}
+#define POINT3(x, y, z) ((double []){x, y, z, 1})
+
+/*
+ * @brief Create a point with no z or w coordinate.
+ *
+ * @params See ::createPoint().
+*/
+#define POINT2(x, y) ((double []){x, y, 0, 1})
 
 /*!
  *  @brief Helper macro for the overloaded ::createPoint().
@@ -105,7 +112,7 @@
  *  @code
  */
 #define POINT(...) \
-	CREATE_POINT_VA_MACRO(__VA_ARGS__, POINT2, POINT1)(__VA_ARGS__)
+	CREATE_POINT_VA_MACRO(__VA_ARGS__, POINT4, POINT3, POINT2)(__VA_ARGS__)
 
 #define COPY_POINT(pt) (POINT(pt[X], pt[Y], pt[Z], pt[W]))
 

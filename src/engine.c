@@ -63,8 +63,8 @@ void test(){
 
 	Matrix_t * pts = createMatrix();
 	addSphere(pts, 0, 0, 20);
-	addTorus(pts, 0, 0, 50, 120);
-	// multiplyMatrix(createScale(POINT(10, 10, 10)), pts);
+	// addTorus(pts, 0, 0, 50, 120);
+	multiplyMatrix(createScale(POINT(10, 10, 10)), pts);
 	Matrix_t * rotX = createRotation(X, 1),
 		* rotY = createRotation(Y, 1),
 		* rotZ = createRotation(Z, 1);
@@ -74,7 +74,7 @@ void test(){
 		multiplyMatrices(4, rotX, rotY, rotZ, pts);
 		drawMatrix(pts);
 		renderScreen();
-		usleep(1e6 / 50);
+		usleep(1e6 / 100);
 	}
 
 	// int degree;

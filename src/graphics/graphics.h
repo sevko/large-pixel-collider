@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "src/graphics/matrix.h"
+
 /*
  * @brief Draw a line with the default color.
  *
@@ -17,7 +19,7 @@
  * @param x2 See ::drawPixel().
  * @param y2 See ::drawPixel().
 */
-#define drawLine1(x1, y1, x2, y2) drawLine(x1, y1, x2, y2, TEST_COLOR)
+#define drawLine1(x1, y1) drawLine(x1, y1, TEST_COLOR)
 
 /*
  * @brief Draw a line with a specific color.
@@ -28,7 +30,7 @@
  * @param y2 See ::drawPixel().
  * @param color See ::drawPixel().
 */
-#define drawLine2(x1, y1, x2, y2, color) drawLine(x1, y1, x2, y2, color)
+#define drawLine2(x1, y1, color) drawLine(x1, y1, color)
 
 /*!
  *  @brief Helper macro for the overloaded drawLine().
@@ -44,7 +46,7 @@
  *  @param func_name The macro to replace drawLine() with.
  *  @param ... Any subsequent arguments.
  */
-#define DRAW_LINE_VA_MACRO(arg1, arg2, arg3, arg4, arg5, func_name, ...) \
+#define DRAW_LINE_VA_MACRO(arg1, arg2, arg3, func_name, ...) \
 	func_name
 
 /*!
@@ -74,7 +76,7 @@
  *  @param y2 The y-coordinate of the second endpoint.
  *  @param color The color of the line.
  */
-void (drawLine)(int x1, int y1, int x2, int y2, int color);
+void (drawLine)(Point_t *p1, Point_t *p2, int color);
 
 /*
  * @brief Fill a triangle using scanline-rendering.

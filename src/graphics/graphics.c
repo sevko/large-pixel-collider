@@ -11,8 +11,8 @@
  */
 #define ABS(val) (val > 0?val:-val)
 
-void drawLine(int x1, int y1, int x2, int y2, int color){
-	int width = x2 - x1, height = y2 - y1;
+void (drawLine)(Point_t *p1, Point_t *p2, int color){
+	int width = p2[X] - p1[X], height = p2[Y] - p1[Y];
 	int dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0;
 
 	if(width < 0)
@@ -43,16 +43,16 @@ void drawLine(int x1, int y1, int x2, int y2, int color){
 
 	unsigned int numerator = longDist >> 1, pixel;
 	for(pixel = 0; pixel <= longDist; pixel++){
-		drawPixel(x1, y1, color);
+		drawPixel(p1[X], p1[Y], color);
 		numerator += shortDist;
 		if(numerator >= longDist){
 			numerator -= longDist;
-			x1 += dx1;
-			y1 += dy1;
+			p1[X] += dx1;
+			p1[Y] += dy1;
 		}
 		else {
-			x1 += dx2;
-			y1 += dy2;
+			p1[X] += dx2;
+			p1[Y] += dy2;
 		}
 	}
 }
@@ -88,7 +88,7 @@ void scanlineRender(double x1, double y1, double x2, double y2, double x3,
 		mainY = pts[5];
 
 	while(pts[5] < pts[3]){
-		drawLine(pts[4], pts[5], mainX, mainY, color);
+		(drawLine)(POINT(pts[4], pts[5]), POINT(mainX, mainY), color);
 
 		pts[4] += m1;
 		pts[5]++;
@@ -98,8 +98,7 @@ void scanlineRender(double x1, double y1, double x2, double y2, double x3,
 	}
 
 	while(pts[3] < pts[1]){
-		drawLine(pts[2], pts[3], mainX, mainY, color);
-
+		drawLine(POINT(pts[2], pts[3]), POINT(mainX, mainY), color);
 		pts[2] += m2;
 		pts[3]++;
 

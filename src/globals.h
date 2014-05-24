@@ -21,7 +21,6 @@
 //! The default color for pixels.
 #define TEST_COLOR 0x00FF0000
 
-
 /*!
  *  @brief Printf-style function macro with helpful debugging information.
  *

@@ -384,13 +384,10 @@ void drawMatrix(const Matrix_t * const matrix){
 			*p3 = matrix->points[ptPair + 2];
 		double x1 = matrix->points[ptPair][X],
 			y1 = matrix->points[ptPair][Y],
-			z1 = matrix->points[ptPair][Z],
 			x2 = matrix->points[ptPair + 1][X],
 			y2 = matrix->points[ptPair + 1][Y],
-			z2 = matrix->points[ptPair + 1][Z],
 			x3 = matrix->points[ptPair + 2][X],
-			y3 = matrix->points[ptPair + 2][Y],
-			z3 = matrix->points[ptPair + 2][Z];
+			y3 = matrix->points[ptPair + 2][Y];
 		color++;
 		if(backfaceCull(p1, p2, p3))
 			scanlineRender(x1, y1, x2, y2, x3, y3, colors[color % 5]);
@@ -399,9 +396,9 @@ void drawMatrix(const Matrix_t * const matrix){
 
 void drawMatrixLines(const Matrix_t * const matrix){
 	int ptPair;
-	for(ptPair = 0; ptPair < matrix->numPoints - 1; ptPair += 2)
-		drawLine(matrix->points[ptPair][X], matrix->points[ptPair][Y],
-			matrix->points[ptPair + 1][X], matrix->points[ptPair + 1][Y]);
+	for(ptPair = 0; ptPair < matrix->numPoints - 1; ptPair += 2);
+		// drawLine(POINT(matrix->points[ptPair][X], matrix->points[ptPair][Y]),
+			// POINT(matrix->points[ptPair + 1][X], matrix->points[ptPair + 1][Y]));
 }
 
 void multiplyScalar(double scalar, Matrix_t * const matrix){
@@ -605,10 +602,6 @@ static void expandMatrix(Matrix_t * const matrix){
 	matrix->numPoints++;
 	matrix->points = realloc(matrix->points,
 		matrix->numPoints * sizeof(Point_t *));
-	// int varPtr;
-	// for(varPtr = 0; varPtr < 4; varPtr++)
-		// matrix->points[varPtr] = realloc(matrix->points[varPtr],
-			// sizeof(double) * matrix->numPoints);
 }
 
 static double dotProduct(const Matrix_t * const m1, int row,

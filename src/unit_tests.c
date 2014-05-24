@@ -416,8 +416,8 @@ void unitTests(void){
 	TEST(testAddBezier());
 	TEST(testAddHermite());
 	TEST(testAddRectangularPrism());
-	// TEST(testAddSphere());
-	// TEST(testAddTorus());
+	TEST(testAddSphere());
+	TEST(testAddTorus());
 	TEST(testCreateTranslation());
 	TEST(testCreateScale());
 	TEST(testCreateRotation());
