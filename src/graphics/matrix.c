@@ -132,7 +132,7 @@ void freeMatrixFromVoid(void * matrix){
 	freeMatrix((Matrix_t *)matrix);
 }
 
-Point_t * (createPoint)(double x, double y, double z, double w){
+Point_t * createPoint(double x, double y, double z, double w){
 	Point_t * point = malloc(4 * sizeof(double));
 	point[X] = x;
 	point[Y] = y;
@@ -146,18 +146,17 @@ void addPoint(Matrix_t * const matrix, Point_t * point){
 	matrix->points[matrix->numPoints - 1] = point;
 }
 
-void addEdge(Matrix_t * const matrix, double x1, double y1, double z1,
-	double x2, double y2, double z2){
-	addPoint(matrix, createPoint(x1, y1 + 0.1, z1));
-	addPoint(matrix, createPoint(x1, y1, z1));
-	addPoint(matrix, createPoint(x2, y2, z2));
+void addEdge(Matrix_t * const matrix, Point_t * p1, Point_t * p2){
+	addPoint(matrix, POINT(p1[X] + 0.1, p1[Y], p1[Z]));
+	addPoint(matrix, p1);
+	addPoint(matrix, p2);
 }
 
-void addTriangle(Matrix_t * const matrix,  double x1, double y1, double z1,
-	double x2, double y2, double z2, double x3, double y3, double z3){
-	addPoint(matrix, createPoint(x1, y1, z1));
-	addPoint(matrix, createPoint(x2, y2, z2));
-	addPoint(matrix, createPoint(x3, y3, z3));
+void addTriangle(Matrix_t * const matrix, Point_t * p1, Point_t * p2,
+	Point_t * p3){
+	addPoint(matrix, p1);
+	addPoint(matrix, p2);
+	addPoint(matrix, p3);
 }
 
 void addPolygonFull(Matrix_t * points, int oX, int oY, int radius, int
@@ -167,12 +166,12 @@ void addPolygonFull(Matrix_t * points, int oX, int oY, int radius, int
 
 	int segment;
 	for(segment = 0; segment < numSides; segment++){
-		addPoint(points, createPoint(x + oX, y + oY, 0));
+		addPoint(points, POINT(x + oX, y + oY, 0));
 		float tempX = x;
 		x = (x - y * tanFactor) * radFactor;
 		y = (y + tempX * tanFactor) * radFactor;
 	}
-	addPoint(points, createPoint(x + oX, y + oY, 0));
+	addPoint(points, POINT(x + oX, y + oY, 0));
 }
 
 void addBezier(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
@@ -194,7 +193,7 @@ void addBezier(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 		bccdY = INTERPOL(bcY, cdY);
 		abbcY = INTERPOL(abY, bcY);
 
-		addPoint(points, createPoint(INTERPOL(abbcX, bccdX), INTERPOL(abbcY, bccdY), 0));
+		addPoint(points, POINT(INTERPOL(abbcX, bccdX), INTERPOL(abbcY, bccdY), 0));
 	}
 }
 
@@ -228,11 +227,11 @@ void addHermite(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 
 		x = aX * t3 + bX * t2 + cX * t1 + dX;
 		y = aY * t3 + bY * t2 + cY * t1 + dY;
-		addPoint(points, createPoint(x, y, 0));
+		addPoint(points, POINT(x, y, 0));
 	}
 }
 
-void addRectangularPrism(Matrix_t * points, double x, double y, double z,
+void addRectangularPrism(Matrix_t * pts, double x, double y, double z,
 	double width, double height, double depth){
 
 	// front, top-left
@@ -276,28 +275,28 @@ void addRectangularPrism(Matrix_t * points, double x, double y, double z,
 	double hZ = dZ - depth;
 
 	// front xz face
-	addTriangle(points, aX, aY, aZ, bX, bY, bZ, cX, cY, cZ);
-	addTriangle(points, aX, aY, aZ, cX, cY, cZ, dX, dY, dZ);
+	addTriangle(pts, POINT(aX, aY, aZ), POINT(bX, bY, bZ), POINT(cX, cY, cZ));
+	addTriangle(pts, POINT(aX, aY, aZ), POINT(cX, cY, cZ), POINT(dX, dY, dZ));
 
 	// back xz face
-	addTriangle(points, fX, fY, fZ, eX, eY, eZ, hX, hY, hZ);
-	addTriangle(points, fX, fY, fZ, hX, hY, hZ, gX, gY, gZ);
+	addTriangle(pts, POINT(fX, fY, fZ), POINT(eX, eY, eZ), POINT(hX, hY, hZ));
+	addTriangle(pts, POINT(fX, fY, fZ), POINT(hX, hY, hZ), POINT(gX, gY, gZ));
 
 	// top xy face
-	addTriangle(points, eX, eY, eZ, aX, aY, aZ, dX, dY, dZ);
-	addTriangle(points, eX, eY, eZ, dX, dY, dZ, hX, hY, hZ);
+	addTriangle(pts, POINT(eX, eY, eZ), POINT(aX, aY, aZ), POINT(dX, dY, dZ));
+	addTriangle(pts, POINT(eX, eY, eZ), POINT(dX, dY, dZ), POINT(hX, hY, hZ));
 
 	// bottom xy face
-	addTriangle(points, bX, bY, bZ, fX, fY, fZ, gX, gY, gZ);
-	addTriangle(points, bX, bY, bZ, gX, gY, gZ, cX, cY, cZ);
+	addTriangle(pts, POINT(bX, bY, bZ), POINT(fX, fY, fZ), POINT(gX, gY, gZ));
+	addTriangle(pts, POINT(bX, bY, bZ), POINT(gX, gY, gZ), POINT(cX, cY, cZ));
 
 	// left yz face
-	addTriangle(points, eX, eY, eZ, fX, fY, fZ, bX, bY, bZ);
-	addTriangle(points, eX, eY, eZ, bX, bY, bZ, aX, aY, aZ);
+	addTriangle(pts, POINT(eX, eY, eZ), POINT(fX, fY, fZ), POINT(bX, bY, bZ));
+	addTriangle(pts, POINT(eX, eY, eZ), POINT(bX, bY, bZ), POINT(aX, aY, aZ));
 
 	// right yz face
-	addTriangle(points, dX, dY, dZ, cX, cY, cZ, gX, gY, gZ);
-	addTriangle(points, dX, dY, dZ, gX, gY, gZ, hX, hY, hZ);
+	addTriangle(pts, POINT(dX, dY, dZ), POINT(cX, cY, cZ), POINT(gX, gY, gZ));
+	addTriangle(pts, POINT(dX, dY, dZ), POINT(gX, gY, gZ), POINT(hX, hY, hZ));
 }
 
 void addSphere(Matrix_t * points, double oX, double oY, double radius){
@@ -309,26 +308,14 @@ void addSphere(Matrix_t * points, double oX, double oY, double radius){
 		int circleStart = circle * circlePts;
 		for(point = 0; point < circlePts - 1; point++){
 			addTriangle(points,
-				sphere->points[circleStart + point + 1][X],
-				sphere->points[circleStart + point + 1][Y],
-				sphere->points[circleStart + point + 1][Z],
-				sphere->points[circleStart + point][X],
-				sphere->points[circleStart + point][Y],
-				sphere->points[circleStart + point][Z],
-				sphere->points[circleStart + circlePts + point + 1][X],
-				sphere->points[circleStart + circlePts + point + 1][Y],
-				sphere->points[circleStart + circlePts + point + 1][Z]
+				COPY_POINT(sphere->points[circleStart + point + 1]),
+				COPY_POINT(sphere->points[circleStart + point]),
+				COPY_POINT(sphere->points[circleStart + circlePts + point + 1])
 			);
 			addTriangle(points,
-				sphere->points[circleStart + point][X],
-				sphere->points[circleStart + point][Y],
-				sphere->points[circleStart + point][Z],
-				sphere->points[circleStart + circlePts + point][X],
-				sphere->points[circleStart + circlePts + point][Y],
-				sphere->points[circleStart + circlePts + point][Z],
-				sphere->points[circleStart + circlePts + point + 1][X],
-				sphere->points[circleStart + circlePts + point + 1][Y],
-				sphere->points[circleStart + circlePts + point + 1][Z]
+				COPY_POINT(sphere->points[circleStart + point]),
+				COPY_POINT(sphere->points[circleStart + circlePts + point]),
+				COPY_POINT(sphere->points[circleStart + circlePts + point + 1])
 			);
 		}
 	}
@@ -336,26 +323,14 @@ void addSphere(Matrix_t * points, double oX, double oY, double radius){
 	for(point = sphere->numPoints - circlePts; point < sphere->numPoints - 1;
 		point++){
 		addTriangle(points,
-			sphere->points[point + 1][X],
-			sphere->points[point + 1][Y],
-			sphere->points[point + 1][Z],
-			sphere->points[point][X],
-			sphere->points[point][Y],
-			sphere->points[point][Z],
-			sphere->points[(point + 1) % circlePts][X],
-			sphere->points[(point + 1) % circlePts][Y],
-			sphere->points[(point + 1) % circlePts][Z]
+			COPY_POINT(sphere->points[point + 1]),
+			COPY_POINT(sphere->points[point]),
+			COPY_POINT(sphere->points[(point + 1) % circlePts])
 		);
 		addTriangle(points,
-			sphere->points[(point + 1) % circlePts][X],
-			sphere->points[(point + 1) % circlePts][Y],
-			sphere->points[(point + 1) % circlePts][Z],
-			sphere->points[point][X],
-			sphere->points[point][Y],
-			sphere->points[point][Z],
-			sphere->points[point % circlePts][X],
-			sphere->points[point % circlePts][Y],
-			sphere->points[point % circlePts][Z]
+			COPY_POINT(sphere->points[(point + 1) % circlePts]),
+			COPY_POINT(sphere->points[point]),
+			COPY_POINT(sphere->points[point % circlePts])
 		);
 	}
 
@@ -372,52 +347,28 @@ void addTorus(Matrix_t * points, double oX, double oY, double rad1,
 		int circleStart = circle * circlePts;
 		for(point = 0; point < circlePts - 1; point++)
 			addTriangle(points,
-				torus->points[circleStart + point + 1][X],
-				torus->points[circleStart + point + 1][Y],
-				torus->points[circleStart + point + 1][Z],
-				torus->points[circleStart + point][X],
-				torus->points[circleStart + point][Y],
-				torus->points[circleStart + point][Z],
-				torus->points[circleStart + circlePts + point + 1][X],
-				torus->points[circleStart + circlePts + point + 1][Y],
-				torus->points[circleStart + circlePts + point + 1][Z]
+				torus->points[circleStart + point + 1],
+				torus->points[circleStart + point],
+				torus->points[circleStart + circlePts + point + 1]
 			);
 		addTriangle(points,
-			torus->points[circleStart][X],
-			torus->points[circleStart][Y],
-			torus->points[circleStart][Z],
-			torus->points[circleStart + point][X],
-			torus->points[circleStart + point][Y],
-			torus->points[circleStart + point][Z],
-			torus->points[circleStart + point + 1][X],
-			torus->points[circleStart + point + 1][Y],
-			torus->points[circleStart + point + 1][Z]
+			torus->points[circleStart],
+			torus->points[circleStart + point],
+			torus->points[circleStart + point + 1]
 		);
 	}
 
 	int circleStart = torus->numPoints - circlePts;
 	for(point = 0; point < circlePts - 1; point++)
 		addTriangle(points,
-			torus->points[circleStart + point + 1][X],
-			torus->points[circleStart + point + 1][Y],
-			torus->points[circleStart + point + 1][Z],
-			torus->points[circleStart + point][X],
-			torus->points[circleStart + point][Y],
-			torus->points[circleStart + point][Z],
-			torus->points[point + 1][X],
-			torus->points[point + 1][Y],
-			torus->points[point + 1][Z]
+			torus->points[circleStart + point + 1],
+			torus->points[circleStart + point],
+			torus->points[point + 1]
 		);
 	addTriangle(points,
-		torus->points[circleStart][X],
-		torus->points[circleStart][Y],
-		torus->points[circleStart][Z],
-		torus->points[circleStart + point][X],
-		torus->points[circleStart + point][Y],
-		torus->points[circleStart + point][Z],
-		torus->points[0][X],
-		torus->points[0][Y],
-		torus->points[0][Z]
+		torus->points[circleStart],
+		torus->points[circleStart + point],
+		torus->points[0]
 	);
 
 	freeMatrix(torus);
@@ -527,10 +478,10 @@ void multiplyMatrix(Matrix_t * const m1, Matrix_t * const m2){
 
 Matrix_t * createIdentity(void){
 	Matrix_t * identity = createMatrix();
-	addPoint(identity, createPoint(1, 0, 0, 0));
-	addPoint(identity, createPoint(0, 1, 0, 0));
-	addPoint(identity, createPoint(0, 0, 1, 0));
-	addPoint(identity, createPoint(0, 0, 0, 1));
+	addPoint(identity, POINT(1, 0, 0, 0));
+	addPoint(identity, POINT(0, 1, 0, 0));
+	addPoint(identity, POINT(0, 0, 1, 0));
+	addPoint(identity, POINT(0, 0, 0, 1));
 	return identity;
 }
 
@@ -544,10 +495,10 @@ Matrix_t * createTranslation(double dx, double dy, double dz){
 
 Matrix_t * createScale(double dx, double dy, double dz){
 	Matrix_t * scale = createMatrix();
-	addPoint(scale, createPoint(dx, 0, 0, 0));
-	addPoint(scale, createPoint(0, dy, 0, 0));
-	addPoint(scale, createPoint(0, 0, dz, 0));
-	addPoint(scale, createPoint(0, 0, 0, 1));
+	addPoint(scale, POINT(dx, 0, 0, 0));
+	addPoint(scale, POINT(0, dy, 0, 0));
+	addPoint(scale, POINT(0, 0, dz, 0));
+	addPoint(scale, POINT(0, 0, 0, 1));
 	return scale;
 }
 
@@ -557,24 +508,24 @@ Matrix_t * createRotation(int axis, double angle){
 	double radAngle = angle * RAD;
 	double sinA = sin(radAngle), cosA = cos(radAngle);
 	if(axis == X_AXIS){
-		addPoint(rotation, createPoint(1, 0, 0, 0));
-		addPoint(rotation, createPoint(0, cosA, sinA, 0));
-		addPoint(rotation, createPoint(0, -sinA, cosA, 0));
+		addPoint(rotation, POINT(1, 0, 0, 0));
+		addPoint(rotation, POINT(0, cosA, sinA, 0));
+		addPoint(rotation, POINT(0, -sinA, cosA, 0));
 	}
 
 	else if(axis == Y_AXIS){
-		addPoint(rotation, createPoint(cosA, 0, sinA, 0));
-		addPoint(rotation, createPoint(0, 1, 0, 0));
-		addPoint(rotation, createPoint(-sinA, 0, cosA, 0));
+		addPoint(rotation, POINT(cosA, 0, sinA, 0));
+		addPoint(rotation, POINT(0, 1, 0, 0));
+		addPoint(rotation, POINT(-sinA, 0, cosA, 0));
 	}
 
 	else if(axis == Z_AXIS){
-		addPoint(rotation, createPoint(cosA, sinA, 0, 0));
-		addPoint(rotation, createPoint(-sinA, cosA, 0, 0));
-		addPoint(rotation, createPoint(0, 0, 1, 0));
+		addPoint(rotation, POINT(cosA, sinA, 0, 0));
+		addPoint(rotation, POINT(-sinA, cosA, 0, 0));
+		addPoint(rotation, POINT(0, 0, 1, 0));
 	}
 
-	addPoint(rotation, createPoint(0, 0, 0, 1));
+	addPoint(rotation, POINT(0, 0, 0, 1));
 	return rotation;
 }
 
@@ -620,7 +571,7 @@ Matrix_t * copyMatrix(const Matrix_t * const matrix){
 
 	int point;
 	for(point = 0; point < matrix->numPoints; point++)
-		addPoint(copyMatrix, createPoint(matrix->points[point][X],
+		addPoint(copyMatrix, POINT(matrix->points[point][X],
 			matrix->points[point][Y], matrix->points[point][Z],
 			matrix->points[point][W]));
 
@@ -651,7 +602,7 @@ Matrix_t * readPointsFromFile(char * filename){
 		int x, y, z;
 		if(fscanf(file, "%d,%d,%d,", &x, &y, &z) < 3)
 			FATAL("Reading %s. Failed to read point #%d.", fullFilename, point);
-		addPoint(points, createPoint(x, y, z));
+		addPoint(points, POINT(x, y, z));
 	}
 
 	fclose(file);

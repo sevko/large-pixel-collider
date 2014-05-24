@@ -97,7 +97,7 @@
 	func_name
 
 /*!
- *  @brief Overloaded :;createPoint(), which allows an optional color argument.
+ *  @brief Overloaded ::createPoint(), which allows an optional color argument.
  *
  *  Uses ::CREATE_POINT_VA_MACRO() to select an appropriate macro
  *  (::createPoint1() or ::createPoint2) for the number of arguments (3, or 4
@@ -109,8 +109,10 @@
  *      createPoint(10, 20, 30, 40);
  *  @code
  */
-#define createPoint(...) \
+#define POINT(...) \
 	CREATE_POINT_VA_MACRO(__VA_ARGS__, createPoint2, createPoint1)(__VA_ARGS__)
+
+#define COPY_POINT(pt) (POINT(pt[X], pt[Y], pt[Z], pt[W]))
 
 //! @brief Macro for the x-axis -- used as an argument to createRotation().
 #define X_AXIS 0
@@ -215,8 +217,7 @@ void (addPoint)(Matrix_t * const matrix, Point_t * point);
  *  @deprecated Deprecated since the introduction of polygonal rendering, which
  *      requires that points be added to a ::Matrix_t with addTriangle().
  */
-void addEdge(Matrix_t * const matrix, double x1, double y1, double z1,
-	double x2, double y2, double z2);
+void addEdge(Matrix_t * const matrix, Point_t * p1, Point_t * p2);
 
 /*!
  *  @brief Add a triangle's three vertices to a ::Matrix_t.
@@ -232,8 +233,8 @@ void addEdge(Matrix_t * const matrix, double x1, double y1, double z1,
  *  @param y3 The double y-coordinate of the third vertex.
  *  @param z3 The double z-coordinate of the third vertex.
  */
-void addTriangle(Matrix_t * const matrix,  double x1, double y1, double z1,
-	double x2, double y2, double z2, double x3, double y3, double z3);
+void addTriangle(Matrix_t * const matrix, Point_t * p1, Point_t * p2,
+	Point_t * p3);
 
 /*!
  *  @brief Add the vertices of a polygon to a ::Matrix_t.
@@ -310,7 +311,6 @@ void addRectangularPrism(Matrix_t * points, double x, double y, double z,
  *  @param radius The radius of the sphere.
  */
 void addSphere(Matrix_t * points, double oX, double oY, double radius);
-
 
 /*!
  *  @brief Add the points of a torus to a ::Matrix_t.

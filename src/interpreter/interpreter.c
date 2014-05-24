@@ -120,8 +120,9 @@ void evaluateMDLScript(){
 
 			else if(opCode == LINE){
 				struct symLine * line = &(cmd->op.line);
-				addEdge(points, line->p0[0], line->p0[1], line->p0[2],
-						line->p1[0], line->p1[1], line->p1[2]);
+				addEdge(points,
+					POINT(line->p0[0], line->p0[1], line->p0[2]),
+					POINT(line->p1[0], line->p1[1], line->p1[2]));
 				multiplyMatrix(peek(coordStack), points);
 				drawMatrix(points);
 				CLEAR(points);

@@ -1,6 +1,6 @@
 SCRIPT_FILE =
 PROJECT_NAME = engine
-FLAGS = -Ofast -Wall -Wextra -Wunreachable-code -I ./
+FLAGS = -Ofast -g -Wall -Wextra -Wunreachable-code -I ./
 LIBS = -lm $(shell sdl-config --libs) -lncurses
 C_COMPILER = gcc $(FLAGS)
 
