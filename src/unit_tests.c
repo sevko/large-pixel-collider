@@ -205,20 +205,22 @@ static int testAddEdge(void){
 
 static int testAddPolygons(void){
 	Matrix_t * points = createMatrix();
-	addCircle(points, 0, 0, 200);
-	addPolygon(points, 0, 0, 100, 8);
+	addCircle(points, POINT(0, 0), 200);
+	addPolygon(points, POINT(0, 0), 100, 8);
 	ASSERT_EQUAL(points, "testAddPolygons.csv");
 }
 
 static int testAddBezier(void){
 	Matrix_t * points = createMatrix();
-	addBezier(points, 200, 250, 150, 50, 300, 250, 300, 250);
+	addBezier(points, POINT(200, 250), POINT(150, 50), POINT(300, 250),
+		POINT(300, 250));
 	ASSERT_EQUAL(points, "testAddBezier.csv");
 }
 
 static int testAddHermite(void){
 	Matrix_t * points = createMatrix();
-	addHermite(points, 150, 150, 150, 50, 350, 150, 350, 300);
+	addHermite(points, POINT(150, 150), POINT(150, 50), POINT(350, 150),
+		POINT(350, 300));
 	ASSERT_EQUAL(points, "testAddHermite.csv");
 }
 

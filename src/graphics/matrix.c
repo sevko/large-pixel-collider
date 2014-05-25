@@ -158,37 +158,37 @@ void addTriangle(Matrix_t * const matrix, Point_t * p1, Point_t * p2,
 	addPoint(matrix, p3);
 }
 
-void addPolygonFull(Matrix_t * points, int oX, int oY, int radius, int
+void addPolygonFull(Matrix_t * points, Point_t *origin, int radius, int
 	numSides, double theta){
 	double tanFactor = tan(theta), radFactor = cos(theta);
 	double x = radius, y = 0;
 
 	int segment;
 	for(segment = 0; segment < numSides; segment++){
-		addPoint(points, POINT(x + oX, y + oY, 0));
+		addPoint(points, POINT(x + origin[X], y + origin[Y], 0));
 		float tempX = x;
 		x = (x - y * tanFactor) * radFactor;
 		y = (y + tempX * tanFactor) * radFactor;
 	}
-	addPoint(points, POINT(x + oX, y + oY, 0));
+	addPoint(points, POINT(x + origin[X], y + origin[Y], 0));
 }
 
-void addBezier(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
-	int y2, int x3, int y3){
+void addBezier(Matrix_t * points, Point_t *p1, Point_t *p2, Point_t *p3,
+	Point_t *p4){
 
 	int t;
 	double t1, abX, bcX, cdX, abbcX, bccdX, abY, bcY, cdY, bccdY, abbcY;
 	for(t = 0; t < CURVE_STEP_NUMBER; t++){
 		t1 = t / CURVE_STEP_NUMBER;
-		abX = INTERPOL(x0, x1);
-		bcX = INTERPOL(x1, x2);
-		cdX = INTERPOL(x2, x3);
+		abX = INTERPOL(p1[X], p2[X]);
+		bcX = INTERPOL(p2[X], p3[X]);
+		cdX = INTERPOL(p3[X], p4[X]);
 		abbcX = INTERPOL(abX, bcX);
 		bccdX = INTERPOL(bcX, cdX);
 
-		abY = INTERPOL(y0, y1);
-		bcY = INTERPOL(y1, y2);
-		cdY = INTERPOL(y2, y3);
+		abY = INTERPOL(p1[Y], p2[Y]);
+		bcY = INTERPOL(p2[Y], p3[Y]);
+		cdY = INTERPOL(p3[Y], p4[Y]);
 		bccdY = INTERPOL(bcY, cdY);
 		abbcY = INTERPOL(abY, bcY);
 
@@ -196,25 +196,25 @@ void addBezier(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
 	}
 }
 
-void addHermite(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
-	int y2, int x3, int y3){
+void addHermite(Matrix_t * points, Point_t *p1, Point_t *p2, Point_t *p3,
+	Point_t *p4){
 
 	// calculate rates of change
-	int r0X = x1 - x0, r0Y = y1 - y0;
-	int r1X = x3 - x2, r1Y = y3 - y2;
+	int r0X = p2[X] - p1[X], r0Y = p2[Y] - p1[Y];
+	int r1X = p4[X] - p3[X], r1Y = p4[Y] - p3[Y];
 
 	// calculate coefficients
-	float aX = 2 * x0 - 2 * x2 + r0X + r1X;
-	float aY = 2 * y0 - 2 * y2 + r0Y + r1Y;
+	float aX = 2 * p1[X] - 2 * p3[X] + r0X + r1X;
+	float aY = 2 * p1[Y] - 2 * p3[Y] + r0Y + r1Y;
 
-	float bX = -3 * x0 + 3 * x2 - 2 * r0X - r1X;
-	float bY = -3 * y0 + 3 * y2 - 2 * r0Y - r1Y;
+	float bX = -3 * p1[X] + 3 * p3[X] - 2 * r0X - r1X;
+	float bY = -3 * p1[Y] + 3 * p3[Y] - 2 * r0Y - r1Y;
 
 	float cX = r0X;
 	float cY = r0Y;
 
-	float dX = x0;
-	float dY = y0;
+	float dX = p1[X];
+	float dY = p1[Y];
 
 	float t1, t2, t3, x, y;
 
@@ -563,7 +563,7 @@ static Matrix_t * generateSphere(Point_t *origin, double radius){
 
 	int degree;
 	for(degree = 0; degree < 360; degree += CIRCLE_STEP_SIZE){
-		addHalfCircle(sphere, 0, 0, radius);
+		addHalfCircle(sphere, POINT(0, 0), radius);
 		multiplyMatrix(xRot, sphere);
 	}
 
@@ -580,7 +580,7 @@ static Matrix_t * generateTorus(Point_t *origin, double rad1, double rad2){
 
 	int degree;
 	for(degree = 0; degree < 360; degree += CIRCLE_STEP_SIZE){
-		addCircle(torus, rad2, 0, rad1);
+		addCircle(torus, POINT(rad2, 0), rad1);
 		multiplyMatrix(yRot, torus);
 	}
 

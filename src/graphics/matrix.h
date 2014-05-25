@@ -29,8 +29,8 @@
  *  @param oY (double) The y-coordinate of the circle's origin.
  *  @param radius (double) The radius of the circle.
  */
-#define addCircle(points, oX, oY, radius) \
-	addPolygon(points, oX, oY, radius, (radius / 2));
+#define addCircle(points, origin, radius) \
+	addPolygon(points, origin, radius, (radius / 2));
 
 /*!
  *  @brief Add a half circle to a ::Matrix_t.
@@ -44,10 +44,10 @@
  *  @param oY (double) The y-coordinate of the half-circle's origin.
  *  @param radius (double) The radius of the half-circle.
  */
-#define addHalfCircle(points, oX, oY, radius) {\
+#define addHalfCircle(points, origin, radius) {\
 		int numSides = (radius / 2);\
 		numSides += numSides % 2;\
-		addPolygonFull(points, oX, oY, radius, numSides, (2 * M_PI / radius));\
+		addPolygonFull(points, origin, radius, numSides, (2 * M_PI / radius));\
 	} while(0)
 
 /*!
@@ -58,8 +58,8 @@
  *  @param oY (double) The y-coordinate of the polygon's centroid.
  *  @param numSides (int) The number of sides the polygon will contain.
  */
-#define addPolygon(points, oX, oY, radius, numSides) \
-	addPolygonFull(points, oX, oY, radius, numSides, 2 * M_PI / numSides)
+#define addPolygon(points, origin, radius, numSides) \
+	addPolygonFull(points, origin, radius, numSides, 2 * M_PI / numSides)
 
 /*
  * @brief Create a point with a specific w-coordinate.
@@ -116,7 +116,7 @@
 
 #define COPY_POINT(pt) (POINT(pt[X], pt[Y], pt[Z], pt[W]))
 
-//! @brief Macro for the x-axis -- used as an argument to createRotation().
+//! Macro for the x-axis -- used as an argument to createRotation().
 #define X_AXIS 0
 
 //! Macro for the y-axis -- used as an argument to createRotation().
@@ -153,7 +153,7 @@ typedef struct Matrix {
  *  @brief Allocate memory for a ::Matrix_t.
  *  @return A pointer to a newly allocated ::Matrix_t.
  */
-Matrix_t * createMatrix(void);
+Matrix_t *createMatrix(void);
 
 /*!
  *  @brief freeMatrix() for varargs ::Matrix_t.
@@ -170,7 +170,7 @@ void freeMatrices(int numMatrices, ...);
  *  matrix.
  *  @param matrix Pointer to a ::Matrix_t.
  */
-void freeMatrix(Matrix_t * matrix);
+void freeMatrix(Matrix_t *matrix);
 
 /*
  * @brief Free a ::Matrix_t from a void pointer.
@@ -193,7 +193,7 @@ void freeMatrixFromVoid(void * matrix);
  *
  * @return A pointer to the new ::Point_t.
 */
-Point_t * createPoint(Point_t * pt);
+Point_t *createPoint(Point_t *pt);
 
 /*!
  *  @brief Add a point to a ::Matrix_t.
@@ -203,7 +203,7 @@ Point_t * createPoint(Point_t * pt);
  *  @param y The double y-coordinate of the point.
  *  @param z The double z-coordinate of the point.
  */
-void addPoint(Matrix_t * const matrix, Point_t * point);
+void addPoint(Matrix_t *const matrix, Point_t *point);
 
 /*!
  *  @brief Add a line's endpoints to a ::Matrix_t.
@@ -219,7 +219,7 @@ void addPoint(Matrix_t * const matrix, Point_t * point);
  *  @deprecated Deprecated since the introduction of polygonal rendering, which
  *      requires that points be added to a ::Matrix_t with addTriangle().
  */
-void addEdge(Matrix_t * const matrix, Point_t * p1, Point_t * p2);
+void addEdge(Matrix_t *const matrix, Point_t *p1, Point_t *p2);
 
 /*!
  *  @brief Add a triangle's three vertices to a ::Matrix_t.
@@ -235,8 +235,7 @@ void addEdge(Matrix_t * const matrix, Point_t * p1, Point_t * p2);
  *  @param y3 The double y-coordinate of the third vertex.
  *  @param z3 The double z-coordinate of the third vertex.
  */
-void addTriangle(Matrix_t * const matrix, Point_t * p1, Point_t * p2,
-	Point_t * p3);
+void addTriangle(Matrix_t *const matrix, Point_t *p1, Point_t *p2, Point_t *p3);
 
 /*!
  *  @brief Add the vertices of a polygon to a ::Matrix_t.
@@ -250,7 +249,7 @@ void addTriangle(Matrix_t * const matrix, Point_t * p1, Point_t * p2,
  *  @param theta The angle of the arc, centered on the origin, and extending
  *      between subsequent vertices of the polygon.
  */
-void addPolygonFull(Matrix_t * points, int oX, int oY, int radius, int
+void addPolygonFull(Matrix_t *points, Point_t *origin, int radius, int
 	numSides, double theta);
 
 /*!
@@ -266,8 +265,8 @@ void addPolygonFull(Matrix_t * points, int oX, int oY, int radius, int
  *  @param x3 The x-coordinate of the curve's fourth control point.
  *  @param y3 The y-coordinate of the curve's fourth control point.
  */
-void addBezier(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
-	int y2, int x3, int y3);
+void addBezier(Matrix_t *points, Point_t *p1, Point_t *p2, Point_t *p3,
+	Point_t *p4);
 
 /*!
  *  @brief Add the points of a Hermite curve to a ::Matrix_t.
@@ -282,8 +281,8 @@ void addBezier(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
  *  @param x3 The x-coordinate of the curve's second control point.
  *  @param y3 The y-coordinate of the curve's second control point.
  */
-void addHermite(Matrix_t * points, int x0, int y0, int x1, int y1, int x2,
-	int y2, int x3, int y3);
+void addHermite(Matrix_t *points, Point_t *p1, Point_t *p2, Point_t *p3,
+	Point_t *p4);
 
 /*!
  *  @brief Add the vertices of a rectangular prism to a ::Matrix_t.
@@ -311,7 +310,7 @@ void addRectangularPrism(Matrix_t *pts, Point_t *p1, Point_t *p2);
  *  @param oZ The z-coordinate of the sphere's origin.
  *  @param radius The radius of the sphere.
  */
-void addSphere(Matrix_t * points, Point_t *origin, double radius);
+void addSphere(Matrix_t *points, Point_t *origin, double radius);
 
 /*!
  *  @brief Add the points of a torus to a ::Matrix_t.
@@ -327,7 +326,7 @@ void addSphere(Matrix_t * points, Point_t *origin, double radius);
  *  @param rad1 The minor radius of the torus.
  *  @param rad2 The major radius of the torus.
  */
-void addTorus(Matrix_t * points, Point_t *origin, double rad1, double rad2);
+void addTorus(Matrix_t *points, Point_t *origin, double rad1, double rad2);
 
 /*!
  *  @brief Render a ::Matrix_t by drawing triangles.
@@ -338,7 +337,7 @@ void addTorus(Matrix_t * points, Point_t *origin, double rad1, double rad2);
  *
  *  @param matrix The ::Matrix_t to be rendered.
  */
-void drawMatrix(const Matrix_t * const matrix);
+void drawMatrix(const Matrix_t *const matrix);
 
 /*!
  *  @brief Render a ::Matrix_t by drawing line segments.
@@ -349,7 +348,7 @@ void drawMatrix(const Matrix_t * const matrix);
  *
  *  @param matrix The ::Matrix_t to be rendered.
  */
-void drawMatrixLines(const Matrix_t * const matrix);
+void drawMatrixLines(const Matrix_t *const matrix);
 
 /*!
  *  @brief Multiply a ::Matrix_t by a scalar value.
@@ -357,7 +356,7 @@ void drawMatrixLines(const Matrix_t * const matrix);
  *  @param scalar The scalar value to multiply @p matrix by.
  *  @param matrix The ::Matrix_t to be multiplied into (in place).
  */
-void multiplyScalar(double scalar, Matrix_t * const matrix);
+void multiplyScalar(double scalar, Matrix_t *const matrix);
 
 /*!
  *  @brief Multiply varargs matrices into the last one.
@@ -377,14 +376,14 @@ void multiplyMatrices(int numMatrices, ...);
  *  @param m1 ::Matrix_t to be multiplied into @p m2.
  *  @param m2 ::Matrix_t to contain the product of the original @p m1 and @p m2.
  */
-void multiplyMatrix(Matrix_t * const m1, Matrix_t * const m2);
+void multiplyMatrix(Matrix_t *const m1, Matrix_t *const m2);
 
 /*!
  *  @brief Return a @a 4x4 identity matrix.
  *
  *  @return An identity ::Matrix_t with four points.
  */
-Matrix_t * createIdentity(void);
+Matrix_t *createIdentity(void);
 
 /*!
  *  @brief Return a matrix used for translations.
@@ -398,7 +397,7 @@ Matrix_t * createIdentity(void);
  *
  *  @return A @a 4x4 translaton ::Matrix_t.
  */
-Matrix_t * createTranslation(Point_t *delta);
+Matrix_t *createTranslation(Point_t *delta);
 
 /*!
  *  @brief Return a matrix used for scaling.
@@ -412,7 +411,7 @@ Matrix_t * createTranslation(Point_t *delta);
  *
  *  @return A @a 4x4 scale ::Matrix_t.
  */
-Matrix_t * createScale(Point_t *delta);
+Matrix_t *createScale(Point_t *delta);
 
 /*!
  *  @brief Return a matrix used for rotation.
@@ -425,21 +424,21 @@ Matrix_t * createScale(Point_t *delta);
  *
  *  @return A @a 4x4 rotation ::Matrix_t.
  */
-Matrix_t * createRotation(int axis, double angle);
+Matrix_t *createRotation(int axis, double angle);
 
 /*
  *  @brief Print ::Matrix_t::points in a point (x, y, z, w) format.
  *
  *  @param matrix The ::Matrix_t whose points will be printed.
  */
-void printPointMatrix(const Matrix_t * const matrix);
+void printPointMatrix(const Matrix_t *const matrix);
 
 /*
  *  @brief Print ::Matrix_t::points in a point matrix format.
  *
  *  @param matrix The ::Matrix_t whose points will be printed.
  */
-void printMatrix(const Matrix_t * const matrix);
+void printMatrix(const Matrix_t *const matrix);
 
 /*!
  *  @brief Return a boolean indicating whether two ::Matrix_t are equal.
@@ -450,7 +449,7 @@ void printMatrix(const Matrix_t * const matrix);
  *  @return If ::Matrix_t @p m1 and @p m2 contain the same number of points,
  *      with equal coordinate values, return 1; else, return 0.
  */
-int equalMatrix(Matrix_t * m1, Matrix_t * m2);
+int equalMatrix(Matrix_t *m1, Matrix_t *m2);
 
 /*
  * @brief Return a deep-copy of a ::Matrix_t.
@@ -460,7 +459,7 @@ int equalMatrix(Matrix_t * m1, Matrix_t * m2);
  * @return A pointer to the new, copied ::Matrix_t with identical contents to
  *      @p matrix.
  */
-Matrix_t * copyMatrix(const Matrix_t * const matrix);
+Matrix_t *copyMatrix(const Matrix_t *const matrix);
 
 /*!
  *  @brief Scan the point coordinates contained in a formatted CSV file into a
@@ -475,7 +474,7 @@ Matrix_t * copyMatrix(const Matrix_t * const matrix);
  *  @return A pointer to a ::Matrix_t containing points with the values stored
  *      in the argument CSV file.
  */
-Matrix_t * readPointsFromFile(char * filename);
+Matrix_t *readPointsFromFile(char * filename);
 
 /*!
  *  @brief Save a ::Matrix_t::points coordinates in a CSV file.
@@ -484,4 +483,4 @@ Matrix_t * readPointsFromFile(char * filename);
  *  @param filename The name of the CSV file to be written to; this file will
  *      be stored in the TEST_FILE_DIR directory.
  */
-void writePointsToFile(Matrix_t * points, char * filename);
+void writePointsToFile(Matrix_t *points, char * filename);
