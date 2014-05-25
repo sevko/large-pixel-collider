@@ -230,16 +230,16 @@ static int testAddRectangularPrism(void){
 
 static int testAddSphere(void){
 	Matrix_t * points = createMatrix();
-	addSphere(points, 0, 0, 100);
-	addSphere(points, 100, 0, 50);
-	addSphere(points, 100, 100, 50);
+	addSphere(points, POINT(0, 0), 100);
+	addSphere(points, POINT(100, 0), 50);
+	addSphere(points, POINT(100, 100), 50);
 	ASSERT_EQUAL(points, "testAddSphere.csv");
 }
 
 static int testAddTorus(void){
 	Matrix_t * points = createMatrix();
-	addTorus(points, 0, 0, 50, 200);
-	addTorus(points, 0, 0, 20, 100);
+	addTorus(points, POINT(0, 0), 50, 200);
+	addTorus(points, POINT(0, 0), 20, 100);
 	ASSERT_EQUAL(points, "testAddTorus.csv");
 }
 

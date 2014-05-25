@@ -311,7 +311,7 @@ void addRectangularPrism(Matrix_t *pts, Point_t *p1, Point_t *p2);
  *  @param oZ The z-coordinate of the sphere's origin.
  *  @param radius The radius of the sphere.
  */
-void addSphere(Matrix_t * points, double oX, double oY, double radius);
+void addSphere(Matrix_t * points, Point_t *origin, double radius);
 
 /*!
  *  @brief Add the points of a torus to a ::Matrix_t.
@@ -327,8 +327,7 @@ void addSphere(Matrix_t * points, double oX, double oY, double radius);
  *  @param rad1 The minor radius of the torus.
  *  @param rad2 The major radius of the torus.
  */
-void addTorus(Matrix_t * points, double oX, double oY, double rad1,
-	double rad2);
+void addTorus(Matrix_t * points, Point_t *origin, double rad1, double rad2);
 
 /*!
  *  @brief Render a ::Matrix_t by drawing triangles.

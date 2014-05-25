@@ -190,7 +190,7 @@ void evaluateMDLScript(){
 
 			else if(opCode == SPHERE){
 				struct symSphere * sphere = &(cmd->op.sphere);
-				addSphere(points, sphere->d[0], sphere->d[1], sphere->r);
+				addSphere(points, POINT(sphere->d[0], sphere->d[1]), sphere->r);
 				multiplyMatrix(peek(coordStack), points);
 				drawMatrix(points);
 				CLEAR(points);
@@ -198,7 +198,7 @@ void evaluateMDLScript(){
 
 			else if(opCode == TORUS){
 				struct symTorus * torus = &(cmd->op.torus);
-				addTorus(points, torus->d[0], torus->d[1], torus->r0,
+				addTorus(points, POINT(torus->d[0], torus->d[1]), torus->r0,
 						torus->r1);
 				multiplyMatrix(peek(coordStack), points);
 				drawMatrix(points);

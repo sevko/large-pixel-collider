@@ -57,9 +57,14 @@ void (drawLine)(Point_t *p1, Point_t *p2, int color){
 	}
 }
 
-void scanlineRender(double x1, double y1, double x2, double y2, double x3,
-	double y3, int color){
-	double * pts;
+void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, int color){
+	double *pts;
+	double x1 = p1[X];
+	double y1 = p1[Y];
+	double x2 = p2[X];
+	double y2 = p2[Y];
+	double x3 = p3[X];
+	double y3 = p3[Y];
 	if(y1 >= y2 && y1 >= y3){
 		if(y3 > y2)
 			pts = (double []){x1, y1, x3, y3, x2, y2};

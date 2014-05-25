@@ -89,5 +89,4 @@ void (drawLine)(Point_t *p1, Point_t *p2, int color);
  * @param y3 The y-coordinate of the third vertex.
  * @param color The color of the filled triangle.
 */
-void scanlineRender(double x1, double y1, double x2, double y2, double x3,
-	double y3, int color);
+void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, int color);

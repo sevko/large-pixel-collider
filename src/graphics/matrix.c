@@ -32,28 +32,6 @@
 #define TEST_FILE_DIR "test/"
 
 /*!
- *  @brief Return a pointer to a ::Matrix_t containing the points of a sphere.
- *
- *  @param oX The x-coordinate of the sphere's origin.
- *  @param oY The y-coordinate of the sphere's origin.
- *  @param radius The radius of the sphere.
- *
- *  @return A pointer to a ::Matrix_t containing the points of the sphere.
- */
-static Matrix_t * generateSphere(double oX, double oY, double radius);
-
-/*!
- *  @brief Return a pointer to a ::Matrix_t containing the points of a torus.
- *
- *  @param oX The x-coordinate of the torus's centroid.
- *  @param oY The y-coordinate of the torus's centroid.
- *  @param radius The radius of the torus.
- *
- *  @return A pointer to a ::Matrix_t containing the points of the torus.
- */
-static Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2);
-
-/*!
  *  @brief Expand a ::Matrix_t::points to accomodate an additional point.
  *
  *  Realloc a given ::Matrix_t::points, and increment ::Matrix_t::numPoints.
@@ -99,6 +77,28 @@ static double dotProduct(const Matrix_t * const m1, int row,
  *      the camera; 0 otherwise.
  */
 static int backfaceCull(Point_t *p1, Point_t *p2, Point_t *p3);
+
+/*!
+ *  @brief Return a pointer to a ::Matrix_t containing the points of a sphere.
+ *
+ *  @param oX The x-coordinate of the sphere's origin.
+ *  @param oY The y-coordinate of the sphere's origin.
+ *  @param radius The radius of the sphere.
+ *
+ *  @return A pointer to a ::Matrix_t containing the points of the sphere.
+ */
+static Matrix_t * generateSphere(Point_t *origin, double radius);
+
+/*!
+ *  @brief Return a pointer to a ::Matrix_t containing the points of a torus.
+ *
+ *  @param oX The x-coordinate of the torus's centroid.
+ *  @param oY The y-coordinate of the torus's centroid.
+ *  @param radius The radius of the torus.
+ *
+ *  @return A pointer to a ::Matrix_t containing the points of the torus.
+ */
+static Matrix_t * generateTorus(Point_t *origin, double rad1, double rad2);
 
 Matrix_t * createMatrix(void){
 	Matrix_t * const matrix = malloc(sizeof(Matrix_t));
@@ -265,8 +265,8 @@ void addRectangularPrism(Matrix_t *pts, Point_t *p1, Point_t *p2){
 	addTriangle(pts, d, g, h);
 }
 
-void addSphere(Matrix_t * points, double oX, double oY, double radius){
-	Matrix_t * sphere = generateSphere(oX, oY, radius);
+void addSphere(Matrix_t * points, Point_t *origin, double radius){
+	Matrix_t * sphere = generateSphere(origin, radius);
 	int circlePts = sphere->numPoints / (360 / CIRCLE_STEP_SIZE);
 
 	int circle, point;
@@ -303,9 +303,8 @@ void addSphere(Matrix_t * points, double oX, double oY, double radius){
 	freeMatrix(sphere);
 }
 
-void addTorus(Matrix_t * points, double oX, double oY, double rad1,
-	double rad2){
-	Matrix_t * torus = generateTorus(oX, oY, rad1, rad2);
+void addTorus(Matrix_t * points, Point_t *origin, double rad1, double rad2){
+	Matrix_t * torus = generateTorus(origin, rad1, rad2);
 	int circlePts = torus->numPoints / (360 / CIRCLE_STEP_SIZE);
 
 	int circle, point;
@@ -340,40 +339,6 @@ void addTorus(Matrix_t * points, double oX, double oY, double rad1,
 	freeMatrix(torus);
 }
 
-Matrix_t * generateSphere(double oX, double oY, double radius){
-	Matrix_t * sphere = createMatrix(),
-		* xRot = createRotation(X_AXIS, CIRCLE_STEP_SIZE);
-
-	int degree;
-	for(degree = 0; degree < 360; degree += CIRCLE_STEP_SIZE){
-		addHalfCircle(sphere, 0, 0, radius);
-		multiplyMatrix(xRot, sphere);
-	}
-
-	Matrix_t * translation = createTranslation(POINT(oX, oY, 0));
-	multiplyMatrix(translation, sphere);
-
-	freeMatrices(2, xRot, translation);
-	return sphere;
-}
-
-Matrix_t * generateTorus(double oX, double oY, double rad1, double rad2){
-	Matrix_t * torus = createMatrix();
-	Matrix_t * yRot = createRotation(Y_AXIS, CIRCLE_STEP_SIZE);
-
-	int degree;
-	for(degree = 0; degree < 360; degree += CIRCLE_STEP_SIZE){
-		addCircle(torus, rad2, 0, rad1);
-		multiplyMatrix(yRot, torus);
-	}
-
-	Matrix_t * translation = createTranslation(POINT(oX, oY, 0));
-	multiplyMatrix(translation, torus);
-
-	freeMatrices(2, yRot, translation);
-	return torus;
-}
-
 void drawMatrix(const Matrix_t * const matrix){
 	int color = 0;
 	int colors[] = {0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF};
@@ -382,15 +347,9 @@ void drawMatrix(const Matrix_t * const matrix){
 		Point_t *p1 = matrix->points[ptPair],
 			*p2 = matrix->points[ptPair + 1],
 			*p3 = matrix->points[ptPair + 2];
-		double x1 = matrix->points[ptPair][X],
-			y1 = matrix->points[ptPair][Y],
-			x2 = matrix->points[ptPair + 1][X],
-			y2 = matrix->points[ptPair + 1][Y],
-			x3 = matrix->points[ptPair + 2][X],
-			y3 = matrix->points[ptPair + 2][Y];
 		color++;
 		if(backfaceCull(p1, p2, p3))
-			scanlineRender(x1, y1, x2, y2, x3, y3, colors[color % 5]);
+			scanlineRender(p1, p2, p3, colors[color % 5]);
 	}
 }
 
@@ -596,6 +555,40 @@ void writePointsToFile(Matrix_t * points, char * filename){
 			(int)points->points[point][Y],
 			(int)points->points[point][Z]);
 	fclose(file);
+}
+
+static Matrix_t * generateSphere(Point_t *origin, double radius){
+	Matrix_t * sphere = createMatrix(),
+		* xRot = createRotation(X_AXIS, CIRCLE_STEP_SIZE);
+
+	int degree;
+	for(degree = 0; degree < 360; degree += CIRCLE_STEP_SIZE){
+		addHalfCircle(sphere, 0, 0, radius);
+		multiplyMatrix(xRot, sphere);
+	}
+
+	Matrix_t * translation = createTranslation(POINT(origin[X], origin[Y], 0));
+	multiplyMatrix(translation, sphere);
+
+	freeMatrices(2, xRot, translation);
+	return sphere;
+}
+
+static Matrix_t * generateTorus(Point_t *origin, double rad1, double rad2){
+	Matrix_t * torus = createMatrix();
+	Matrix_t * yRot = createRotation(Y_AXIS, CIRCLE_STEP_SIZE);
+
+	int degree;
+	for(degree = 0; degree < 360; degree += CIRCLE_STEP_SIZE){
+		addCircle(torus, rad2, 0, rad1);
+		multiplyMatrix(yRot, torus);
+	}
+
+	Matrix_t * translation = createTranslation(POINT(origin[X], origin[Y], 0));
+	multiplyMatrix(translation, torus);
+
+	freeMatrices(2, yRot, translation);
+	return torus;
 }
 
 static void expandMatrix(Matrix_t * const matrix){
