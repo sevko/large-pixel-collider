@@ -15,6 +15,7 @@
 #include "src/globals.h"
 #include "src/graphics/screen.h"
 #include "src/unit_tests.h"
+#include "src/graphics/geometry.h"
 #include "src/graphics/graphics.h"
 #include "src/graphics/matrix.h"
 #include "src/interpreter/file_parser.h"

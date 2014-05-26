@@ -9,6 +9,7 @@
 
 #include "src/globals.h"
 #include "src/unit_tests.h"
+#include "src/graphics/geometry.h"
 #include "src/graphics/matrix.h"
 #include "src/graphics/screen.h"
 

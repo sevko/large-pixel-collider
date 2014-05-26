@@ -1,11 +1,9 @@
 /*!
- *  @file
- *  @brief Functions that concern shape creation and point manipulations.
+ * @file
+ * @brief Constructs for matrix manipulation.
  *
- *  matrix.h contains functions that constitute the backbone of the graphics
- *  engine's processing and rendering. The module introduces a ::Matrix_t
- *  struct, which contains a matrix of points that can be transformed and house
- *  various shapes (eg tori, spheres), and the methods necessary to modfy it.
+ * A collection of functions, macros, and structs used to create and manipulate
+ * points matrices, which are represented with ::Point_t and ::Matrix_t.
  */
 
 #pragma once
@@ -17,46 +15,6 @@
 		freeMatrix(matrix_pointer);\
 		matrix_pointer = createMatrix();\
 	} while(0)
-
-/*
- *  @brief Add a circle to a ::Matrix_t.
- *
- *  Add an approximated circle of points to ::Matrix_t @p points, by calling
- *  ::addPolygonFull() with a large number of sides: (@f$\frac{radius}{2}@f$).
- *
- *  @param points (::Matrix_t) The matrix to add the circle's points to.
- *  @param origin (Point_t *) The circle's origin.
- *  @param radius (double) The radius of the circle.
- */
-#define addCircle(points, origin, radius) \
-	addPolygon(points, origin, radius, (radius / 2));
-
-/*
- *  @brief Add a half circle to a ::Matrix_t.
- *
- *  Add an approximated half-circle of points to ::Matrix_t @p points, by
- *  calling addPolygonFull() with a large number of sides,
- *  (@f$\frac{radius}{2}@f$), and half the angle used by addCircle().
- *
- *  @param points (::Matrix_t) The matrix to add the half-circle's points to.
- *  @param origin (Point_t *) The torus's origin.
- *  @param radius (double) The radius of the half-circle.
- */
-#define addHalfCircle(points, origin, radius) {\
-		int numSides = (radius / 2);\
-		numSides += numSides % 2;\
-		addPolygonFull(points, origin, radius, numSides, (2 * M_PI / radius));\
-	} while(0)
-
-/*
- *  @brief A wrapper for addPolygonFull(), with an implicit angle calculation.
- *
- *  @param points (::Matrix_t) The matrix to add the polygon's points to.
- *  @param origin (Point_t *) The polygon's centroid.
- *  @param numSides (int) The number of sides the polygon will contain.
- */
-#define addPolygon(points, origin, radius, numSides) \
-	addPolygonFull(points, origin, radius, numSides, 2 * M_PI / numSides)
 
 /*
  * @brief Create a point with a specific w-coordinate.
@@ -112,27 +70,13 @@
 	CREATE_POINT_VA_MACRO(__VA_ARGS__, POINT4, POINT3, POINT2)(__VA_ARGS__)
 
 #define COPY_POINT(pt) (POINT(pt[X], pt[Y], pt[Z], pt[W]))
-
-// Macro for the x-axis; used as an argument to createRotation().
-#define X_AXIS 0
-
-// Macro for the y-axis; used as an argument to createRotation().
-#define Y_AXIS 1
-
-// Macro for the z-axis; used as an argument to createRotation().
-#define Z_AXIS 2
-
-// The index of the x-coordinate of a point in ::Point_t *.
-#define X 0
-
-// The index of the y-coordinate of a point in ::Point_t *.
-#define Y 1
-
-// The index of the x-coordinate of a point in ::Point_t *.
-#define Z 2
-
-// The index of the w-coordinate of a point in ::Point_t *.
-#define W 3
+#define X_AXIS 0 // Macro for the x-axis.
+#define Y_AXIS 1 // Macro for the y-axis.
+#define Z_AXIS 2 // Macro for the z-axis.
+#define X 0 // The index of the x-coordinate of a point in ::Point_t *.
+#define Y 1 // The index of the y-coordinate of a point in ::Point_t *.
+#define Z 2 // The index of the x-coordinate of a point in ::Point_t *.
+#define W 3 // The index of the w-coordinate of a point in ::Point_t *.
 
 typedef double Point_t;
 
@@ -142,12 +86,39 @@ typedef struct Matrix {
 	int numPoints; // The number of points in this ::Matrix_t.
 } Matrix_t;
 
+/*
+ * @brief Return an allocated ::Point_t.
+ *
+ * @param Point_t The ::Point_t to create an allocated copy of.
+ *
+ * @return A pointer to the new ::Point_t.
+*/
+Point_t *createPoint(Point_t *pt);
+
+/*!
+ *  @brief Add a point to a ::Matrix_t.
+ *
+ *  @param matrix A pointer to the ::Matrix_t to add the @p point to.
+ *  @param point The point.
+ */
+void addPoint(Matrix_t *const matrix, Point_t *point);
+
 /*!
  *  @brief Allocate memory for a ::Matrix_t.
  *
  *  @return A pointer to a newly allocated ::Matrix_t.
  */
 Matrix_t *createMatrix(void);
+
+/*!
+ *  @brief Expand a ::Matrix_t::points to accomodate an additional point.
+ *
+ *  Realloc a given ::Matrix_t::points, and increment ::Matrix_t::numPoints.
+ *
+ *  @param matrix The ::Matrix_t whose ::Matrix_t::points matrix will be
+ *      expanded to an additional column
+ */
+void expandMatrix(Matrix_t * const matrix);
 
 /*!
  *  @brief ::freeMatrix() for varargs ::Matrix_t.
@@ -177,119 +148,6 @@ void freeMatrix(Matrix_t *matrix);
  * @param matrix A void pointer to a ::Matrix_t to be deallocated.
 */
 void freeMatrixFromVoid(void *matrix);
-
-/*
- * @brief Return an allocated ::Point_t.
- *
- * @param Point_t The ::Point_t to create an allocated copy of.
- *
- * @return A pointer to the new ::Point_t.
-*/
-Point_t *createPoint(Point_t *pt);
-
-/*!
- *  @brief Add a point to a ::Matrix_t.
- *
- *  @param matrix A pointer to the ::Matrix_t to add the @p point to.
- *  @param point The point.
- */
-void addPoint(Matrix_t *const matrix, Point_t *point);
-
-/*!
- *  @brief Add a line's endpoints to a ::Matrix_t.
- *
- *  @param matrix A pointer to the ::Matrix_t to add the endpoints to.
- *  @param p1 The first endpoint.
- *  @param p2 The second endpoint.
- *
- *  @deprecated Deprecated since the introduction of polygonal rendering, which
- *      requires that points be added to a ::Matrix_t with addTriangle().
- */
-void addEdge(Matrix_t *const matrix, Point_t *p1, Point_t *p2);
-
-/*!
- *  @brief Add a triangle's three vertices to a ::Matrix_t.
- *
- *  @param matrix A pointer to the ::Matrix_t to add the vertices to.
- *  @param p1 The first vertex.
- *  @param p2 The second vertex.
- *  @param p3 The third vertex.
- */
-void addTriangle(Matrix_t *const matrix, Point_t *p1, Point_t *p2, Point_t *p3);
-
-/*!
- *  @brief Add the vertices of a polygon to a ::Matrix_t.
- *
- *  @param points A pointer to the ::Matrix_t to add the vertices to.
- *  @param origin The polygon's centroid.
- *  @param radius The distance between the centroid and any of the polygon's
- *      vertices.
- *  @param numSides The number of edges the polygon has.
- *  @param theta The angle of the arc, centered on the origin, and extending
- *      between subsequent vertices of the polygon.
- */
-void addPolygonFull(Matrix_t *points, Point_t *origin, int radius, int
-	numSides, double theta);
-
-/*!
- *  @brief Add the points of a Bezier curve to a ::Matrix_t.
- *
- *  @param points A pointer to the ::Matrix_t to add the curve's points to.
- *  @param p1 The first control point.
- *  @param p2 The second control point.
- *  @param p3 The third control point.
- *  @param p4 The fourth control point.
- */
-void addBezier(Matrix_t *points, Point_t *p1, Point_t *p2, Point_t *p3,
-	Point_t *p4);
-
-/*!
- *  @brief Add the points of a Hermite curve to a ::Matrix_t.
- *
- *  @param points A pointer to the ::Matrix_t to add the curve's points to.
- *  @param p1 The first control point.
- *  @param p2 The second control point.
- *  @param p3 The third control point.
- *  @param p4 The fourth control point.
- */
-void addHermite(Matrix_t *points, Point_t *p1, Point_t *p2, Point_t *p3,
-	Point_t *p4);
-
-/*!
- *  @brief Add the vertices of a rectangular prism to a ::Matrix_t.
- *
- *  @param points A pointer to the ::Matrix_t to add the prism's points to.
- *  @param p1 The front-top-left vertex of the prism.
- *  @param p2 The back-bottom-right vertex of the prism.
- */
-void addRectangularPrism(Matrix_t *pts, Point_t *p1, Point_t *p2);
-
-/*!
- *  @brief Add the points of a sphere to a ::Matrix_t.
- *
- *  Internally calls ::generateSphere(), and adds the points of the returned
- *  ::Matrix_t to @p points in such a manner as to facilitate proper triangular
- *  rendering.
- *
- *  @param points A pointer to the ::Matrix_t to add the sphere's points to.
- *  @param origin The origin of the sphere.
- *  @param radius The radius of the sphere.
- */
-void addSphere(Matrix_t *points, Point_t *origin, double radius);
-
-/*!
- *  @brief Add the points of a torus to a ::Matrix_t.
- *
- *  Internally calls ::generateTorus(), and adds the points of the returned
- *  ::Matrix_t to @p points in such a manner as to facilitate proper triangular
- *  rendering.
- *
- *  @param points A pointer to the ::Matrix_t to add the torus's points to.
- *  @param origin The origin of the torus.
- *  @param rad1 The minor radius of the torus.
- *  @param rad2 The major radius of the torus.
- */
-void addTorus(Matrix_t *points, Point_t *origin, double rad1, double rad2);
 
 /*!
  *  @brief Render a ::Matrix_t by drawing triangles.

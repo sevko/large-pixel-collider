@@ -93,7 +93,7 @@ void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, int color){
 		mainY = pts[5];
 
 	while(pts[5] < pts[3]){
-		(drawLine)(POINT(pts[4], pts[5]), POINT(mainX, mainY), color);
+		drawLine(POINT(pts[4], pts[5]), POINT(mainX, mainY), color);
 
 		pts[4] += m1;
 		pts[5]++;
