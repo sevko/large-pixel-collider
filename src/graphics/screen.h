@@ -6,48 +6,47 @@
 #pragma once
 
 #include "src/globals.h"
+#include "src/graphics/matrix.h"
 
 /*!
- *  @brief Draw a pixel at @a (@p x, @p y) with color TEST_COLOR.
+ * @brief Draw a pixel at a pair of coordinates with color TEST_COLOR.
  *
- *  @param x The x-coordinate of the pixel to draw.
- *  @param y The y-coordinate of the pixel to draw.
+ * @param pt See ::drawPixel().
  */
-#define drawPixel1(x, y) drawPixel(x, y, TEST_COLOR)
+#define drawPixel1(pt) drawPixel(pt, TEST_COLOR)
 
 /*!
- *  @brief Draw a pixel at @a (@p x, @p y) with color @p color.
+ * @brief Draw a pixel at a pair of coordinates with color @p color.
  *
- *  @param x (int) The x-coordinate of the pixel to draw.
- *  @param y (int) The y-coordinate of the pixel to draw.
- *  @param color (int) The color of the pixel.
+ * @param pt See ::drawPixel().
+ * @param color See ::drawPixel().
  */
-#define drawPixel2(x, y, color) drawPixel(x, y, color)
+#define drawPixel2(pt, color) drawPixel(pt, color)
 
 /*!
- *  @brief Helper macro for the overloaded drawPixel().
+ *  @brief Helper macro for the overloaded ::drawPixel().
  *
- *  Replaces the drawPixel() macro with drawPixel1() or drawPixel2(), depending
- *  on the number of received arguments.
+ *  Replaces the ::drawPixel() macro with ::drawPixel1() or ::drawPixel2(),
+ *  depending on the number of received arguments.
  *
  *  @param arg1 Placeholder for an argument.
  *  @param arg2 Placeholder for an argument.
- *  @param arg3 Placeholder for an argument.
  *  @param func_name The macro to replace drawPixel() with.
  *  @param ... Any subsequent arguments.
  */
-#define DRAW_PIXEL_VA_MACRO(arg1, arg2, arg3, func_name, ...) func_name
+#define DRAW_PIXEL_VA_MACRO(arg1, arg2, func_name, ...) func_name
 
 /*!
  *  @brief Overloaded drawPixel(), which allows an optional color argument.
  *
- *  Uses DRAW_PIXEL_VA_MACRO to select an appropriate macro (drawPixel1 or
- *  drawPixel2) for the number of arguments (2, or 3 if a color is specified).
+ *  Uses ::DRAW_PIXEL_VA_MACRO() to select an appropriate macro (::drawPixel1()
+ *  or ::drawPixel2()) for the number of arguments (1, or 2 if a color is
+ *  specified).
  *
  *  @code
  *      // The following macro-function calls are both valid.
- *      drawPixel(10, 30);
- *      drawPixel(40, 50, 0xFFFFFF);
+ *      drawPixel(POINT(10, 30));
+ *      drawPixel(POINT(40, 50), 0xFFFFFF);
  *  @code
  */
 #define drawPixel(...) \
@@ -59,18 +58,18 @@
 void configureScreen(void);
 
 /*!
- *  @brief Draw a pixel to the SDL screen.
+ * @brief Draw a pixel to the SDL screen.
  *
- *  @param x The x-coordinate of the pixel.
- *  @param y The y-coordinate of the pixel.
+ * @param pt The coordinates of the pixel to draw.
+ * @param color The color of the pixel.
  */
-void (drawPixel)(int x, int y, int color);
+void (drawPixel)(Point_t *pt, int color);
 
 /*!
  *  @brief Update the SDL screen to display pixels newly plotted with
- *      drawPixel().
+ *      ::drawPixel().
  *
- *  renderScreen() must be called for the SDL screen to display any newly
+ *  ::renderScreen() must be called for the SDL screen to display any newly
  *  rendered pixels.
  */
 void renderScreen(void);
@@ -85,7 +84,8 @@ void clearScreen(void);
 /*!
  *  @brief Deinitialize the SDL screen.
  *
- *  quitScreen() should be called once the engine finishes using the SDL screen.
+ *  ::quitScreen() should be called once the engine finishes using the SDL
+ *  screen.
  */
 void quitScreen(void);
 

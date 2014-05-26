@@ -2,49 +2,67 @@
 
 #include "src/globals.h"
 #include "src/graphics/screen.h"
+#include "src/graphics/matrix.h"
 
-/*!
- *  The millisecond delay before the SDL screen quits after quitScreen() is
- *  called.
- */
+// The ms delay before the SDL screen quits after ::quitScreen() is called.
 #define QUIT_DELAY 400
 
-//! The name of the SDL screen.
+// The name of the SDL screen.
 #define SCREEN_NAME "Graphics Engine: Screen"
 
-/*!
- *  @brief The global SDL screen -- global because only one will be necessary
- *      per run of the engine, and it renders use of the module cleaner.
- */
-static SDL_Surface * screen;
+// Used for z-buffering.
+typedef struct {
+	// 3D representation of each pixel's current height/color.
+	double buf[IMAGE_HEIGHT][IMAGE_WIDTH][2];
+} ZBuffer_t;
+
+static SDL_Surface * g_screen; // The engine's SDL screen.
+static ZBuffer_t * g_zbuffer; // The screen's z-buffer.
+
+/*
+ * @brief Draw a pixel on the SDL screen.
+ *
+ * @param x The x-coordinate of the pixel.
+ * @param y The y-coordinate of the pixel.
+ * @param color The color of the pixel.
+*/
+static void plotPixel(int x, int y, int color);
 
 void configureScreen(void){
-	if((SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) == -1)){
-		printf("Could not initialize SDL: %s.\n", SDL_GetError());
-		exit(EXIT_FAILURE);
-	}
-
-	screen = SDL_SetVideoMode(IMAGE_WIDTH, IMAGE_HEIGHT, 32, SDL_SWSURFACE);
+	if((SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) == -1))
+		FATAL("Could not initialize SDL: %s.\n", SDL_GetError());
+	g_screen = SDL_SetVideoMode(IMAGE_WIDTH, IMAGE_HEIGHT, 32, SDL_SWSURFACE);
 	SDL_WM_SetCaption(SCREEN_NAME, NULL);
+
+	g_zbuffer = malloc(sizeof(ZBuffer_t));
 }
 
-void (drawPixel)(int x, int y, int color) {
-	x += IMAGE_WIDTH / 2;
-	y += IMAGE_HEIGHT / 2;
-	if(x < 0 || IMAGE_WIDTH - 1 < x || y < 0 || IMAGE_HEIGHT - 1 < y)
-		return;
+void (drawPixel)(Point_t *pt, int color){
+	int x = pt[X] + IMAGE_WIDTH / 2,
+		y = pt[Y] + IMAGE_HEIGHT / 2;
 
-	Uint8 * pixelAddress = (Uint8 * )screen->pixels + y * screen->pitch +
-		x * screen->format->BytesPerPixel;
-	*(Uint32 *)pixelAddress = color;
+	if(x < 0 || IMAGE_WIDTH - 1 < x ||
+		y < 0 || IMAGE_HEIGHT - 1 < y)
+		return;
+	else if(g_zbuffer->buf[y][x][0] > pt[Z])
+		return;
+	else {
+		g_zbuffer->buf[y][x][0] = pt[Z];
+		g_zbuffer->buf[y][x][1] = color;
+	}
 }
 
 void renderScreen(void){
-	SDL_Flip(screen);
+	int y, x;
+	for(y = 0; y < IMAGE_HEIGHT; y++)
+		for(x = 0; x < IMAGE_WIDTH; x++)
+			plotPixel(x, y, g_zbuffer->buf[y][x][1]);
+	SDL_Flip(g_screen);
 }
 
 void clearScreen(void){
-	SDL_FillRect(screen, NULL, 0x000000);
+	memset(g_zbuffer->buf, 0, sizeof(double) * IMAGE_HEIGHT * IMAGE_WIDTH * 2);
+	SDL_FillRect(g_screen, NULL, 0x000000);
 }
 
 void quitScreen(void){
@@ -53,5 +71,11 @@ void quitScreen(void){
 }
 
 int writeScreen(const char * const filename){
-	return SDL_SaveBMP(screen, filename);
+	return SDL_SaveBMP(g_screen, filename);
+}
+
+static void plotPixel(int x, int y, int color){
+	Uint8 * pixelAddress = (Uint8 *)g_screen->pixels + y * g_screen->pitch +
+		x * g_screen->format->BytesPerPixel;
+	*(Uint32 *)pixelAddress = color;
 }
