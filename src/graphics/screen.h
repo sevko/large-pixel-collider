@@ -11,46 +11,46 @@
 /*!
  * @brief Draw a pixel at a pair of coordinates with color TEST_COLOR.
  *
- * @param pt See ::drawPixel().
+ * @param pt See ::plotPixel().
  */
-#define drawPixel1(pt) drawPixel(pt, TEST_COLOR)
+#define plotPixel1(pt) plotPixel(pt, TEST_COLOR)
 
 /*!
  * @brief Draw a pixel at a pair of coordinates with color @p color.
  *
- * @param pt See ::drawPixel().
- * @param color See ::drawPixel().
+ * @param pt See ::plotPixel().
+ * @param color See ::plotPixel().
  */
-#define drawPixel2(pt, color) drawPixel(pt, color)
+#define plotPixel2(pt, color) plotPixel(pt, color)
 
 /*!
- *  @brief Helper macro for the overloaded ::drawPixel().
+ *  @brief Helper macro for the overloaded ::plotPixel().
  *
- *  Replaces the ::drawPixel() macro with ::drawPixel1() or ::drawPixel2(),
+ *  Replaces the ::plotPixel() macro with ::plotPixel1() or ::plotPixel2(),
  *  depending on the number of received arguments.
  *
  *  @param arg1 Placeholder for an argument.
  *  @param arg2 Placeholder for an argument.
- *  @param func_name The macro to replace drawPixel() with.
+ *  @param func_name The macro to replace plotPixel() with.
  *  @param ... Any subsequent arguments.
  */
 #define DRAW_PIXEL_VA_MACRO(arg1, arg2, func_name, ...) func_name
 
 /*!
- *  @brief Overloaded drawPixel(), which allows an optional color argument.
+ *  @brief Overloaded plotPixel(), which allows an optional color argument.
  *
- *  Uses ::DRAW_PIXEL_VA_MACRO() to select an appropriate macro (::drawPixel1()
- *  or ::drawPixel2()) for the number of arguments (1, or 2 if a color is
+ *  Uses ::DRAW_PIXEL_VA_MACRO() to select an appropriate macro (::plotPixel1()
+ *  or ::plotPixel2()) for the number of arguments (1, or 2 if a color is
  *  specified).
  *
  *  @code
  *      // The following macro-function calls are both valid.
- *      drawPixel(POINT(10, 30));
- *      drawPixel(POINT(40, 50), 0xFFFFFF);
+ *      plotPixel(POINT(10, 30));
+ *      plotPixel(POINT(40, 50), 0xFFFFFF);
  *  @code
  */
-#define drawPixel(...) \
-	DRAW_PIXEL_VA_MACRO(__VA_ARGS__, drawPixel2, drawPixel1)(__VA_ARGS__)
+#define plotPixel(...) \
+	DRAW_PIXEL_VA_MACRO(__VA_ARGS__, plotPixel2, plotPixel1)(__VA_ARGS__)
 
 /*!
  *  @brief Initialize the SDL screen.
@@ -63,11 +63,11 @@ void configureScreen(void);
  * @param pt The coordinates of the pixel to draw.
  * @param color The color of the pixel.
  */
-void (drawPixel)(Point_t *pt, int color);
+void (plotPixel)(Point_t *pt, int color);
 
 /*!
  *  @brief Update the SDL screen to display pixels newly plotted with
- *      ::drawPixel().
+ *      ::plotPixel().
  *
  *  ::renderScreen() must be called for the SDL screen to display any newly
  *  rendered pixels.

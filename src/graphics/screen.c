@@ -26,7 +26,7 @@ static ZBuffer_t * g_zbuffer; // The screen's z-buffer.
  * @param y The y-coordinate of the pixel.
  * @param color The color of the pixel.
 */
-static void plotPixel(int x, int y, int color);
+static void drawPixel(int x, int y, int color);
 
 void configureScreen(void){
 	if((SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) == -1))
@@ -37,7 +37,7 @@ void configureScreen(void){
 	g_zbuffer = malloc(sizeof(ZBuffer_t));
 }
 
-void (drawPixel)(Point_t *pt, int color){
+void (plotPixel)(Point_t *pt, int color){
 	int x = pt[X] + IMAGE_WIDTH / 2,
 		y = pt[Y] + IMAGE_HEIGHT / 2;
 
@@ -56,7 +56,7 @@ void renderScreen(void){
 	int y, x;
 	for(y = 0; y < IMAGE_HEIGHT; y++)
 		for(x = 0; x < IMAGE_WIDTH; x++)
-			plotPixel(x, y, g_zbuffer->buf[y][x][1]);
+			drawPixel(x, y, g_zbuffer->buf[y][x][1]);
 	SDL_Flip(g_screen);
 }
 
@@ -74,7 +74,7 @@ int writeScreen(const char * const filename){
 	return SDL_SaveBMP(g_screen, filename);
 }
 
-static void plotPixel(int x, int y, int color){
+static void drawPixel(int x, int y, int color){
 	Uint8 * pixelAddress = (Uint8 *)g_screen->pixels + y * g_screen->pitch +
 		x * g_screen->format->BytesPerPixel;
 	*(Uint32 *)pixelAddress = color;

@@ -43,7 +43,7 @@ void (drawLine)(Point_t *p1, Point_t *p2, int color){
 
 	unsigned int numerator = longDist >> 1, pixel;
 	for(pixel = 0; pixel <= longDist; pixel++){
-		drawPixel(p1, color);
+		plotPixel(p1, color);
 		numerator += shortDist;
 		if(numerator >= longDist){
 			numerator -= longDist;
