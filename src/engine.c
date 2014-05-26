@@ -62,9 +62,9 @@ void test(){
 	configureScreen();
 
 	Matrix_t * pts = createMatrix();
-	addSphere(pts, POINT(0, 0), 20);
+	addSphere(pts, POINT(0, 0), 300);
 	// addTorus(pts, 0, 0, 50, 120);
-	multiplyMatrix(createScale(POINT(10, 10, 10)), pts);
+	// multiplyMatrix(createScale(POINT(10, 10, 10)), pts);
 	Matrix_t * rotX = createRotation(X, 1),
 		* rotY = createRotation(Y, 1),
 		* rotZ = createRotation(Z, 1);

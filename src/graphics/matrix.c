@@ -16,8 +16,8 @@
  */
 #define INTERPOL(a, b) (a + (b - a) * t1)
 
-//! The angle between the subsequent, rotated circles that compose a sphere.
-#define CIRCLE_STEP_SIZE 8 // angle between circles of a sphere/torus
+// The angle between the subsequent, rotated circles that compose a sphere.
+#define CIRCLE_STEP_SIZE 4
 
 //! The number of steps taken in plotting Bezier and Hermite curves.
 #define CURVE_STEP_NUMBER 1e3
@@ -63,15 +63,9 @@ static double dotProduct(const Matrix_t * const m1, int row,
  *  calculate the triangle's surface normal to determine whether it's visible
  *  to the camera.
  *
- *  @param x1 The x-coordinate of the triangle's first vertex.
- *  @param y1 The y-coordinate of the triangle's first vertex.
- *  @param z1 The z-coordinate of the triangle's first vertex.
- *  @param x2 The x-coordinate of the triangle's second vertex.
- *  @param y2 The y-coordinate of the triangle's second vertex.
- *  @param z2 The z-coordinate of the triangle's second vertex.
- *  @param x3 The x-coordinate of the triangle's third vertex.
- *  @param y3 The y-coordinate of the triangle's third vertex.
- *  @param z3 The z-coordinate of the triangle's third vertex.
+ *  @param p1 The first vertex.
+ *  @param p2 The second vertex.
+ *  @param p3 The third vertex.
  *
  *  @return 1 if the triangle specified by the three vertices is visible to
  *      the camera; 0 otherwise.
@@ -81,8 +75,7 @@ static int backfaceCull(Point_t *p1, Point_t *p2, Point_t *p3);
 /*!
  *  @brief Return a pointer to a ::Matrix_t containing the points of a sphere.
  *
- *  @param oX The x-coordinate of the sphere's origin.
- *  @param oY The y-coordinate of the sphere's origin.
+ *  @param origin The origin of the sphere.
  *  @param radius The radius of the sphere.
  *
  *  @return A pointer to a ::Matrix_t containing the points of the sphere.
@@ -92,8 +85,7 @@ static Matrix_t * generateSphere(Point_t *origin, double radius);
 /*!
  *  @brief Return a pointer to a ::Matrix_t containing the points of a torus.
  *
- *  @param oX The x-coordinate of the torus's centroid.
- *  @param oY The y-coordinate of the torus's centroid.
+ *  @param origin The origin of the torus.
  *  @param radius The radius of the torus.
  *
  *  @return A pointer to a ::Matrix_t containing the points of the torus.
