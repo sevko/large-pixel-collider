@@ -100,13 +100,6 @@ void drawMatrix(const Matrix_t * const matrix){
 	}
 }
 
-void drawMatrixLines(const Matrix_t * const matrix){
-	int ptPair;
-	for(ptPair = 0; ptPair < matrix->numPoints - 1; ptPair += 2);
-		// drawLine(POINT(matrix->points[ptPair][X], matrix->points[ptPair][Y]),
-			// POINT(matrix->points[ptPair + 1][X], matrix->points[ptPair + 1][Y]));
-}
-
 void multiplyScalar(double scalar, Matrix_t * const matrix){
 	int row, col;
 	for(row = 0; row < 4; row++)

@@ -61,35 +61,9 @@ static void argumentHandler(int argc, char * argv[]);
 
 void test(){
 	configureScreen();
-
-	Matrix_t * pts = createMatrix();
-	addSphere(pts, POINT(0, 0), 300);
-	// addTorus(pts, 0, 0, 50, 120);
-	// multiplyMatrix(createScale(POINT(10, 10, 10)), pts);
-	Matrix_t * rotX = createRotation(X, 1),
-		* rotY = createRotation(Y, 1),
-		* rotZ = createRotation(Z, 1);
-	int tick;
-	for(tick = 0; tick < 1000; tick++){
-		clearScreen();
-		multiplyMatrices(4, rotX, rotY, rotZ, pts);
-		drawMatrix(pts);
-		renderScreen();
-		usleep(1e6 / 100);
-	}
-
-	// int degree;
-	// for(degree = 0; degree >= 0; degree++){
-		// clearScreen();
-		// Matrix_t * pts = createMatrix();
-		// // addTriangle(pts, 0, 0, 0, 200, 0, 0, 200, -200, 0);
-		// addTriangle(pts, 0, 0, 0, 200, 0, 0, 200 * cos(degree * M_PI / 180),
-			// 200 * sin(degree * M_PI / 180), 0);
-		// drawMatrix(pts);
-		// renderScreen();
-		// // usleep(1e6 / 120);
-	// }
-
+	scanlineRender(POINT(0, 0, 0), POINT(100, 100, 0), POINT(150, -40, 0), 0xFFFFFF);
+	renderScreen();
+	usleep(4e6);
 	quitScreen();
 }
 

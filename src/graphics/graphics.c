@@ -58,56 +58,53 @@ void (drawLine)(Point_t *p1, Point_t *p2, int color){
 }
 
 void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, int color){
-	double *pts;
-	double x1 = p1[X];
-	double y1 = p1[Y];
-	double x2 = p2[X];
-	double y2 = p2[Y];
-	double x3 = p3[X];
-	double y3 = p3[Y];
-	if(y1 >= y2 && y1 >= y3){
-		if(y3 > y2)
-			pts = (double []){x1, y1, x3, y3, x2, y2};
+	double **pts1;
+
+	if(p1[Y] >= p2[Y] && p1[Y] >= p3[Y]){
+		if(p3[Y] > p2[Y])
+			pts1 = (Point_t *[]){p1, p3, p2};
 		else
-			pts = (double []){x1, y1, x2, y2, x3, y3};
+			pts1 = (Point_t *[]){p1, p2, p3};
 	}
 
-	else if(y2 >= y1 && y2 >= y3){
-		if(y3 > y1)
-			pts = (double []){x2, y2, x3, y3, x1, y1};
+	else if(p2[Y] >= p1[Y] && p2[Y] >= p3[Y]){
+		if(p3[Y] > p1[Y])
+			pts1 = (Point_t *[]){p2, p3, p1};
 		else
-			pts = (double []){x2, y2, x1, y1, x3, y3};
+			pts1 = (Point_t *[]){p2, p1, p3};
 	}
 
 	else {
-		if(y2 > y1)
-			pts = (double []){x3, y3, x2, y2, x1, y1};
+		if(p2[Y] > p1[Y])
+			pts1 = (Point_t *[]){p3, p2, p1};
 		else
-			pts = (double []){x3, y3, x1, y1, x2, y2};
+			pts1 = (Point_t *[]){p3, p1, p2};
 	}
 
-	double m1 = (pts[3] - pts[5] != 0)?(pts[2] - pts[4]) / (pts[3] - pts[5]):0,
-		m2 = (pts[1] - pts[3] != 0)?(pts[0] - pts[2]) / (pts[1] - pts[3]):0,
-		m3 = (pts[1] - pts[5] != 0)?(pts[0] - pts[4]) / (pts[1] - pts[5]):0;
-	double mainX = pts[4],
-		mainY = pts[5];
+	double m1 = (pts1[1][Y] - pts1[2][Y] != 0)?
+			(pts1[1][X] - pts1[2][X]) / (pts1[1][Y] - pts1[2][Y]):0,
+		m2 = (pts1[0][Y] - pts1[1][Y] != 0)?
+			(pts1[0][X] - pts1[1][X]) / (pts1[0][Y] - pts1[1][Y]):0,
+		m3 = (pts1[0][Y] - pts1[2][Y] != 0)?
+			(pts1[0][X] - pts1[2][X]) / (pts1[0][Y] - pts1[2][Y]):0;
+	Point_t *guide = COPY_POINT(pts1[2]);
 
-	while(pts[5] < pts[3]){
-		drawLine(POINT(pts[4], pts[5]), POINT(mainX, mainY), color);
+	while(pts1[2][Y] < pts1[1][Y]){
+		drawLine(POINT(pts1[2][X], pts1[2][Y]), guide, color);
 
-		pts[4] += m1;
-		pts[5]++;
+		pts1[2][X] += m1;
+		pts1[2][Y]++;
 
-		mainX += m3;
-		mainY++;
+		guide[X] += m3;
+		guide[Y]++;
 	}
 
-	while(pts[3] < pts[1]){
-		drawLine(POINT(pts[2], pts[3]), POINT(mainX, mainY), color);
-		pts[2] += m2;
-		pts[3]++;
+	while(pts1[1][Y] < pts1[0][Y]){
+		drawLine(POINT(pts1[1][X], pts1[1][Y]), guide, color);
+		pts1[1][X] += m2;
+		pts1[1][Y]++;
 
-		mainX += m3;
-		mainY++;
+		guide[X] += m3;
+		guide[Y]++;
 	}
 }

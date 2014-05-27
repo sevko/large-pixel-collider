@@ -161,17 +161,6 @@ void freeMatrixFromVoid(void *matrix);
 void drawMatrix(const Matrix_t *const matrix);
 
 /*!
- *  @brief Render a ::Matrix_t by drawing line segments.
- *
- *  Draw @p matrix by drawing line segments for every pair of points. The first
- *  two  points of ::Matrix_t::points are the endpoints of the first line,
- *  the second two are the endpoints of the second, etc.
- *
- *  @param matrix The ::Matrix_t to be rendered.
- */
-void drawMatrixLines(const Matrix_t *const matrix);
-
-/*!
  *  @brief Multiply a ::Matrix_t by a scalar value.
  *
  *  @param scalar The scalar value to multiply @p matrix by.
