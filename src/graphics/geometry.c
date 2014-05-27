@@ -181,14 +181,14 @@ void addSphere(Matrix_t * points, Point_t *origin, double radius){
 		int circleStart = circle * circlePts;
 		for(point = 0; point < circlePts - 2; point++){
 			addTriangle(points,
-				COPY_POINT(sphere->points[circleStart + point + 1]),
-				COPY_POINT(sphere->points[circleStart + point]),
-				COPY_POINT(sphere->points[circleStart + circlePts + point + 1])
+				(sphere->points[circleStart + point + 1]),
+				(sphere->points[circleStart + point]),
+				(sphere->points[circleStart + circlePts + point + 1])
 			);
 			addTriangle(points,
-				COPY_POINT(sphere->points[circleStart + point]),
-				COPY_POINT(sphere->points[circleStart + circlePts + point]),
-				COPY_POINT(sphere->points[circleStart + circlePts + point + 1])
+				(sphere->points[circleStart + point]),
+				(sphere->points[circleStart + circlePts + point]),
+				(sphere->points[circleStart + circlePts + point + 1])
 			);
 		}
 	}
@@ -196,14 +196,14 @@ void addSphere(Matrix_t * points, Point_t *origin, double radius){
 	for(point = sphere->numPoints - circlePts; point < sphere->numPoints - 2;
 		point++){
 		addTriangle(points,
-			COPY_POINT(sphere->points[point + 1]),
-			COPY_POINT(sphere->points[point]),
-			COPY_POINT(sphere->points[(point + 1) % circlePts])
+			(sphere->points[point + 1]),
+			(sphere->points[point]),
+			(sphere->points[(point + 1) % circlePts])
 		);
 		addTriangle(points,
-			COPY_POINT(sphere->points[(point + 1) % circlePts]),
-			COPY_POINT(sphere->points[point]),
-			COPY_POINT(sphere->points[point % circlePts])
+			(sphere->points[(point + 1) % circlePts]),
+			(sphere->points[point]),
+			(sphere->points[point % circlePts])
 		);
 	}
 
@@ -217,31 +217,33 @@ void addTorus(Matrix_t * points, Point_t *origin, double rad1, double rad2){
 	int circle, point;
 	for(circle = 0; circle < 360 / CIRCLE_STEP_SIZE - 1; circle++){
 		int circleStart = circle * circlePts;
-		for(point = 0; point < circlePts - 1; point++)
+		for(point = 0; point < circlePts - 1; point++){
 			addTriangle(points,
-				COPY_POINT(torus->points[circleStart + point + 1]),
-				COPY_POINT(torus->points[circleStart + point]),
-				COPY_POINT(torus->points[circleStart + circlePts + point + 1])
+				torus->points[circleStart + point + 1],
+				torus->points[circleStart + point],
+				torus->points[circleStart + circlePts + point + 1]
 			);
-		addTriangle(points,
-			COPY_POINT(torus->points[circleStart]),
-			COPY_POINT(torus->points[circleStart + point]),
-			COPY_POINT(torus->points[circleStart + point + 1])
-		);
+			addTriangle(points,
+				torus->points[circleStart + point],
+				torus->points[circleStart + circlePts + point],
+				torus->points[circleStart + circlePts + point + 1]
+			);
+		}
 	}
 
 	int circleStart = torus->numPoints - circlePts;
-	for(point = 0; point < circlePts - 1; point++)
+	for(point = 0; point < circlePts - 1; point++){
 		addTriangle(points,
-			COPY_POINT(torus->points[circleStart + point + 1]),
-			COPY_POINT(torus->points[circleStart + point]),
-			COPY_POINT(torus->points[point + 1])
+			torus->points[circleStart + point + 1],
+			torus->points[circleStart + point],
+			torus->points[point + 1]
 		);
-	addTriangle(points,
-		COPY_POINT(torus->points[circleStart]),
-		COPY_POINT(torus->points[circleStart + point]),
-		COPY_POINT(torus->points[0])
-	);
+		addTriangle(points,
+			torus->points[point + 1],
+			torus->points[circleStart + point],
+			torus->points[point]
+		);
+	}
 
 	freeMatrix(torus);
 }

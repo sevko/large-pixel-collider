@@ -64,9 +64,9 @@ void test(){
 	Matrix_t *pts = createMatrix();
 	// addSphere(pts, POINT(0, 0), 10);
 	// addRectangularPrism(pts, POINT(0, 0, 3), POINT(1, 2, 3));
-	// addRectangularPrism(pts, POINT(0, 0), POINT(2.5, 7.5, 12.5));
-	addTorus(pts, POINT(0, 0), 50, 200);
-	// multiplyMatrix(createScale(POINT(20, 20, 20)), pts);
+	addRectangularPrism(pts, POINT(0, 0), POINT(2.5, 7.5, 12.5));
+	// addTorus(pts, POINT(0, 0), 100, 200);
+	multiplyMatrix(createScale(POINT(20, 20, 20)), pts);
 	Matrix_t *rX = createRotation(X_AXIS, 1),
 		*rY = createRotation(Y_AXIS, 1),
 		*rZ = createRotation(Z_AXIS, 1);
