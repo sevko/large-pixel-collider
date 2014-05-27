@@ -179,7 +179,7 @@ void addSphere(Matrix_t * points, Point_t *origin, double radius){
 	int circle, point;
 	for(circle = 0; circle < 360 / CIRCLE_STEP_SIZE - 1; circle++){
 		int circleStart = circle * circlePts;
-		for(point = 0; point < circlePts - 1; point++){
+		for(point = 0; point < circlePts - 2; point++){
 			addTriangle(points,
 				COPY_POINT(sphere->points[circleStart + point + 1]),
 				COPY_POINT(sphere->points[circleStart + point]),
@@ -193,7 +193,7 @@ void addSphere(Matrix_t * points, Point_t *origin, double radius){
 		}
 	}
 
-	for(point = sphere->numPoints - circlePts; point < sphere->numPoints - 1;
+	for(point = sphere->numPoints - circlePts; point < sphere->numPoints - 2;
 		point++){
 		addTriangle(points,
 			COPY_POINT(sphere->points[point + 1]),

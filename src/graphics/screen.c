@@ -41,12 +41,8 @@ void (plotPixel)(Point_t *pt, int color){
 	int x = pt[X] + IMAGE_WIDTH / 2,
 		y = pt[Y] + IMAGE_HEIGHT / 2;
 
-	if(x < 0 || IMAGE_WIDTH - 1 < x ||
-		y < 0 || IMAGE_HEIGHT - 1 < y)
-		return;
-	else if(g_zbuffer->buf[y][x][0] > pt[Z])
-		return;
-	else {
+	if(!(x < 0 || IMAGE_WIDTH - 1 < x || y < 0 || IMAGE_HEIGHT - 1 < y) &&
+		(g_zbuffer->buf[y][x][1] == -1 || g_zbuffer->buf[y][x][0] < pt[Z])){
 		g_zbuffer->buf[y][x][0] = pt[Z];
 		g_zbuffer->buf[y][x][1] = color;
 	}
@@ -61,7 +57,7 @@ void renderScreen(void){
 }
 
 void clearScreen(void){
-	memset(g_zbuffer->buf, 0, sizeof(double) * IMAGE_HEIGHT * IMAGE_WIDTH * 2);
+	memset(g_zbuffer->buf, -1, sizeof(double) * IMAGE_HEIGHT * IMAGE_WIDTH * 2);
 	SDL_FillRect(g_screen, NULL, 0x000000);
 }
 

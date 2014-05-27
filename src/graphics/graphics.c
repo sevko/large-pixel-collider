@@ -12,6 +12,7 @@
 #define ABS(val) (val > 0?val:-val)
 
 void (drawLine)(Point_t *p1, Point_t *p2, int color){
+	p1 = COPY_POINT(p1);
 	int width = p2[X] - p1[X], height = p2[Y] - p1[Y];
 	int dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0;
 
@@ -58,51 +59,53 @@ void (drawLine)(Point_t *p1, Point_t *p2, int color){
 }
 
 void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, int color){
-	double **pts1;
+	Point_t **pts;
 
 	if(p1[Y] >= p2[Y] && p1[Y] >= p3[Y]){
 		if(p3[Y] > p2[Y])
-			pts1 = (Point_t *[]){p1, p3, p2};
+			pts = (Point_t *[]){p1, p3, p2};
 		else
-			pts1 = (Point_t *[]){p1, p2, p3};
+			pts = (Point_t *[]){p1, p2, p3};
 	}
 
 	else if(p2[Y] >= p1[Y] && p2[Y] >= p3[Y]){
 		if(p3[Y] > p1[Y])
-			pts1 = (Point_t *[]){p2, p3, p1};
+			pts = (Point_t *[]){p2, p3, p1};
 		else
-			pts1 = (Point_t *[]){p2, p1, p3};
+			pts = (Point_t *[]){p2, p1, p3};
 	}
 
 	else {
 		if(p2[Y] > p1[Y])
-			pts1 = (Point_t *[]){p3, p2, p1};
+			pts = (Point_t *[]){p3, p2, p1};
 		else
-			pts1 = (Point_t *[]){p3, p1, p2};
+			pts = (Point_t *[]){p3, p1, p2};
 	}
 
-	double m1 = (pts1[1][Y] - pts1[2][Y] != 0)?
-			(pts1[1][X] - pts1[2][X]) / (pts1[1][Y] - pts1[2][Y]):0,
-		m2 = (pts1[0][Y] - pts1[1][Y] != 0)?
-			(pts1[0][X] - pts1[1][X]) / (pts1[0][Y] - pts1[1][Y]):0,
-		m3 = (pts1[0][Y] - pts1[2][Y] != 0)?
-			(pts1[0][X] - pts1[2][X]) / (pts1[0][Y] - pts1[2][Y]):0;
-	Point_t *guide = COPY_POINT(pts1[2]);
+	pts = (Point_t *[]){COPY_POINT(pts[0]), COPY_POINT(pts[1]), COPY_POINT(pts[2])};
 
-	while(pts1[2][Y] < pts1[1][Y]){
-		drawLine(POINT(pts1[2][X], pts1[2][Y]), guide, color);
+	double m1 = (pts[1][Y] - pts[2][Y] != 0)?
+			(pts[1][X] - pts[2][X]) / (pts[1][Y] - pts[2][Y]):0,
+		m2 = (pts[0][Y] - pts[1][Y] != 0)?
+			(pts[0][X] - pts[1][X]) / (pts[0][Y] - pts[1][Y]):0,
+		m3 = (pts[0][Y] - pts[2][Y] != 0)?
+			(pts[0][X] - pts[2][X]) / (pts[0][Y] - pts[2][Y]):0;
+	Point_t *guide = COPY_POINT(pts[2]);
 
-		pts1[2][X] += m1;
-		pts1[2][Y]++;
+	while(pts[2][Y] < pts[1][Y]){
+		drawLine(pts[2], guide, color);
+
+		pts[2][X] += m1;
+		pts[2][Y]++;
 
 		guide[X] += m3;
 		guide[Y]++;
 	}
 
-	while(pts1[1][Y] < pts1[0][Y]){
-		drawLine(POINT(pts1[1][X], pts1[1][Y]), guide, color);
-		pts1[1][X] += m2;
-		pts1[1][Y]++;
+	while(pts[1][Y] < pts[0][Y]){
+		drawLine(pts[1], guide, color);
+		pts[1][X] += m2;
+		pts[1][Y]++;
 
 		guide[X] += m3;
 		guide[Y]++;
