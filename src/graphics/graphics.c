@@ -61,6 +61,14 @@ void (drawLine)(Point_t *p1, Point_t *p2, int color){
 void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, int color){
 	Point_t **pts;
 
+	p1 = COPY_POINT(p1);
+	p2 = COPY_POINT(p2);
+	p3 = COPY_POINT(p3);
+
+	p1[Y] = (int)p1[Y];
+	p2[Y] = (int)p2[Y];
+	p3[Y] = (int)p3[Y];
+
 	if(p1[Y] >= p2[Y] && p1[Y] >= p3[Y]){
 		if(p3[Y] > p2[Y])
 			pts = (Point_t *[]){p1, p3, p2};
@@ -81,8 +89,6 @@ void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, int color){
 		else
 			pts = (Point_t *[]){p3, p1, p2};
 	}
-
-	pts = (Point_t *[]){COPY_POINT(pts[0]), COPY_POINT(pts[1]), COPY_POINT(pts[2])};
 
 	double m1 = (pts[1][Y] - pts[2][Y] != 0)?
 			(pts[1][X] - pts[2][X]) / (pts[1][Y] - pts[2][Y]):0,
