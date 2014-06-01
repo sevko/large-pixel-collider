@@ -258,7 +258,7 @@ static Matrix_t * generateSphere(Point_t *origin, double radius){
 		multiplyMatrix(xRot, sphere);
 	}
 
-	Matrix_t * translation = createTranslation(POINT(origin[X], origin[Y], 0));
+	Matrix_t * translation = createTranslation(origin);
 	multiplyMatrix(translation, sphere);
 
 	freeMatrices(2, xRot, translation);
@@ -275,7 +275,7 @@ static Matrix_t * generateTorus(Point_t *origin, double rad1, double rad2){
 		multiplyMatrix(yRot, torus);
 	}
 
-	Matrix_t * translation = createTranslation(POINT(origin[X], origin[Y], 0));
+	Matrix_t * translation = createTranslation(origin);
 	multiplyMatrix(translation, torus);
 
 	freeMatrices(2, yRot, translation);

@@ -10,14 +10,8 @@
 // The name of the SDL screen.
 #define SCREEN_NAME "Graphics Engine: Screen"
 
-// Used for z-buffering.
-typedef struct {
-	// 3D representation of each pixel's current height/color.
-	double buf[IMAGE_HEIGHT][IMAGE_WIDTH][2];
-} ZBuffer_t;
-
-static SDL_Surface * g_screen; // The engine's SDL screen.
-static ZBuffer_t * g_zbuffer; // The screen's z-buffer.
+static SDL_Surface *g_screen; // The engine's SDL screen.
+ZBuffer_t *g_zbuffer = NULL; // The screen's z-buffer.
 
 /*
  * @brief Draw a pixel on the SDL screen.
@@ -34,7 +28,7 @@ void configureScreen(void){
 	g_screen = SDL_SetVideoMode(IMAGE_WIDTH, IMAGE_HEIGHT, 32, SDL_SWSURFACE);
 	SDL_WM_SetCaption(SCREEN_NAME, NULL);
 
-	g_zbuffer = malloc(sizeof(ZBuffer_t));
+	g_zbuffer = createZBuffer();
 }
 
 void (plotPixel)(Point_t *pt, int color){
@@ -57,7 +51,7 @@ void renderScreen(void){
 }
 
 void clearScreen(void){
-	memset(g_zbuffer->buf, -1, sizeof(double) * IMAGE_HEIGHT * IMAGE_WIDTH * 2);
+	clearZBuffer(g_zbuffer);
 	SDL_FillRect(g_screen, NULL, 0x000000);
 }
 
@@ -68,6 +62,69 @@ void quitScreen(void){
 
 int writeScreen(const char * const filename){
 	return SDL_SaveBMP(g_screen, filename);
+}
+
+ZBuffer_t *createZBuffer(void){
+	ZBuffer_t *zBuf = malloc(sizeof(ZBuffer_t));
+	clearZBuffer(zBuf);
+	return zBuf;
+}
+
+void clearZBuffer(ZBuffer_t *zBuf){
+	memset(zBuf->buf, -1, sizeof(double) * IMAGE_HEIGHT * IMAGE_WIDTH * 2);
+}
+
+ZBuffer_t *readZBufferFromFile(const char *filePath){
+	char *fullFilePath = malloc(strlen(filePath) + strlen(TEST_FILE_DIR) + 1);
+	strcpy(fullFilePath, TEST_FILE_DIR);
+	strcat(fullFilePath, filePath);
+	FILE *file = fopen(fullFilePath, "r");
+
+	int numPoints;
+	if(fscanf(file, "%d:", &numPoints) < 1)
+		FATAL("Reading '%s'. Failed to read number of pixels.", fullFilePath);
+
+	if(numPoints != IMAGE_WIDTH * IMAGE_HEIGHT * 2)
+		return NULL;
+
+	ZBuffer_t *zBuf = malloc(sizeof(ZBuffer_t));
+
+	int y, x;
+	for(y = 0; y < IMAGE_HEIGHT; y++)
+		for(x = 0; x < IMAGE_WIDTH; x++)
+			if(fscanf(file, "%lf,%lf,", &zBuf->buf[y][x][0],
+				&zBuf->buf[y][x][1]) < 2)
+				FATAL("Reading '%s'. Failed to read pixel (%d, %d).",
+					fullFilePath, x, y);
+
+	fclose(file);
+	free(fullFilePath);
+	return zBuf;
+}
+
+void writeZBufferToFile(ZBuffer_t *zBuf, const char *filePath){
+	char *fullFilePath = malloc(strlen(filePath) + strlen(TEST_FILE_DIR) + 1);
+	strcpy(fullFilePath, TEST_FILE_DIR);
+	strcat(fullFilePath, filePath);
+	FILE *file = fopen(fullFilePath, "w");
+
+	fprintf(file, "%d:", IMAGE_WIDTH * IMAGE_HEIGHT * 2);
+	int y, x;
+	for(y = 0; y < IMAGE_HEIGHT; y++)
+		for(x = 0; x < IMAGE_WIDTH; x++)
+			fprintf(file, "%lf,%lf,", zBuf->buf[y][x][0], zBuf->buf[y][x][1]);
+
+	fclose(file);
+}
+
+int equalZBuffers(ZBuffer_t *zBuf1, ZBuffer_t *zBuf2){
+	int y, x;
+	for(y = 0; y < IMAGE_HEIGHT; y++)
+		for(x = 0; x < IMAGE_WIDTH; x++)
+			if((int)zBuf1->buf[y][x][0] != (int)zBuf2->buf[y][x][0] ||
+				(int)zBuf1->buf[y][x][1] != (int)zBuf2->buf[y][x][1])
+				return 0;
+	return 1;
 }
 
 static void drawPixel(int x, int y, int color){

@@ -15,9 +15,6 @@
  */
 #define RAD (M_PI / 180)
 
-//! The directory to contain all ::Matrix_t points CSV files.
-#define TEST_FILE_DIR "test/"
-
 /*!
  *  @brief Return the dot-product of a row of one ::Matrix_t and a column of
  *      another ::Matrix_t.

@@ -6,10 +6,12 @@
 #include <ncurses.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "src/globals.h"
 #include "src/unit_tests.h"
 #include "src/graphics/geometry.h"
+#include "src/graphics/graphics.h"
 #include "src/graphics/matrix.h"
 #include "src/graphics/screen.h"
 
@@ -102,6 +104,8 @@
 //! The terminal escape code to reset the terminal's foreground color.
 #define TERM_COLOR_NORMAL "\033[0;00m"
 
+extern ZBuffer_t *g_zbuffer;
+
 /*!
  *  @brief Test matrix.h addPoint().
  */
@@ -181,6 +185,16 @@ static int testCreateIdentity(void);
  *  @brief Test matrix.h equalMatrix().
  */
 static int testEqualMatrix(void);
+
+/*
+ * @brief Test ::screen::scanlineRender().
+ */
+static int testScanLineRender(void);
+
+/*
+ * @brief Test ::screen::ZBuffer_t functionality.
+ */
+static int testZBuffering(void);
 
 static int testAddPoint(void){
 	Matrix_t * points = createMatrix();
@@ -398,6 +412,31 @@ static int testEqualMatrix(void){
 	return result;
 }
 
+static int testScanLineRender(void){
+	scanlineRender(POINT(0, 0, 5), POINT(100, 200, 10),
+		POINT(130, -30, 20), 0xFFFFFF);
+	ZBuffer_t *fileZBuf = readZBufferFromFile("testScanLineRender.csv");
+	int equalZBufs = equalZBuffers(g_zbuffer, fileZBuf);
+	free(fileZBuf);
+	clearZBuffer(g_zbuffer);
+	return equalZBufs;
+}
+
+static int testZBuffering(void){
+	Matrix_t *pts = createMatrix();
+	addRectangularPrism(pts, POINT(0, 0, 300), POINT(20, 40, 60));
+	addSphere(pts, POINT(0, 0, 0), 80);
+	addTorus(pts, POINT(20, 20, 200), 30, 20);
+	drawMatrix(pts);
+	freeMatrix(pts);
+
+	ZBuffer_t *fileZBuf = readZBufferFromFile("testZBuffering.csv");
+	int equalZBufs = equalZBuffers(g_zbuffer, fileZBuf);
+	free(fileZBuf);
+	clearZBuffer(g_zbuffer);
+	return equalZBufs;
+}
+
 void unitTests(void){
 	// initscr();
 	int hasColors = 1;
@@ -410,6 +449,7 @@ void unitTests(void){
 	else
 		puts("Begin unit tests.\n");
 
+	g_zbuffer = createZBuffer();
 	TEST(testMultiplyScalar());
 	TEST(testMultiplyMatrices());
 	TEST(testEqualMatrix());
@@ -426,6 +466,9 @@ void unitTests(void){
 	TEST(testCreateRotation());
 	TEST(testAddEdge());
 	TEST(testCreateIdentity());
+	TEST(testScanLineRender());
+	TEST(testZBuffering());
+	free(g_zbuffer);
 
 	if(hasColors)
 		printf("\n%sUnit tests completed successfully.%s\n", TERM_COLOR_HEADER,
