@@ -21,6 +21,9 @@
 //! The default color for pixels.
 #define TEST_COLOR 0x00FF0000
 
+//! The directory to contain all ::Matrix_t points CSV files.
+#define TEST_FILE_DIR "test/"
+
 /*!
  *  @brief Printf-style function macro with helpful debugging information.
  *

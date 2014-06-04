@@ -52,6 +52,11 @@
 #define plotPixel(...) \
 	DRAW_PIXEL_VA_MACRO(__VA_ARGS__, plotPixel2, plotPixel1)(__VA_ARGS__)
 
+typedef struct {
+	// 3D representation of each pixel's current height/color.
+	double buf[IMAGE_HEIGHT][IMAGE_WIDTH][2];
+} ZBuffer_t;
+
 /*!
  *  @brief Initialize the SDL screen.
  */
@@ -95,3 +100,58 @@ void quitScreen(void);
  *  @param filename The path of the BMP file to save the screen to.
  */
 int writeScreen(const char * const filename);
+
+/*
+ * @brief Create a ::ZBuffer_t.
+ *
+ * @return The new ::ZBuffer_t.
+*/
+ZBuffer_t *createZBuffer(void);
+
+/*
+ * @brief Zero out a ::ZBuffer_t::buf.
+ *
+ * @param zBuf The ::ZBuffer_t to clear.
+*/
+void clearZBuffer(ZBuffer_t *zBuf);
+/*
+ * @brief Recreate a ::ZBuffer_t from a file written with
+ *      ::writeZBufferToFile().
+ *
+ * @note Used only by ::unit_tests.
+ * @param filePath The path to the file to read.
+ *
+ * @return A pointer to the newly created ::ZBuffer_t.
+*/
+ZBuffer_t *readZBufferFromFile(const char *filePath);
+/*
+ * @brief Write a ::ZBuffer_t to a file.
+ *
+ * The ::ZBuffer_t::buf is written to a file named @p filePath in the following
+ * format:
+ *
+ *      %(d1):%(f1),%(f2),...
+ *
+ *      %(d1) : The number of points in ::ZBuffer_t::buf.
+ *      %(f1) : The z-coordinate of the first pixel.
+ *      %(f2) : The color of the first pixel.
+ *      ... : The pattern "%(f1),%(f2)," for every other pixel.
+ *
+ * @param zBuf The ::ZBuffer_t to write.
+ * @param filePath The path of the file to write.
+*/
+void writeZBufferToFile(ZBuffer_t *zBuf, const char *filePath);
+
+/*
+ * @brief Determine whether two ::ZBuffer_t are identical.
+ *
+ * The contents of ::ZBuffer_t::buf are inspected for equality. Note that both
+ * ::ZBuffer_t::buf are expected to contain ::IMAGE_HEIGHT * ::IMAGE_WIDTH
+ * points; if one does not, undefined behavior ensues.
+ *
+ * @param zBuf1 The first ::ZBuffer_t.
+ * @param zBuf2 The second ::ZBuffer_t.
+ *
+ * @return 1 if the ::ZBuffer_t::buf are equal; 0, otherwise.
+*/
+int equalZBuffers(ZBuffer_t *zBuf1, ZBuffer_t *zBuf2);
