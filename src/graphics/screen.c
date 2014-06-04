@@ -80,11 +80,11 @@ ZBuffer_t *readZBufferFromFile(const char *filePath){
 	strcat(fullFilePath, filePath);
 	FILE *file = fopen(fullFilePath, "r");
 
-	int numPoints;
-	if(fscanf(file, "%d:", &numPoints) < 1)
-		FATAL("Reading '%s'. Failed to read number of pixels.", fullFilePath);
+	int width, height;
+	if(fscanf(file, "%d, %d:", &width, &height) < 1)
+		FATAL("Reading '%s'. Failed to read width and height.", fullFilePath);
 
-	if(numPoints != IMAGE_WIDTH * IMAGE_HEIGHT * 2)
+	if(width != IMAGE_WIDTH || height != IMAGE_HEIGHT)
 		return NULL;
 
 	ZBuffer_t *zBuf = malloc(sizeof(ZBuffer_t));
@@ -108,7 +108,7 @@ void writeZBufferToFile(ZBuffer_t *zBuf, const char *filePath){
 	strcat(fullFilePath, filePath);
 	FILE *file = fopen(fullFilePath, "w");
 
-	fprintf(file, "%d:", IMAGE_WIDTH * IMAGE_HEIGHT * 2);
+	fprintf(file, "%d, %d:", IMAGE_WIDTH, IMAGE_HEIGHT);
 	int y, x;
 	for(y = 0; y < IMAGE_HEIGHT; y++)
 		for(x = 0; x < IMAGE_WIDTH; x++)

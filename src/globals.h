@@ -13,12 +13,10 @@
 #include <stdlib.h>
 
 //! The width of the engine's screen. The what.
-// #define IMAGE_WIDTH 800
-#define IMAGE_WIDTH 500
+#define IMAGE_WIDTH 800
 
 //! The height of the engine's screen.
-// #define IMAGE_HEIGHT 700
-#define IMAGE_HEIGHT 500
+#define IMAGE_HEIGHT 700
 
 //! The default color for pixels.
 #define TEST_COLOR 0x00FF0000

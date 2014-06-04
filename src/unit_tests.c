@@ -92,6 +92,27 @@
 		return result;\
 	} while(0)
 
+/*
+ * @brief Indicate whether ::g_zbuffer matches the ::ZBuffer_t stored in a file.
+ *
+ * @param filename (char *) The name of a file written with
+ *      ::writeZBufferToFile().
+ *
+ * @return 1 if the ::ZBuffer_t stored in a file named @filename is equal to the
+ *      current ::ZBuffer_t, ::g_zbuffer; otherwise, return 0.
+*/
+#define ASSERT_EQUAL_SCREEN(filename) \
+	do {\
+		ZBuffer_t *fileZBuf;\
+		if(!(fileZBuf = readZBufferFromFile(filename)))\
+			return 0;\
+	\
+		int equalZBufs = equalZBuffers(g_zbuffer, fileZBuf);\
+		free(fileZBuf);\
+		clearZBuffer(g_zbuffer);\
+		return equalZBufs;\
+	} while(0);\
+
 //! The terminal escape code to set a foreground color for a success message.
 #define TERM_COLOR_SUCCESS "\033[38;5;34m"
 
@@ -185,6 +206,11 @@ static int testCreateIdentity(void);
  *  @brief Test matrix.h equalMatrix().
  */
 static int testEqualMatrix(void);
+
+/*
+ * @brief Test ::graphics::drawLine().
+*/
+static int testDrawLine(void);
 
 /*
  * @brief Test ::screen::scanlineRender().
@@ -412,14 +438,17 @@ static int testEqualMatrix(void){
 	return result;
 }
 
+static int testDrawLine(void){
+	drawLine(POINT(0, 0), POINT(100, 200));
+	drawLine(POINT(100, 200), POINT(230, 190));
+	drawLine(POINT(230, 190), POINT(0, 0));
+	ASSERT_EQUAL_SCREEN("testDrawLine.csv");
+}
+
 static int testScanLineRender(void){
 	scanlineRender(POINT(0, 0, 5), POINT(100, 200, 10),
 		POINT(130, -30, 20), 0xFFFFFF);
-	ZBuffer_t *fileZBuf = readZBufferFromFile("testScanLineRender.csv");
-	int equalZBufs = equalZBuffers(g_zbuffer, fileZBuf);
-	free(fileZBuf);
-	clearZBuffer(g_zbuffer);
-	return equalZBufs;
+	ASSERT_EQUAL_SCREEN("testScanLineRender.csv");
 }
 
 static int testZBuffering(void){
@@ -429,12 +458,7 @@ static int testZBuffering(void){
 	addTorus(pts, POINT(20, 20, 200), 30, 20);
 	drawMatrix(pts);
 	freeMatrix(pts);
-
-	ZBuffer_t *fileZBuf = readZBufferFromFile("testZBuffering.csv");
-	int equalZBufs = equalZBuffers(g_zbuffer, fileZBuf);
-	free(fileZBuf);
-	clearZBuffer(g_zbuffer);
-	return equalZBufs;
+	ASSERT_EQUAL_SCREEN("testZBuffering.csv");
 }
 
 void unitTests(void){
@@ -466,6 +490,7 @@ void unitTests(void){
 	TEST(testCreateRotation());
 	TEST(testAddEdge());
 	TEST(testCreateIdentity());
+	TEST(testDrawLine());
 	TEST(testScanLineRender());
 	TEST(testZBuffering());
 	free(g_zbuffer);
