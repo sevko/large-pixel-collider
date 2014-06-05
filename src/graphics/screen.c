@@ -6,9 +6,7 @@
 
 // The ms delay before the SDL screen quits after ::quitScreen() is called.
 #define QUIT_DELAY 400
-
-// The name of the SDL screen.
-#define SCREEN_NAME "Graphics Engine: Screen"
+#define SCREEN_NAME "Graphics Engine: Screen" // The name of the SDL screen.
 
 static SDL_Surface *g_screen; // The engine's SDL screen.
 ZBuffer_t *g_zbuffer = NULL; // The screen's z-buffer.

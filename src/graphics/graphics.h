@@ -58,6 +58,21 @@
 #define drawLine(...) \
 	DRAW_LINE_VA_MACRO(__VA_ARGS__, drawLine2, drawLine1)(__VA_ARGS__)
 
+/*
+ * @brief Return an ::RGB_t representation of a color.
+ *
+ * @param r (int) The red color value.
+ * @param g (int) The green color value.
+ * @param b (int) The blue color value.
+*/
+#define RGB(r, g, b) ((int []){r, g, b})
+
+#define R 0 // The index of the red color value in a ::RGB_t *.
+#define G 1 // The index of the green color value in a ::RGB_t *.
+#define B 2 // The index of the blue color value in a ::RGB_t *.
+
+typedef int RGB_t; // Used to represent RGB color values.
+
 /*!
  *  @brief Rasterize a line.
  *
@@ -68,7 +83,7 @@
  *  @param p2 The second endpoint.
  *  @param color The color of the line.
  */
-void (drawLine)(Point_t *p1, Point_t *p2, int color);
+void (drawLine)(Point_t *p1, Point_t *p2, RGB_t *color);
 
 /*
  * @brief Fill a triangle using scanline-rendering.
@@ -78,4 +93,24 @@ void (drawLine)(Point_t *p1, Point_t *p2, int color);
  * @param p3 The third vertex of the triangle.
  * @param color The color of the filled triangle.
 */
-void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, int color);
+void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, RGB_t *color);
+
+/*
+ * @brief Apply flat-shading to a color.
+ *
+ * @param color The original color.
+ *
+ * @return The RGB value of a color with ambient, diffuse, and spectral
+ *      lighting applied..
+*/
+RGB_t *flatShade(RGB_t *color);
+
+/*
+ * @brief Convert an ::RGB_t to an int.
+ *
+ * @param color A color.
+ *
+ * @return An int representing the RGB values stored in @p color, in the form:
+ *      0xRRGGBB.
+*/
+int rgbToInt(RGB_t *color);

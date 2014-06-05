@@ -70,15 +70,15 @@
 	CREATE_POINT_VA_MACRO(__VA_ARGS__, POINT4, POINT3, POINT2)(__VA_ARGS__)
 
 #define COPY_POINT(pt) (POINT(pt[X], pt[Y], pt[Z], pt[W]))
-#define X_AXIS 0 // Macro for the x-axis.
-#define Y_AXIS 1 // Macro for the y-axis.
-#define Z_AXIS 2 // Macro for the z-axis.
+#define X_AXIS 0 // The x-axis.
+#define Y_AXIS 1 // The y-axis.
+#define Z_AXIS 2 // The z-axis.
 #define X 0 // The index of the x-coordinate of a point in ::Point_t *.
 #define Y 1 // The index of the y-coordinate of a point in ::Point_t *.
 #define Z 2 // The index of the x-coordinate of a point in ::Point_t *.
 #define W 3 // The index of the w-coordinate of a point in ::Point_t *.
 
-typedef double Point_t;
+typedef double Point_t; // Used to represent multi-dimensional points.
 
 // A struct to contain point coordinates.
 typedef struct Matrix {

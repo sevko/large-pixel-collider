@@ -85,7 +85,14 @@ void freeMatrixFromVoid(void * matrix){
 
 void drawMatrix(const Matrix_t * const matrix){
 	int color = 0;
-	int colors[] = {0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF};
+	RGB_t *colors[] = {
+		RGB(0xFF, 0x00, 0x00),
+		RGB(0x00, 0xFF, 0x00),
+		RGB(0x00, 0x00, 0xFF),
+		RGB(0xFF, 0xFF, 0x00),
+		RGB(0xFF, 0x00, 0xFF)
+	};
+
 	int ptPair;
 	for(ptPair = 0; ptPair < matrix->numPoints - 2; ptPair += 3){
 		Point_t *p1 = matrix->points[ptPair],

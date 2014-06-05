@@ -11,7 +11,7 @@
  */
 #define ABS(val) (val > 0?val:-val)
 
-void (drawLine)(Point_t *p1, Point_t *p2, int color){
+void (drawLine)(Point_t *p1, Point_t *p2, RGB_t *color){
 	p1 = COPY_POINT(p1);
 	int width = p2[X] - p1[X], height = p2[Y] - p1[Y];
 	int dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0;
@@ -44,7 +44,7 @@ void (drawLine)(Point_t *p1, Point_t *p2, int color){
 
 	unsigned int numerator = longDist >> 1, pixel;
 	for(pixel = 0; pixel <= longDist; pixel++){
-		plotPixel(p1, color);
+		plotPixel(p1, rgbToInt(color));
 		numerator += shortDist;
 		if(numerator >= longDist){
 			numerator -= longDist;
@@ -58,7 +58,7 @@ void (drawLine)(Point_t *p1, Point_t *p2, int color){
 	}
 }
 
-void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, int color){
+void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, RGB_t *color){
 	Point_t **pts;
 
 	p1 = COPY_POINT(p1);
@@ -116,4 +116,16 @@ void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, int color){
 		guide[X] += m3;
 		guide[Y]++;
 	}
+}
+
+RGB_t *flatShade(RGB_t *color){
+	// int r = (color & 0xFF0000) >> 4 * 4,
+		// g = (color & 0x00FF00) >> 4 * 2,
+		// b = color & 0x0000FF;
+	// return i * ((r << 4 * 4) + (g << 4 * 2) + b);
+	return color;
+}
+
+int rgbToInt(RGB_t *color){
+	return (color[R] << 4 * 4) + (color[G] << 4 * 2) + color[B];
 }

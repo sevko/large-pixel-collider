@@ -12,14 +12,11 @@
 
 #include <stdlib.h>
 
-//! The width of the engine's screen. The what.
-#define IMAGE_WIDTH 800
+#include "src/graphics/matrix.h"
 
-//! The height of the engine's screen.
-#define IMAGE_HEIGHT 700
-
-//! The default color for pixels.
-#define TEST_COLOR 0x00FF0000
+#define IMAGE_WIDTH 800 //! The width of the engine's screen. The what.
+#define IMAGE_HEIGHT 700 //! The height of the engine's screen.
+#define TEST_COLOR RGB(0xFF, 0x00, 0x00) //! The default color for pixels.
 
 //! The directory to contain all ::Matrix_t points CSV files.
 #define TEST_FILE_DIR "test/"
