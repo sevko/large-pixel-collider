@@ -9,6 +9,19 @@
 #include "src/graphics/graphics.h"
 #include "src/graphics/matrix.h"
 
+/*
+ * @brief Get a ::Point_t representation of a ::Matrix_t row.
+ *
+ * Values are taken from the first four columns of the matrix, because this
+ * macro is only useful in the context of ::multiplyMatrix().
+ *
+ * @param matrix (::Matrix_t *) A matrix.
+ * @param row (int) The row to retrieve values from.
+*/
+#define GET_HORIZONTAL_POINT(matrix, row) \
+	(POINT(matrix->points[0][row], matrix->points[1][row],\
+		matrix->points[2][row], matrix->points[3][row]))
+
 /*!
  *  The ratio between degrees and radians -- faciliates conversion from the
  *  former to the latter.
@@ -16,19 +29,14 @@
 #define RAD (M_PI / 180)
 
 /*!
- *  @brief Return the dot-product of a row of one ::Matrix_t and a column of
- *      another ::Matrix_t.
+ *  @brief Calculate a dot-product.
  *
- *  @param m1 The first @a n*4 matrix (in practice, should always be @a 4*4).
- *  @param row The row of @p m1 to be multiplied.
- *  @param m2 The second @a 4*n ::Matrix_t.
- *  @param col The col of @p m2 to be multiplied.
+ *  @param p1 A point.
+ *  @param p2 A point.
  *
- *  @return The dot-product of row @p row of m1::points and column @p col of
- *      m2::points.
+ *  @return The dot-product of @p p1 and @p p2.
  */
-static double dotProduct(const Matrix_t * const m1, int row,
-	const Matrix_t * const m2, int col);
+static double dotProduct(Point_t *p1, Point_t *p2);
 
 /*
  *  @brief Indicate whether or not a given triangle is visible to the camera.
@@ -133,10 +141,11 @@ void multiplyMatrices(int numMatrices, ...){
 void multiplyMatrix(Matrix_t * const m1, Matrix_t * const m2){
 	int col;
 	for(col = 0; col < m2->numPoints; col++){
-		double dot0 = dotProduct(m1, 0, m2, col);
-		double dot1 = dotProduct(m1, 1, m2, col);
-		double dot2 = dotProduct(m1, 2, m2, col);
-		double dot3 = dotProduct(m1, 3, m2, col);
+
+		double dot0 = dotProduct(GET_HORIZONTAL_POINT(m1, 0), m2->points[col]);
+		double dot1 = dotProduct(GET_HORIZONTAL_POINT(m1, 1), m2->points[col]);
+		double dot2 = dotProduct(GET_HORIZONTAL_POINT(m1, 2), m2->points[col]);
+		double dot3 = dotProduct(GET_HORIZONTAL_POINT(m1, 3), m2->points[col]);
 
 		m2->points[col][X] = dot0;
 		m2->points[col][Y] = dot1;
@@ -301,12 +310,8 @@ void writePointsToFile(Matrix_t * points, char * filename){
 	fclose(file);
 }
 
-static double dotProduct(const Matrix_t * const m1, int row,
-	const Matrix_t * const m2, int col){
-	return m1->points[0][row] * m2->points[col][X] +
-		m1->points[1][row] * m2->points[col][Y] +
-		m1->points[2][row] * m2->points[col][Z] +
-		m1->points[3][row] * m2->points[col][W];
+static double dotProduct(Point_t *p1, Point_t *p2){
+	return p1[X] * p2[X] + p1[Y] * p2[Y] + p1[Z] * p2[Z] + p1[W] * p2[W];
 }
 
 static int backfaceCull(Point_t *p1, Point_t *p2, Point_t *p3){
