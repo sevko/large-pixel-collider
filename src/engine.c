@@ -60,9 +60,9 @@ static void setup(void);
 static void argumentHandler(int argc, char * argv[]);
 
 void test(){
-	// printf("%X\n", rgbToInt(flatShade((int []){0xAB, 0xCD, 0xEF})));
 	configureScreen();
 	Matrix_t *pts = createMatrix();
+	// addSphere(pts, POINT(0, 0), 200);
 	addTorus(pts, POINT(0, 0), 100, 200);
 	Matrix_t *rX = createRotation(X_AXIS, 1),
 		*rY = createRotation(Y_AXIS, 1),
@@ -99,7 +99,6 @@ static void argumentHandler(int argc, char * argv[]){
 			FATAL("Argument not recognized.");
 	}
 	else
-		// puts("No arguments given. Exiting.");
 		test();
 }
 

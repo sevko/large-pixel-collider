@@ -16,7 +16,7 @@
 
 #define IMAGE_WIDTH 800 //! The width of the engine's screen. The what.
 #define IMAGE_HEIGHT 700 //! The height of the engine's screen.
-#define TEST_COLOR RGB(0xFF, 0x00, 0x00) //! The default color for pixels.
+#define TEST_COLOR 0xFF0000 //! The default color for pixels.
 
 //! The directory to contain all ::Matrix_t points CSV files.
 #define TEST_FILE_DIR "test/"

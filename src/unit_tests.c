@@ -446,8 +446,7 @@ static int testDrawLine(void){
 }
 
 static int testScanLineRender(void){
-	scanlineRender(POINT(0, 0, 5), POINT(100, 200, 10),
-		POINT(130, -30, 20), RGB(0xFF, 0xFF, 0xFF));
+	scanlineRender(POINT(0, 0, 5), POINT(100, 200, 10), POINT(130, -30, 20));
 	ASSERT_EQUAL_SCREEN("testScanLineRender.csv");
 }
 

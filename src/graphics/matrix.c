@@ -28,16 +28,6 @@
  */
 #define RAD (M_PI / 180)
 
-/*!
- *  @brief Calculate a dot-product.
- *
- *  @param p1 A point.
- *  @param p2 A point.
- *
- *  @return The dot-product of @p p1 and @p p2.
- */
-static double dotProduct(Point_t *p1, Point_t *p2);
-
 /*
  *  @brief Indicate whether or not a given triangle is visible to the camera.
  *
@@ -92,23 +82,13 @@ void freeMatrixFromVoid(void * matrix){
 }
 
 void drawMatrix(const Matrix_t * const matrix){
-	int color = 0;
-	RGB_t *colors[] = {
-		RGB(0xFF, 0x00, 0x00),
-		RGB(0x00, 0xFF, 0x00),
-		RGB(0x00, 0x00, 0xFF),
-		RGB(0xFF, 0xFF, 0x00),
-		RGB(0xFF, 0x00, 0xFF)
-	};
-
 	int ptPair;
 	for(ptPair = 0; ptPair < matrix->numPoints - 2; ptPair += 3){
 		Point_t *p1 = matrix->points[ptPair],
 			*p2 = matrix->points[ptPair + 1],
 			*p3 = matrix->points[ptPair + 2];
-		color++;
 		if(backfaceCull(p1, p2, p3))
-			scanlineRender(p1, p2, p3, colors[color % 5]);
+			scanlineRender(p1, p2, p3);
 	}
 }
 
@@ -262,9 +242,8 @@ Matrix_t * readPointsFromFile(char * filename){
 	strcat(fullFilename, filename);
 
 	FILE * file;
-	if((file = fopen(fullFilename, "r")) == NULL){
+	if((file = fopen(fullFilename, "r")) == NULL)
 		FATAL("Cannot open file %s.", fullFilename);
-	}
 
 	free(fullFilename);
 	Matrix_t * points = createMatrix();
@@ -310,18 +289,24 @@ void writePointsToFile(Matrix_t * points, char * filename){
 	fclose(file);
 }
 
-static double dotProduct(Point_t *p1, Point_t *p2){
+double dotProduct(Point_t *p1, Point_t *p2){
 	return p1[X] * p2[X] + p1[Y] * p2[Y] + p1[Z] * p2[Z] + p1[W] * p2[W];
 }
 
+Point_t *surfaceNormal(Point_t *p1, Point_t *p2, Point_t *p3){
+	Point_t *norm = malloc(sizeof(Point_t)),
+		*u = SUB_POINT(p2, p1),
+		*v = SUB_POINT(p3, p1);
+
+	norm[X] = (u[Y] * v[Z]) - (u[Z] * v[Y]);
+	norm[Y] = (u[Z] * v[X]) - (u[X] * v[Z]);
+	norm[Z] = (u[X] * v[Y]) - (u[Y] * v[X]);
+	return norm;
+}
+
 static int backfaceCull(Point_t *p1, Point_t *p2, Point_t *p3){
-	Point_t * u = POINT(p2[X] - p1[X], p2[Y] - p1[Y], p2[Z] - p1[Z]);
-	Point_t * v = POINT(p3[X] - p1[X], p3[Y] - p1[Y], p3[Z] - p1[Z]);
-
-	double normalX = (u[Y] * v[Z]) - (u[Z] * v[Y]);
-	double normalY = (u[Z] * v[X]) - (u[X] * v[Z]);
-	double normalZ = (u[X] * v[Y]) - (u[Y] * v[X]);
-
-	int dotProduct = normalX * 0 + normalY * 0 + normalZ * -1;
-	return dotProduct < 0;
+	Point_t *norm = surfaceNormal(p1, p2, p3);
+	int culled = -(int)norm[Z] < 0;
+	free(norm);
+	return culled;
 }

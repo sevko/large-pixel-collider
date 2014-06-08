@@ -83,7 +83,7 @@ typedef int RGB_t; // Used to represent RGB color values.
  *  @param p2 The second endpoint.
  *  @param color The color of the line.
  */
-void (drawLine)(Point_t *p1, Point_t *p2, RGB_t *color);
+void (drawLine)(Point_t *p1, Point_t *p2, int color);
 
 /*
  * @brief Fill a triangle using scanline-rendering.
@@ -91,26 +91,17 @@ void (drawLine)(Point_t *p1, Point_t *p2, RGB_t *color);
  * @param p1 The first vertex of the triangle.
  * @param p2 The second vertex of the triangle.
  * @param p3 The third vertex of the triangle.
- * @param color The color of the filled triangle.
 */
-void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, RGB_t *color);
+void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3);
 
 /*
- * @brief Apply flat-shading to a color.
+ * @brief Calculate the flat-shaded color of a triangle.
  *
- * @param color The original color.
+ * @param p1 The first vertex of the triangle.
+ * @param p2 The second vertex of the triangle.
+ * @param p3 The third vertex of the triangle.
  *
- * @return The RGB value of a color with ambient, diffuse, and spectral
- *      lighting applied..
+ * @return The RGB color of the triangle with ambient, diffuse, and spectral
+ *      lighting applied.
 */
-RGB_t *flatShade(RGB_t *color);
-
-/*
- * @brief Convert an ::RGB_t to an int.
- *
- * @param color A color.
- *
- * @return An int representing the RGB values stored in @p color, in the form:
- *      0xRRGGBB.
-*/
-int rgbToInt(RGB_t *color);
+int flatShade(Point_t *p1, Point_t *p2, Point_t *p3);

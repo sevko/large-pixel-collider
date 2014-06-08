@@ -11,20 +11,28 @@
  */
 #define ABS(val) (val > 0?val:-val)
 
-void (drawLine)(Point_t *p1, Point_t *p2, RGB_t *color){
+
+/*
+ * @brief Convert an ::RGB_t to an int.
+ *
+ * @param color A color.
+ *
+ * @return An int representing the RGB values stored in @p color, in the form:
+ *      0xRRGGBB.
+*/
+static int rgbToInt(RGB_t *color);
+
+void (drawLine)(Point_t *p1, Point_t *p2, int color){
 	p1 = COPY_POINT(p1);
-	int width = p2[X] - p1[X], height = p2[Y] - p1[Y];
-	int dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0;
+	int width = p2[X] - p1[X],
+		height = p2[Y] - p1[Y];
+	int dx1 = 0,
+		dy1 = 0,
+		dx2 = 0,
+		dy2 = 0;
 
-	if(width < 0)
-		dx1 = dx2 = -1;
-	else
-		dx1 = dx2 = 1;
-
-	if(height < 0)
-		dy1 = -1;
-	else
-		dy1 = 1;
+	dx1 = dx2 = (width < 0)?-1:1;
+	dy1 = (height < 0)?-1:1;
 
 	// Unsigned arithmetic is faster than signed.
 	unsigned int longDist = ABS(width);
@@ -35,16 +43,13 @@ void (drawLine)(Point_t *p1, Point_t *p2, RGB_t *color){
 		longDist = shortDist;
 		shortDist = tempDist;
 
-		if(height < 0)
-			dy2 = -1;
-		else
-			dy2 = 1;
+		dy2 = (height < 0)?-1:1;
 		dx2 = 0;
 	}
 
 	unsigned int numerator = longDist >> 1, pixel;
 	for(pixel = 0; pixel <= longDist; pixel++){
-		plotPixel(p1, rgbToInt(color));
+		plotPixel(p1, color);
 		numerator += shortDist;
 		if(numerator >= longDist){
 			numerator -= longDist;
@@ -58,8 +63,9 @@ void (drawLine)(Point_t *p1, Point_t *p2, RGB_t *color){
 	}
 }
 
-void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, RGB_t *color){
+void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3){
 	Point_t **pts;
+	int color = flatShade(p1, p2, p3);
 
 	p1 = COPY_POINT(p1);
 	p2 = COPY_POINT(p2);
@@ -118,14 +124,27 @@ void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, RGB_t *color){
 	}
 }
 
-RGB_t *flatShade(RGB_t *color){
-	// int r = (color & 0xFF0000) >> 4 * 4,
-		// g = (color & 0x00FF00) >> 4 * 2,
-		// b = color & 0x0000FF;
-	// return i * ((r << 4 * 4) + (g << 4 * 2) + b);
-	return color;
+int flatShade(Point_t *p1, Point_t *p2, Point_t *p3){
+	Point_t *lDP = POINT(0, 8000, 0);
+	RGB_t *lDC = RGB(0xAA, 0xBB, 0x00);
+
+	Point_t *norm = surfaceNormal(p1, p2, p3),
+		*lightVector = SUB_POINT(p3, lDP);
+	NORMALIZE(norm);
+	NORMALIZE(lightVector);
+	double dot = dotProduct(norm, lightVector);
+	if(dot < 0)
+		dot = 0;
+
+	RGB_t *diffuseColor = RGB(
+		lDC[R] * dot,
+		lDC[G] * dot,
+		lDC[B] * dot
+	);
+	free(norm);
+	return rgbToInt(diffuseColor);
 }
 
-int rgbToInt(RGB_t *color){
+static int rgbToInt(RGB_t *color){
 	return (color[R] << 4 * 4) + (color[G] << 4 * 2) + color[B];
 }

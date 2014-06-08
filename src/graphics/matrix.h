@@ -69,7 +69,36 @@
 #define POINT(...) \
 	CREATE_POINT_VA_MACRO(__VA_ARGS__, POINT4, POINT3, POINT2)(__VA_ARGS__)
 
+/*
+ * @brief Normalize a vector.
+ *
+ * @param vector (::Point_t *) A vector.
+*/
+#define NORMALIZE(vector) \
+	do {\
+		double length = sqrt(vector[X] * vector[X] + vector[Y] * vector[Y] +\
+			vector[Z] * vector[Z]);\
+		vector[X] /= length;\
+		vector[Y] /= length;\
+		vector[Z] /= length;\
+	} while(0)
+
+/*
+ * @brief Create the ::Point_t * difference of two ::Point_t.
+ *
+ * @param p1 (::Point_t *) A point.
+ * @param p2 (::Point_t *) A point.
+*/
+#define SUB_POINT(p1, p2) \
+	POINT(p1[X] - p2[X], p1[Y] - p2[Y], p1[Z] - p2[Z], p1[Z] - p2[Z])
+
+/*
+ * @brief Create a copy of a ::Point_t.
+ *
+ * @param pt (::Point_t *) A ::Point_t.
+*/
 #define COPY_POINT(pt) (POINT(pt[X], pt[Y], pt[Z], pt[W]))
+
 #define X_AXIS 0 // The x-axis.
 #define Y_AXIS 1 // The y-axis.
 #define Z_AXIS 2 // The z-axis.
@@ -290,3 +319,24 @@ Matrix_t *readPointsFromFile(char *filename);
  *      be stored in the TEST_FILE_DIR directory.
  */
 void writePointsToFile(Matrix_t *points, char *filename);
+
+/*!
+ *  @brief Calculate a dot-product.
+ *
+ *  @param p1 A point.
+ *  @param p2 A point.
+ *
+ *  @return The dot-product of @p p1 and @p p2.
+ */
+double dotProduct(Point_t *p1, Point_t *p2);
+
+/*
+ * @brief Return the normal vector to a triangle.
+ *
+ * @param p1 The first vertex of the triangle.
+ * @param p2 The second vertex of the triangle.
+ * @param p3 The third vertex of the triangle.
+ *
+ * @return The surface normal of the triangle in ::Point_t form.
+*/
+Point_t *surfaceNormal(Point_t *p1, Point_t *p2, Point_t *p3);
