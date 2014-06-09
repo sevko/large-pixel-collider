@@ -11,6 +11,17 @@
  */
 #define ABS(val) (val > 0?val:-val)
 
+/*
+ * @brief Calculate the flat-shaded color of a triangle.
+ *
+ * @param p1 The first vertex of the triangle.
+ * @param p2 The second vertex of the triangle.
+ * @param p3 The third vertex of the triangle.
+ *
+ * @return The RGB color of the triangle with ambient, diffuse, and spectral
+ *      lighting applied.
+*/
+static int flatShade(Point_t *p1, Point_t *p2, Point_t *p3);
 
 /*
  * @brief Convert an ::RGB_t to an int.
@@ -124,8 +135,19 @@ void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3){
 	}
 }
 
-int flatShade(Point_t *p1, Point_t *p2, Point_t *p3){
-	Point_t *lDP = POINT(0, 8000, 0);
+static int flatShade(Point_t *p1, Point_t *p2, Point_t *p3){
+	return ambientLight() + diffuseLight(p1, p2, p3) + specularLight(p3);
+}
+
+int ambientLight(){
+	return rgbToInt(RGB(
+		0.2 * 0x00,
+		0.2 * 0x00,
+		0.2 * 0xFF));
+}
+
+int diffuseLight(Point_t *p1, Point_t *p2, Point_t *p3){
+	Point_t *lDP = POINT(0, 1000, 0);
 	RGB_t *lDC = RGB(0xAA, 0xBB, 0x00);
 
 	Point_t *norm = surfaceNormal(p1, p2, p3),
@@ -133,8 +155,9 @@ int flatShade(Point_t *p1, Point_t *p2, Point_t *p3){
 	NORMALIZE(norm);
 	NORMALIZE(lightVector);
 	double dot = dotProduct(norm, lightVector);
+
 	if(dot < 0)
-		dot = 0;
+		return 0;
 
 	RGB_t *diffuseColor = RGB(
 		lDC[R] * dot,
@@ -143,6 +166,28 @@ int flatShade(Point_t *p1, Point_t *p2, Point_t *p3){
 	);
 	free(norm);
 	return rgbToInt(diffuseColor);
+}
+
+int specularLight(Point_t *vertex){
+	Point_t *lSP = POINT(0, 0, -100, 0),
+		*view = POINT(0, 0, 1, 0);
+	RGB_t *lSC = RGB(0xAA, 0xBB, 0x00);
+
+	Point_t *lightVector = SUB_POINT(vertex, lSP);
+	NORMALIZE(view);
+	NORMALIZE(lightVector);
+
+	double dot = dotProduct(view, lightVector);
+	if(dot < 0)
+		return 0;
+	dot = pow(dot, 10);
+
+	RGB_t *specularColor = RGB(
+		lSC[R] * dot,
+		lSC[G] * dot,
+		lSC[B] * dot
+	);
+	return rgbToInt(specularColor);
 }
 
 static int rgbToInt(RGB_t *color){

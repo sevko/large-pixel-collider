@@ -93,15 +93,3 @@ void (drawLine)(Point_t *p1, Point_t *p2, int color);
  * @param p3 The third vertex of the triangle.
 */
 void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3);
-
-/*
- * @brief Calculate the flat-shaded color of a triangle.
- *
- * @param p1 The first vertex of the triangle.
- * @param p2 The second vertex of the triangle.
- * @param p3 The third vertex of the triangle.
- *
- * @return The RGB color of the triangle with ambient, diffuse, and spectral
- *      lighting applied.
-*/
-int flatShade(Point_t *p1, Point_t *p2, Point_t *p3);
