@@ -11,6 +11,9 @@
  */
 #define ABS(val) (val > 0?val:-val)
 
+// The exponential rate at which specular light diffuses.
+#define SPECULAR_FADE_CONSTANT 10
+
 /*
  * @brief Calculate the flat-shaded color of a triangle.
  *
@@ -142,35 +145,39 @@ static int flatShade(Point_t *p1, Point_t *p2, Point_t *p3){
 		0.2 * 0xFF
 	));
 
-	Point_t *lDP = POINT(0, 1000, 0);
-	RGB_t *lDC = RGB(0xAA, 0xBB, 0x00);
+	Light_t diffuseSource = {
+		.color = RGB(0xAA, 0xBB, 0x00),
+		.pos = POINT(0, 1000, 0)
+	};
 
 	Point_t *norm = surfaceNormal(p1, p2, p3),
-		*dLightVector = SUB_POINT(p3, lDP);
+		*dLightVector = SUB_POINT(p3, diffuseSource.pos);
 	NORMALIZE(norm);
 	NORMALIZE(dLightVector);
 	double diffuseDot = dotProduct(norm, dLightVector);
 
 	int diffuseLight = (diffuseDot < 0)?0:rgbToInt(RGB(
-		lDC[R] * diffuseDot,
-		lDC[G] * diffuseDot,
-		lDC[B] * diffuseDot
+		diffuseSource.color[R] * diffuseDot,
+		diffuseSource.color[G] * diffuseDot,
+		diffuseSource.color[B] * diffuseDot
 	));
 	free(norm);
 
-	Point_t *lSP = POINT(0, 0, 100, 0),
-		*view = POINT(0, 0, 1, 0);
-	RGB_t *lSC = RGB(0xAA, 0xBB, 0x00);
+	Light_t specularSource = {
+		.color = RGB(0xAA, 0xBB, 0x00),
+		.pos = POINT(0, 0, 100, 0)
+	};
+	Point_t *view = POINT(0, 0, 1, 0);
 
-	Point_t *sLightVector = SUB_POINT(p3, lSP);
+	Point_t *sLightVector = SUB_POINT(p3, specularSource.pos);
 	NORMALIZE(view);
 	NORMALIZE(sLightVector);
 
 	double specularDot = pow(dotProduct(view, sLightVector), 10);
 	int specularLight = (specularDot < 0)?0:rgbToInt(RGB(
-		lSC[R] * specularDot,
-		lSC[G] * specularDot,
-		lSC[B] * specularDot
+		specularSource.color[R] * specularDot,
+		specularSource.color[G] * specularDot,
+		specularSource.color[B] * specularDot
 	));
 
 	int sum = ambientLight + diffuseLight + specularLight;

@@ -72,6 +72,11 @@
 #define B 2 // The index of the blue color value in a ::RGB_t *.
 
 typedef int RGB_t; // Used to represent RGB color values.
+// Represents a light.
+typedef struct {
+	RGB_t *color; // The light's color
+	Point_t *pos; // The light's location.
+} Light_t;
 
 /*!
  *  @brief Rasterize a line.
