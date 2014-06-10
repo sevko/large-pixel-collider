@@ -136,58 +136,45 @@ void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3){
 }
 
 static int flatShade(Point_t *p1, Point_t *p2, Point_t *p3){
-	return ambientLight() + diffuseLight(p1, p2, p3) + specularLight(p3);
-}
-
-int ambientLight(){
-	return rgbToInt(RGB(
+	int ambientLight = rgbToInt(RGB(
 		0.2 * 0x00,
 		0.2 * 0x00,
-		0.2 * 0xFF));
-}
+		0.2 * 0xFF
+	));
 
-int diffuseLight(Point_t *p1, Point_t *p2, Point_t *p3){
 	Point_t *lDP = POINT(0, 1000, 0);
 	RGB_t *lDC = RGB(0xAA, 0xBB, 0x00);
 
 	Point_t *norm = surfaceNormal(p1, p2, p3),
-		*lightVector = SUB_POINT(p3, lDP);
+		*dLightVector = SUB_POINT(p3, lDP);
 	NORMALIZE(norm);
-	NORMALIZE(lightVector);
-	double dot = dotProduct(norm, lightVector);
+	NORMALIZE(dLightVector);
+	double diffuseDot = dotProduct(norm, dLightVector);
 
-	if(dot < 0)
-		return 0;
-
-	RGB_t *diffuseColor = RGB(
-		lDC[R] * dot,
-		lDC[G] * dot,
-		lDC[B] * dot
-	);
+	int diffuseLight = (diffuseDot < 0)?0:rgbToInt(RGB(
+		lDC[R] * diffuseDot,
+		lDC[G] * diffuseDot,
+		lDC[B] * diffuseDot
+	));
 	free(norm);
-	return rgbToInt(diffuseColor);
-}
 
-int specularLight(Point_t *vertex){
-	Point_t *lSP = POINT(0, 0, -100, 0),
+	Point_t *lSP = POINT(0, 0, 100, 0),
 		*view = POINT(0, 0, 1, 0);
 	RGB_t *lSC = RGB(0xAA, 0xBB, 0x00);
 
-	Point_t *lightVector = SUB_POINT(vertex, lSP);
+	Point_t *sLightVector = SUB_POINT(p3, lSP);
 	NORMALIZE(view);
-	NORMALIZE(lightVector);
+	NORMALIZE(sLightVector);
 
-	double dot = dotProduct(view, lightVector);
-	if(dot < 0)
-		return 0;
-	dot = pow(dot, 10);
+	double specularDot = pow(dotProduct(view, sLightVector), 10);
+	int specularLight = (specularDot < 0)?0:rgbToInt(RGB(
+		lSC[R] * specularDot,
+		lSC[G] * specularDot,
+		lSC[B] * specularDot
+	));
 
-	RGB_t *specularColor = RGB(
-		lSC[R] * dot,
-		lSC[G] * dot,
-		lSC[B] * dot
-	);
-	return rgbToInt(specularColor);
+	int sum = ambientLight + diffuseLight + specularLight;
+	return (0xFFFFFF < sum)?0xFFFFFF:sum;
 }
 
 static int rgbToInt(RGB_t *color){
