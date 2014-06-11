@@ -49,7 +49,7 @@ void (drawLine)(Point_t *p1, Point_t *p2, int color){
 	dy1 = (height < 0)?-1:1;
 
 	// Unsigned arithmetic is faster than signed.
-	unsigned int longDist = ABS(width);
+	unsigned int longDist = ABS(width) + 1;
 	unsigned int shortDist = ABS(height);
 
 	if(longDist < shortDist){
@@ -165,7 +165,7 @@ static int flatShade(Point_t *p1, Point_t *p2, Point_t *p3){
 
 	Light_t specularSource = {
 		.color = RGB(0xAA, 0xBB, 0x00),
-		.pos = POINT(0, 0, 100, 0)
+		.pos = POINT(0, 0, 1, 0)
 	};
 	Point_t *view = POINT(0, 0, 1, 0);
 

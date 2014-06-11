@@ -44,7 +44,8 @@ void renderScreen(void){
 	int y, x;
 	for(y = 0; y < IMAGE_HEIGHT; y++)
 		for(x = 0; x < IMAGE_WIDTH; x++)
-			drawPixel(x, y, g_zbuffer->buf[y][x][1]);
+			drawPixel(x, y,
+					g_zbuffer->buf[y][x][1] == -1?0x0:g_zbuffer->buf[y][x][1]);
 	SDL_Flip(g_screen);
 }
 
@@ -54,6 +55,7 @@ void clearScreen(void){
 }
 
 void quitScreen(void){
+	free(g_zbuffer);
 	SDL_Delay(QUIT_DELAY);
 	SDL_Quit();
 }
@@ -69,7 +71,12 @@ ZBuffer_t *createZBuffer(void){
 }
 
 void clearZBuffer(ZBuffer_t *zBuf){
-	memset(zBuf->buf, -1, sizeof(double) * IMAGE_HEIGHT * IMAGE_WIDTH * 2);
+	int y, x;
+	for(y = 0; y < IMAGE_HEIGHT; y++)
+		for(x = 0; x < IMAGE_WIDTH; x++){
+			zBuf->buf[y][x][0] = 0;
+			zBuf->buf[y][x][1] = -1;
+		}
 }
 
 ZBuffer_t *readZBufferFromFile(const char *filePath){
