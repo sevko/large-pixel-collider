@@ -72,13 +72,21 @@
 #define B 2 // The index of the blue color value in a ::RGB_t *.
 
 typedef int RGB_t; // Used to represent RGB color values.
+
 // Represents a light.
 typedef struct {
 	RGB_t *color; // The light's color
 	Point_t *pos; // The light's location.
 } Light_t;
 
-void drawHorizontalGradientLine(Light_t *p1, Light_t *p2);
+/*
+ * @brief Draw a horizontal line with an interpolated color gradient.
+ *
+ * @param p1 The first endpoint.
+ * @param p2 The second endpoint.
+*/
+void drawHorizontalGradientLine(Light_t *light1, Light_t *light2);
+
 /*!
  *  @brief Rasterize a line.
  *

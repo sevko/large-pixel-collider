@@ -151,9 +151,9 @@ void drawMatrix(const Matrix_t *matrix){
 		Point_t *norm = surfaceNormal(p1, p2, p3);
 		NORMALIZE(norm);
 
-		RGB_t *color1 = flatShade(p1, norm),
-			*color2 = flatShade(p2, norm),
-			*color3 = flatShade(p3, norm);
+		RGB_t *color1 = flatShade(p1, avgNorms[vertex]),
+			*color2 = flatShade(p2, avgNorms[vertex + 1]),
+			*color3 = flatShade(p3, avgNorms[vertex + 2]);
 
 		if(backfaceCull(p1, p2, p3))
 			scanlineRender(

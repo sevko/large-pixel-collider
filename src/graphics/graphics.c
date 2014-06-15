@@ -11,8 +11,23 @@
  */
 #define ABS(val) (val > 0?val:-val)
 
+/*
+ * @brief Interpolate the intensity (color) of a ::Point_t along a line between
+ *      two ::Light_t.
+ *
+ * @param l1 (::Light_t *) The first light endpoint.
+ * @param l2 (::Light_t *) The second light endpoint.
+ * @param guide (::Point_t *) A point along the line formed by @p l1 and @p l2.
+ * @param axis (int) Determines which axis to interpolate along: either X or Y.
+*/
 #define INTERPOLATE_COLOR(l1, l2, guide, axis) \
 	({\
+		if(l1->pos[axis] > l2->pos[axis]){\
+			Light_t *tmp = l1;\
+			l1 = l2;\
+			l2 = tmp;\
+		}\
+		\
 		double divisor = 1.0 / (l2->pos[axis] - l1->pos[axis]),\
 			colCoef1 = l2->pos[axis] - guide[axis],\
 			colCoef2 = guide[axis] - l1->pos[axis];\
@@ -86,11 +101,16 @@ void (drawLine)(Point_t *p1, Point_t *p2, int color){
 	}
 }
 
-void drawHorizontalGradientLine(Light_t *p1, Light_t *p2){
-	Point_t *guide = COPY_POINT(p1->pos);
+void drawHorizontalGradientLine(Light_t *light1, Light_t *light2){
+	if(light1->pos[X] >= light2->pos[X]){
+		Light_t *tmp = light1;
+		light1 = light2;
+		light2 = tmp;
+	}
+	Point_t *guide = COPY_POINT(light1->pos);
 
-	while(guide[X] < p2->pos[X]){
-		plotPixel(guide, rgbToInt(INTERPOLATE_COLOR(p1, p2, guide, X)));
+	while(guide[X] < light2->pos[X]){
+		plotPixel(guide, rgbToInt(INTERPOLATE_COLOR(light1, light2, guide, X)));
 		guide[X]++;
 	}
 }

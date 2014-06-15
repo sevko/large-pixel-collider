@@ -71,48 +71,48 @@ void test(){
 			// .pos = POINT(100, 0)
 		// }
 	// );
-	scanlineRender(
-		&(Light_t){
-			.color = RGB(0xFF, 0, 0),
-			.pos = POINT(-300, -300)
-		},
-		&(Light_t){
-			.color = RGB(0, 0xFF, 0),
-			.pos = POINT(-300, 0)
-		},
-		&(Light_t){
-			.color = RGB(0, 0, 0xFF),
-			.pos = POINT(300, 300)
-		});
-	renderScreen();
-	usleep(10e6);
-	quitScreen();
-
-
-
-	// configureScreen();
-	// Matrix_t *pts = createMatrix();
-	// // addSphere(pts, POINT(0, 0), 100);
-	// addTorus(pts, POINT(0, 0), 100, 200);
-	// // addRectangularPrism(pts, POINT(0, 0), POINT(100, 200, 300));
-	// Matrix_t *rX = createRotation(X_AXIS, 1),
-		// *rY = createRotation(Y_AXIS, 1),
-		// *rZ = createRotation(Z_AXIS, 1);
-
-	// int tick;
-	// for(tick = 0; tick < 1000; tick++){
-		// clearScreen();
-		// multiplyMatrices(4, rX, rY, rZ, pts);
-		// drawMatrix(pts);
-		// renderScreen();
-		// // break;
-		// // usleep(1e6 / 60);
-	// }
-
-	// freeMatrices(4, rX, rY, rZ, pts);
+	// scanlineRender(
+		// &(Light_t){
+			// .color = RGB(0xFF, 0, 0),
+			// .pos = POINT(0, -300)
+		// },
+		// &(Light_t){
+			// .color = RGB(0, 0xFF, 0),
+			// .pos = POINT(-300, 0)
+		// },
+		// &(Light_t){
+			// .color = RGB(0, 0, 0xFF),
+			// .pos = POINT(300, -300)
+		// });
 	// renderScreen();
-	// usleep(4e6);
+	// usleep(10e6);
 	// quitScreen();
+
+
+
+	configureScreen();
+	Matrix_t *pts = createMatrix();
+	// addSphere(pts, POINT(0, 0), 100);
+	addTorus(pts, POINT(0, 0), 100, 200);
+	// addRectangularPrism(pts, POINT(0, 0), POINT(100, 200, 300));
+	Matrix_t *rX = createRotation(X_AXIS, 1),
+		*rY = createRotation(Y_AXIS, 1),
+		*rZ = createRotation(Z_AXIS, 1);
+
+	int tick;
+	for(tick = 0; tick < 1000; tick++){
+		clearScreen();
+		multiplyMatrices(4, rX, rY, rZ, pts);
+		drawMatrix(pts);
+		renderScreen();
+		// break;
+		// usleep(1e6 / 60);
+	}
+
+	freeMatrices(4, rX, rY, rZ, pts);
+	renderScreen();
+	usleep(4e6);
+	quitScreen();
 }
 
 static void argumentHandler(int argc, char * argv[]){
