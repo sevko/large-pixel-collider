@@ -27,14 +27,6 @@
 #define SPECULAR_FADE_CONSTANT 10
 
 /*
- * @brief Draw a horizontal line with a color gradient.
- *
- * @param p1 The first endpoint.
- * @param p2 The second endpoint.
-*/
-// static void drawHorizontalGradientLine(Light_t *p1, Light_t *p2);
-
-/*
  * @brief Convert an ::RGB_t to an int.
  *
  * @param color A color.
@@ -105,7 +97,6 @@ void drawHorizontalGradientLine(Light_t *p1, Light_t *p2){
 
 void scanlineRender(Light_t *l1, Light_t *l2, Light_t *l3){
 	Light_t **pts;
-	int color = rgbToInt(l3->color);
 	l1->pos = COPY_POINT(l1->pos);
 	l2->pos = COPY_POINT(l2->pos);
 	l3->pos = COPY_POINT(l3->pos);
