@@ -199,11 +199,11 @@ void scanlineRender(Light_t *l1, Light_t *l2, Light_t *l3){
 }
 
 RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
-	unsigned int ambientLight = rgbToInt(RGB(
+	RGB_t *ambientLight = RGB(
 		0.2 * 0x00,
 		0.2 * 0x00,
 		0.2 * 0xFF
-	));
+	);
 
 	Light_t diffuseSource = {
 		.color = RGB(0xAA, 0xBB, 0x00),
@@ -214,11 +214,11 @@ RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
 	NORMALIZE(dLightVector);
 	double diffuseDot = dotProduct(surfaceNorm, dLightVector);
 
-	unsigned int diffuseLight = (diffuseDot < 0)?0:rgbToInt(RGB(
+	RGB_t *diffuseLight = (diffuseDot < 0)?RGB(0, 0, 0):RGB(
 		diffuseSource.color[R] * diffuseDot,
 		diffuseSource.color[G] * diffuseDot,
 		diffuseSource.color[B] * diffuseDot
-	));
+	);
 
 	Light_t specularSource = {
 		.color = RGB(0xAA, 0xBB, 0x00),
@@ -231,14 +231,23 @@ RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
 	NORMALIZE(sLightVector);
 
 	double specularDot = pow(dotProduct(view, sLightVector), 10);
-	unsigned int specularLight = (specularDot < 0)?0:rgbToInt(RGB(
+	RGB_t *specularLight = (specularDot < 0)?RGB(0, 0, 0):RGB(
 		specularSource.color[R] * specularDot,
 		specularSource.color[G] * specularDot,
 		specularSource.color[B] * specularDot
-	));
+	);
 
-	unsigned int sum = ambientLight + diffuseLight + specularLight;
-	return intToRgb((0xFFFFFF < sum)?0xFFFFFF:sum);
+	// unsigned int sum = ambientLight + diffuseLight + specularLight;
+	RGB_t *sum = malloc(3 * sizeof(RGB_t));
+	sum[R] = ambientLight[R] + diffuseLight[R] + specularLight[R];
+	sum[G] = ambientLight[G] + diffuseLight[G] + specularLight[G];
+	sum[B] = ambientLight[B] + diffuseLight[B] + specularLight[B];
+
+	int col;
+	for(col = 0; col < 3; col++)
+		if(0xFF < sum[col])
+			sum[col] = 0xFF;
+	return sum;
 }
 
 static unsigned int rgbToInt(RGB_t *color){
