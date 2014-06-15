@@ -73,6 +73,20 @@
 
 typedef int RGB_t; // Used to represent RGB color values.
 
+// Represents a light.
+typedef struct {
+	RGB_t *color; // The light's color
+	Point_t *pos; // The light's location.
+} Light_t;
+
+/*
+ * @brief Draw a horizontal line with an interpolated color gradient.
+ *
+ * @param p1 The first endpoint.
+ * @param p2 The second endpoint.
+*/
+void drawHorizontalGradientLine(Light_t *light1, Light_t *light2);
+
 /*!
  *  @brief Rasterize a line.
  *
@@ -83,34 +97,25 @@ typedef int RGB_t; // Used to represent RGB color values.
  *  @param p2 The second endpoint.
  *  @param color The color of the line.
  */
-void (drawLine)(Point_t *p1, Point_t *p2, RGB_t *color);
+void (drawLine)(Point_t *p1, Point_t *p2, int color);
 
 /*
  * @brief Fill a triangle using scanline-rendering.
  *
+ * @param light1 The position and color of the first vertex of the triangle.
+ * @param light2 The position and color of the second vertex of the triangle.
+ * @param light3 The position and color of the third vertex of the triangle.
+*/
+void scanlineRender(Light_t *light1, Light_t *light2, Light_t *light3);
+/*
+ * @brief Calculate the flat-shaded color of a triangle.
+ *
  * @param p1 The first vertex of the triangle.
  * @param p2 The second vertex of the triangle.
  * @param p3 The third vertex of the triangle.
- * @param color The color of the filled triangle.
+ * @param surfaceNorm The averaged surface normal of the triangle.
+ *
+ * @return The RGB color of the triangle with ambient, diffuse, and spectral
+ *      lighting applied.
 */
-void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, RGB_t *color);
-
-/*
- * @brief Apply flat-shading to a color.
- *
- * @param color The original color.
- *
- * @return The RGB value of a color with ambient, diffuse, and spectral
- *      lighting applied..
-*/
-RGB_t *flatShade(RGB_t *color);
-
-/*
- * @brief Convert an ::RGB_t to an int.
- *
- * @param color A color.
- *
- * @return An int representing the RGB values stored in @p color, in the form:
- *      0xRRGGBB.
-*/
-int rgbToInt(RGB_t *color);
+RGB_t *flatShade(Point_t *p1, Point_t *surfaceNorm);

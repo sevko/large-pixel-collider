@@ -1,6 +1,6 @@
 SCRIPT_FILE =
 PROJECT_NAME = engine
-FLAGS = -Ofast -g -Wall -Wextra -Wunreachable-code -I ./
+FLAGS = -Wall -Wextra -Wunreachable-code -I ./
 LIBS = -lm $(shell sdl-config --libs) -lncurses
 C_COMPILER = gcc $(FLAGS)
 
@@ -13,9 +13,14 @@ SRC = $(shell find src lib -name "*.c" -printf "%p ")
 HEADERS = $(shell find src lib -name "*.h" -printf "%p ")
 OBJ = $(patsubst %.c, bin/%.o, $(foreach srcFile, $(SRC), $(notdir $(srcFile))))
 
-.PHONY: all run test kill clean install
+debug: FLAGS += -O0 -g3
+all: FLAGS += -Ofast
+
+.PHONY: all debug run test kill clean install
 
 all: bin bin/$(PROJECT_NAME)
+
+debug: bin bin/$(PROJECT_NAME)
 
 bin:
 	@mkdir $@

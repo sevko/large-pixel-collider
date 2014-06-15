@@ -446,8 +446,19 @@ static int testDrawLine(void){
 }
 
 static int testScanLineRender(void){
-	scanlineRender(POINT(0, 0, 5), POINT(100, 200, 10),
-		POINT(130, -30, 20), RGB(0xFF, 0xFF, 0xFF));
+	scanlineRender(
+			&(Light_t){
+				.color = RGB(0xFF, 0x00, 0x00),
+				.pos = POINT(0, 0, 5)
+			},
+			&(Light_t){
+				.color = RGB(0x00, 0xFF, 0x00),
+				.pos = POINT(100, 200, 10)
+			},
+			&(Light_t){
+				.color = RGB(0x00, 0x00, 0xFF),
+				.pos = POINT(130, -30, 20)
+			});
 	ASSERT_EQUAL_SCREEN("testScanLineRender.csv");
 }
 

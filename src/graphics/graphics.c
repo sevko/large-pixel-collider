@@ -11,23 +11,69 @@
  */
 #define ABS(val) (val > 0?val:-val)
 
-void (drawLine)(Point_t *p1, Point_t *p2, RGB_t *color){
+/*
+ * @brief Interpolate the intensity (color) of a ::Point_t along a line between
+ *      two ::Light_t.
+ *
+ * @param l1 (::Light_t *) The first light endpoint.
+ * @param l2 (::Light_t *) The second light endpoint.
+ * @param guide (::Point_t *) A point along the line formed by @p l1 and @p l2.
+ * @param axis (int) Determines which axis to interpolate along: either X or Y.
+*/
+#define INTERPOLATE_COLOR(l1, l2, guide, axis) \
+	({\
+		if(l1->pos[axis] > l2->pos[axis]){\
+			Light_t *tmp = l1;\
+			l1 = l2;\
+			l2 = tmp;\
+		}\
+		\
+		double divisor = 1.0 / (l2->pos[axis] - l1->pos[axis]),\
+			colCoef1 = l2->pos[axis] - guide[axis],\
+			colCoef2 = guide[axis] - l1->pos[axis];\
+		RGB(\
+			divisor * (colCoef1 * l1->color[R] + colCoef2 * l2->color[R]),\
+			divisor * (colCoef1 * l1->color[G] + colCoef2 * l2->color[G]),\
+			divisor * (colCoef1 * l1->color[B] + colCoef2 * l2->color[B])\
+		);\
+	})
+
+// The exponential rate at which specular light diffuses.
+#define SPECULAR_FADE_CONSTANT 10
+
+/*
+ * @brief Convert an ::RGB_t to an int.
+ *
+ * @param color A color.
+ *
+ * @return An int representing the RGB values stored in @p color, in the form:
+ *      0xRRGGBB.
+*/
+static unsigned int rgbToInt(RGB_t *color);
+
+/*
+ * @brief Convert an int to an ::RGB_t.
+ *
+ * @param color An integer (0xRRGGBB) representation of a color.
+ *
+ * @return An ::RGB_t with its R, G, and B values corresponding to @p color.
+*/
+static RGB_t *intToRgb(int color);
+
+void (drawLine)(Point_t *p1, Point_t *p2, int color){
 	p1 = COPY_POINT(p1);
-	int width = p2[X] - p1[X], height = p2[Y] - p1[Y];
-	int dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0;
+	int width = p2[X] - p1[X],
+		height = p2[Y] - p1[Y];
+	int dx1 = 0,
+		dy1 = 0,
+		dx2 = 0,
+		dy2 = 0;
 
-	if(width < 0)
-		dx1 = dx2 = -1;
-	else
-		dx1 = dx2 = 1;
-
-	if(height < 0)
-		dy1 = -1;
-	else
-		dy1 = 1;
+	dx1 = dx2 = (width < 0)?-1:1;
+	dy1 = (height < 0)?-1:1;
 
 	// Unsigned arithmetic is faster than signed.
-	unsigned int longDist = ABS(width);
+	unsigned int longDist = ABS(width) + 1;
 	unsigned int shortDist = ABS(height);
 
 	if(longDist < shortDist){
@@ -35,16 +81,13 @@ void (drawLine)(Point_t *p1, Point_t *p2, RGB_t *color){
 		longDist = shortDist;
 		shortDist = tempDist;
 
-		if(height < 0)
-			dy2 = -1;
-		else
-			dy2 = 1;
+		dy2 = (height < 0)?-1:1;
 		dx2 = 0;
 	}
 
 	unsigned int numerator = longDist >> 1, pixel;
 	for(pixel = 0; pixel <= longDist; pixel++){
-		plotPixel(p1, rgbToInt(color));
+		plotPixel(p1, color);
 		numerator += shortDist;
 		if(numerator >= longDist){
 			numerator -= longDist;
@@ -58,74 +101,157 @@ void (drawLine)(Point_t *p1, Point_t *p2, RGB_t *color){
 	}
 }
 
-void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, RGB_t *color){
-	Point_t **pts;
+void drawHorizontalGradientLine(Light_t *light1, Light_t *light2){
+	if(light1->pos[X] >= light2->pos[X]){
+		Light_t *tmp = light1;
+		light1 = light2;
+		light2 = tmp;
+	}
+	Point_t *guide = COPY_POINT(light1->pos);
 
-	p1 = COPY_POINT(p1);
-	p2 = COPY_POINT(p2);
-	p3 = COPY_POINT(p3);
+	while(guide[X] < light2->pos[X]){
+		plotPixel(guide, rgbToInt(INTERPOLATE_COLOR(light1, light2, guide, X)));
+		guide[X]++;
+	}
+}
 
-	p1[Y] = (int)p1[Y];
-	p2[Y] = (int)p2[Y];
-	p3[Y] = (int)p3[Y];
+void scanlineRender(Light_t *l1, Light_t *l2, Light_t *l3){
+	Light_t **pts;
+	l1->pos = COPY_POINT(l1->pos);
+	l2->pos = COPY_POINT(l2->pos);
+	l3->pos = COPY_POINT(l3->pos);
 
-	if(p1[Y] >= p2[Y] && p1[Y] >= p3[Y]){
-		if(p3[Y] > p2[Y])
-			pts = (Point_t *[]){p1, p3, p2};
+	l1->pos[Y] = (int)l1->pos[Y];
+	l2->pos[Y] = (int)l2->pos[Y];
+	l3->pos[Y] = (int)l3->pos[Y];
+
+	if(l1->pos[Y] >= l2->pos[Y] && l1->pos[Y] >= l3->pos[Y]){
+		if(l3->pos[Y] > l2->pos[Y])
+			pts = (Light_t *[]){l1, l3, l2};
 		else
-			pts = (Point_t *[]){p1, p2, p3};
+			pts = (Light_t *[]){l1, l2, l3};
 	}
 
-	else if(p2[Y] >= p1[Y] && p2[Y] >= p3[Y]){
-		if(p3[Y] > p1[Y])
-			pts = (Point_t *[]){p2, p3, p1};
+	else if(l2->pos[Y] >= l1->pos[Y] && l2->pos[Y] >= l3->pos[Y]){
+		if(l3->pos[Y] > l1->pos[Y])
+			pts = (Light_t *[]){l2, l3, l1};
 		else
-			pts = (Point_t *[]){p2, p1, p3};
+			pts = (Light_t *[]){l2, l1, l3};
 	}
 
 	else {
-		if(p2[Y] > p1[Y])
-			pts = (Point_t *[]){p3, p2, p1};
+		if(l2->pos[Y] > l1->pos[Y])
+			pts = (Light_t *[]){l3, l2, l1};
 		else
-			pts = (Point_t *[]){p3, p1, p2};
+			pts = (Light_t *[]){l3, l1, l2};
 	}
 
-	double m1 = (pts[1][Y] - pts[2][Y] != 0)?
-			(pts[1][X] - pts[2][X]) / (pts[1][Y] - pts[2][Y]):0,
-		m2 = (pts[0][Y] - pts[1][Y] != 0)?
-			(pts[0][X] - pts[1][X]) / (pts[0][Y] - pts[1][Y]):0,
-		m3 = (pts[0][Y] - pts[2][Y] != 0)?
-			(pts[0][X] - pts[2][X]) / (pts[0][Y] - pts[2][Y]):0;
-	Point_t *guide = COPY_POINT(pts[2]);
+	double m1 = (pts[1]->pos[Y] - pts[2]->pos[Y] != 0)?
+			(pts[1]->pos[X] - pts[2]->pos[X]) / (pts[1]->pos[Y] - pts[2]->pos[Y]):0,
+		m2 = (pts[0]->pos[Y] - pts[1]->pos[Y] != 0)?
+			(pts[0]->pos[X] - pts[1]->pos[X]) / (pts[0]->pos[Y] - pts[1]->pos[Y]):0,
+		m3 = (pts[0]->pos[Y] - pts[2]->pos[Y] != 0)?
+			(pts[0]->pos[X] - pts[2]->pos[X]) / (pts[0]->pos[Y] - pts[2]->pos[Y]):0;
+	Point_t *shortGuide = COPY_POINT(pts[2]->pos),
+		*longGuide = COPY_POINT(pts[2]->pos);
 
-	while(pts[2][Y] < pts[1][Y]){
-		drawLine(pts[2], guide, color);
+	while(shortGuide[Y] < pts[1]->pos[Y]){
+		// drawLine(shortGuide, longGuide, color);
+		drawHorizontalGradientLine(
+			&(Light_t){
+				.pos = shortGuide,
+				.color = INTERPOLATE_COLOR(pts[2], pts[1], shortGuide, Y)
+			},
+			&(Light_t){
+				.pos = longGuide,
+				.color = INTERPOLATE_COLOR(pts[2], pts[0], longGuide, Y)
+			}
+		);
 
-		pts[2][X] += m1;
-		pts[2][Y]++;
+		shortGuide[X] += m1;
+		shortGuide[Y]++;
 
-		guide[X] += m3;
-		guide[Y]++;
+		longGuide[X] += m3;
+		longGuide[Y]++;
 	}
 
-	while(pts[1][Y] < pts[0][Y]){
-		drawLine(pts[1], guide, color);
-		pts[1][X] += m2;
-		pts[1][Y]++;
+	shortGuide = COPY_POINT(pts[1]->pos);
 
-		guide[X] += m3;
-		guide[Y]++;
+	while(shortGuide[Y] < pts[0]->pos[Y]){
+		// drawLine(shortGuide, longGuide, color);
+		drawHorizontalGradientLine(
+			&(Light_t){
+				.pos = shortGuide,
+				.color = INTERPOLATE_COLOR(pts[1], pts[0], shortGuide, Y)
+			},
+			&(Light_t){
+				.pos = longGuide,
+				.color = INTERPOLATE_COLOR(pts[2], pts[0], longGuide, Y)
+			}
+		);
+
+		shortGuide[X] += m2;
+		shortGuide[Y]++;
+
+		longGuide[X] += m3;
+		longGuide[Y]++;
 	}
 }
 
-RGB_t *flatShade(RGB_t *color){
-	// int r = (color & 0xFF0000) >> 4 * 4,
-		// g = (color & 0x00FF00) >> 4 * 2,
-		// b = color & 0x0000FF;
-	// return i * ((r << 4 * 4) + (g << 4 * 2) + b);
-	return color;
+RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
+	unsigned int ambientLight = rgbToInt(RGB(
+		0.2 * 0x00,
+		0.2 * 0x00,
+		0.2 * 0xFF
+	));
+
+	Light_t diffuseSource = {
+		.color = RGB(0xAA, 0xBB, 0x00),
+		.pos = POINT(0, 1000, 0, 0)
+	};
+
+	Point_t *dLightVector = SUB_POINT(vertex, diffuseSource.pos);
+	NORMALIZE(dLightVector);
+	double diffuseDot = dotProduct(surfaceNorm, dLightVector);
+
+	unsigned int diffuseLight = (diffuseDot < 0)?0:rgbToInt(RGB(
+		diffuseSource.color[R] * diffuseDot,
+		diffuseSource.color[G] * diffuseDot,
+		diffuseSource.color[B] * diffuseDot
+	));
+
+	Light_t specularSource = {
+		.color = RGB(0xAA, 0xBB, 0x00),
+		.pos = POINT(0, 0, 1, 0)
+	};
+	Point_t *view = POINT(0, 0, 1, 0);
+
+	Point_t *sLightVector = SUB_POINT(vertex, specularSource.pos);
+	NORMALIZE(view);
+	NORMALIZE(sLightVector);
+
+	double specularDot = pow(dotProduct(view, sLightVector), 10);
+	unsigned int specularLight = (specularDot < 0)?0:rgbToInt(RGB(
+		specularSource.color[R] * specularDot,
+		specularSource.color[G] * specularDot,
+		specularSource.color[B] * specularDot
+	));
+
+	unsigned int sum = ambientLight + diffuseLight + specularLight;
+	return intToRgb((0xFFFFFF < sum)?0xFFFFFF:sum);
 }
 
-int rgbToInt(RGB_t *color){
+static unsigned int rgbToInt(RGB_t *color){
+	if(0xFFFFFF < ((color[R] << 4 * 4) & (color[G] << 4 * 2) & color[B]))
+		FATAL("Stop: %X, %X, %X", color[R], color[G], color[B]);
+
 	return (color[R] << 4 * 4) + (color[G] << 4 * 2) + color[B];
+}
+
+static RGB_t *intToRgb(int color){
+	RGB_t *rgb = malloc(3 * sizeof(RGB_t));
+	rgb[R] = color >> 4 * 4;
+	rgb[G] = (color & 0x00FF00) >> 4 * 2;
+	rgb[B] = color & 0x0000FF;
+	return rgb;
 }

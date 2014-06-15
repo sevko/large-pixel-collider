@@ -1,0 +1,19 @@
+# Suppression file for Valgrind's `memcheck` tool.
+
+{
+	SDL
+	Memcheck:Leak
+
+	...
+	obj:/usr/lib/x86_64-linux-gnu/libSDL-1.2.so.0.11.4
+	...
+}
+
+{
+	SDL
+	Memcheck:Leak
+
+	...
+	obj:/usr/lib/x86_64-linux-gnu/pulseaudio/libpulsecommon-3.0.so
+	...
+}

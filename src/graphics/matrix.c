@@ -28,16 +28,6 @@
  */
 #define RAD (M_PI / 180)
 
-/*!
- *  @brief Calculate a dot-product.
- *
- *  @param p1 A point.
- *  @param p2 A point.
- *
- *  @return The dot-product of @p p1 and @p p2.
- */
-static double dotProduct(Point_t *p1, Point_t *p2);
-
 /*
  *  @brief Indicate whether or not a given triangle is visible to the camera.
  *
@@ -53,6 +43,17 @@ static double dotProduct(Point_t *p1, Point_t *p2);
  *      the camera; 0 otherwise.
  */
 static int backfaceCull(Point_t *p1, Point_t *p2, Point_t *p3);
+
+/*
+ * @brief Wrapper for ::surfaceNormal() that acts on a triangle.
+ *
+ * @param pts A matrix containing a triangular mesh.
+ * @param vertex The first vertex of a triangle in @p pts.
+ *
+ * @return The surface normal of the triangle depicted by the ::Point_t * at
+ *      offset @a vertex in @a pts->points, and the two ::Point_t * after it.
+*/
+static Point_t *triangleNormal(const Matrix_t *pts, int vertex);
 
 Matrix_t * createMatrix(void){
 	Matrix_t * const matrix = malloc(sizeof(Matrix_t));
@@ -91,24 +92,88 @@ void freeMatrixFromVoid(void * matrix){
 	freeMatrix((Matrix_t *)matrix);
 }
 
-void drawMatrix(const Matrix_t * const matrix){
-	int color = 0;
-	RGB_t *colors[] = {
-		RGB(0xFF, 0x00, 0x00),
-		RGB(0x00, 0xFF, 0x00),
-		RGB(0x00, 0x00, 0xFF),
-		RGB(0xFF, 0xFF, 0x00),
-		RGB(0xFF, 0x00, 0xFF)
-	};
+void drawMatrix(const Matrix_t *matrix){
+	Point_t *surfaceNorms[(matrix->numPoints) / 3];
+	int vertex;
+	for(vertex = 0; vertex < matrix->numPoints - 2; vertex += 3){
+		surfaceNorms[vertex / 3] = triangleNormal(matrix, vertex);
+		NORMALIZE(surfaceNorms[vertex / 3]);
+	}
 
-	int ptPair;
-	for(ptPair = 0; ptPair < matrix->numPoints - 2; ptPair += 3){
-		Point_t *p1 = matrix->points[ptPair],
-			*p2 = matrix->points[ptPair + 1],
-			*p3 = matrix->points[ptPair + 2];
-		color++;
+	Point_t *avgNorms[matrix->numPoints];
+	int circle = matrix->numPoints / (360 / CIRCLE_STEP_SIZE);
+	for(vertex = 2 * circle; vertex < matrix->numPoints - circle * 2; vertex += 3){
+		Point_t *adjacentNorms[12] = {
+			surfaceNorms[(vertex - 3) / 3],
+			surfaceNorms[(vertex - circle - 3 * 2) / 3],
+			surfaceNorms[(vertex - circle - 3) / 3],
+			surfaceNorms[(vertex - circle) / 3],
+			surfaceNorms[(vertex + 3) / 3],
+			surfaceNorms[(vertex + 3 * 2) / 3],
+			surfaceNorms[(vertex + circle + 3 * 3) / 3],
+			surfaceNorms[(vertex + circle + 3 * 2) / 3],
+			surfaceNorms[(vertex + circle + 3) / 3],
+			surfaceNorms[(vertex + circle) / 3],
+			surfaceNorms[(vertex + circle - 3) / 3],
+			surfaceNorms[(vertex - 3 * 2) / 3]
+		};
+
+		int adjacentNorm;
+		int adjIndexes[3][6] = {
+			{0, 1, 2, 3, 4},
+			{4, 5, 6, 7, 8},
+			{8, 9, 10, 11, 0}
+		};
+
+		int avgVertex;
+		for(avgVertex = 0; avgVertex < 3; avgVertex++){
+			avgNorms[vertex + avgVertex] = POINT(0, 0, 0, 0);
+			int adjVertex;
+			for(adjVertex = 0; adjVertex < 6; adjVertex++)
+				ADD_POINT_IN_PLACE(
+						avgNorms[vertex + avgVertex],
+						adjacentNorms[adjIndexes[avgVertex][adjVertex]]);
+
+			avgNorms[vertex + avgVertex][X] /= 6;
+			avgNorms[vertex + avgVertex][Y] /= 6;
+			avgNorms[vertex + avgVertex][Z] /= 6;
+		}
+	}
+
+	int norm;
+	for(norm = 0; norm < matrix->numPoints / 3; norm++)
+		free(surfaceNorms[norm]);
+
+	for(vertex = 2 * circle; vertex < matrix->numPoints - 2 * circle - 2; vertex += 3){
+		Point_t *p1 = matrix->points[vertex],
+			*p2 = matrix->points[vertex + 1],
+			*p3 = matrix->points[vertex + 2];
+		Point_t *norm = surfaceNormal(p1, p2, p3);
+		NORMALIZE(norm);
+
+		RGB_t *color1 = flatShade(p1, avgNorms[vertex]),
+			*color2 = flatShade(p2, avgNorms[vertex + 1]),
+			*color3 = flatShade(p3, avgNorms[vertex + 2]);
+
 		if(backfaceCull(p1, p2, p3))
-			scanlineRender(p1, p2, p3, colors[color % 5]);
+			scanlineRender(
+				&(Light_t){
+					.color = color1,
+					.pos = p1
+				},
+				&(Light_t){
+					.color = color2,
+					.pos = p2
+				},
+				&(Light_t){
+					.color = color3,
+					.pos = p3
+				}
+			);
+		free(norm);
+		free(color1);
+		free(color2);
+		free(color3);
 	}
 }
 
@@ -262,9 +327,8 @@ Matrix_t * readPointsFromFile(char * filename){
 	strcat(fullFilename, filename);
 
 	FILE * file;
-	if((file = fopen(fullFilename, "r")) == NULL){
+	if((file = fopen(fullFilename, "r")) == NULL)
 		FATAL("Cannot open file %s.", fullFilename);
-	}
 
 	free(fullFilename);
 	Matrix_t * points = createMatrix();
@@ -310,18 +374,28 @@ void writePointsToFile(Matrix_t * points, char * filename){
 	fclose(file);
 }
 
-static double dotProduct(Point_t *p1, Point_t *p2){
+double dotProduct(Point_t *p1, Point_t *p2){
 	return p1[X] * p2[X] + p1[Y] * p2[Y] + p1[Z] * p2[Z] + p1[W] * p2[W];
 }
 
+Point_t *surfaceNormal(Point_t *p1, Point_t *p2, Point_t *p3){
+	Point_t *u = SUB_POINT(p2, p1),
+		*v = SUB_POINT(p3, p1);
+
+	return createPoint(POINT(
+			(u[Y] * v[Z]) - (u[Z] * v[Y]),
+			(u[Z] * v[X]) - (u[X] * v[Z]),
+			(u[X] * v[Y]) - (u[Y] * v[X]), 0));
+}
+
 static int backfaceCull(Point_t *p1, Point_t *p2, Point_t *p3){
-	Point_t * u = POINT(p2[X] - p1[X], p2[Y] - p1[Y], p2[Z] - p1[Z]);
-	Point_t * v = POINT(p3[X] - p1[X], p3[Y] - p1[Y], p3[Z] - p1[Z]);
+	Point_t *norm = surfaceNormal(p1, p2, p3);
+	int culled = -(int)norm[Z] < 0;
+	free(norm);
+	return culled;
+}
 
-	double normalX = (u[Y] * v[Z]) - (u[Z] * v[Y]);
-	double normalY = (u[Z] * v[X]) - (u[X] * v[Z]);
-	double normalZ = (u[X] * v[Y]) - (u[Y] * v[X]);
-
-	int dotProduct = normalX * 0 + normalY * 0 + normalZ * -1;
-	return dotProduct < 0;
+static Point_t *triangleNormal(const Matrix_t *pts, int vertex){
+	return surfaceNormal(pts->points[vertex], pts->points[vertex + 1],
+			pts->points[vertex + 2]);
 }
