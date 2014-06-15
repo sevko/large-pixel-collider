@@ -11,6 +11,18 @@
  */
 #define ABS(val) (val > 0?val:-val)
 
+#define INTERPOLATE_COLOR(l1, l2, guide, axis) \
+	({\
+		double divisor = 1.0 / (l2->pos[axis] - l1->pos[axis]),\
+			colCoef1 = l2->pos[axis] - guide[axis],\
+			colCoef2 = guide[axis] - l1->pos[axis];\
+		RGB(\
+			divisor * (colCoef1 * l1->color[R] + colCoef2 * l2->color[R]),\
+			divisor * (colCoef1 * l1->color[G] + colCoef2 * l2->color[G]),\
+			divisor * (colCoef1 * l1->color[B] + colCoef2 * l2->color[B])\
+		);\
+	})
+
 // The exponential rate at which specular light diffuses.
 #define SPECULAR_FADE_CONSTANT 10
 
@@ -86,75 +98,92 @@ void drawHorizontalGradientLine(Light_t *p1, Light_t *p2){
 	Point_t *guide = COPY_POINT(p1->pos);
 
 	while(guide[X] < p2->pos[X]){
-		double divisor = 1.0 / (p2->pos[X] - p1->pos[X]),
-			colCoef1 = (p2->pos[X] - guide[X]),
-			colCoef2 = (guide[X] - p1->pos[X]);
-		plotPixel(guide, rgbToInt(RGB(
-			divisor * (colCoef1 * p1->color[R] + colCoef2 * p2->color[R]),
-			divisor * (colCoef1 * p1->color[G] + colCoef2 * p2->color[G]),
-			divisor * (colCoef1 * p1->color[B] + colCoef2 * p2->color[B]))));
+		plotPixel(guide, rgbToInt(INTERPOLATE_COLOR(p1, p2, guide, X)));
 		guide[X]++;
 	}
 }
 
-void scanlineRender(Light_t *light1, Light_t *light2, Light_t *light3){
-	Point_t **pts;
-	int color = rgbToInt(light3->color);
+void scanlineRender(Light_t *l1, Light_t *l2, Light_t *l3){
+	Light_t **pts;
+	int color = rgbToInt(l3->color);
+	l1->pos = COPY_POINT(l1->pos);
+	l2->pos = COPY_POINT(l2->pos);
+	l3->pos = COPY_POINT(l3->pos);
 
-	Point_t *p1 = COPY_POINT(light1->pos);
-	Point_t *p2 = COPY_POINT(light2->pos);
-	Point_t *p3 = COPY_POINT(light3->pos);
+	l1->pos[Y] = (int)l1->pos[Y];
+	l2->pos[Y] = (int)l2->pos[Y];
+	l3->pos[Y] = (int)l3->pos[Y];
 
-	p1[Y] = (int)p1[Y];
-	p2[Y] = (int)p2[Y];
-	p3[Y] = (int)p3[Y];
-
-	if(p1[Y] >= p2[Y] && p1[Y] >= p3[Y]){
-		if(p3[Y] > p2[Y])
-			pts = (Point_t *[]){p1, p3, p2};
+	if(l1->pos[Y] >= l2->pos[Y] && l1->pos[Y] >= l3->pos[Y]){
+		if(l3->pos[Y] > l2->pos[Y])
+			pts = (Light_t *[]){l1, l3, l2};
 		else
-			pts = (Point_t *[]){p1, p2, p3};
+			pts = (Light_t *[]){l1, l2, l3};
 	}
 
-	else if(p2[Y] >= p1[Y] && p2[Y] >= p3[Y]){
-		if(p3[Y] > p1[Y])
-			pts = (Point_t *[]){p2, p3, p1};
+	else if(l2->pos[Y] >= l1->pos[Y] && l2->pos[Y] >= l3->pos[Y]){
+		if(l3->pos[Y] > l1->pos[Y])
+			pts = (Light_t *[]){l2, l3, l1};
 		else
-			pts = (Point_t *[]){p2, p1, p3};
+			pts = (Light_t *[]){l2, l1, l3};
 	}
 
 	else {
-		if(p2[Y] > p1[Y])
-			pts = (Point_t *[]){p3, p2, p1};
+		if(l2->pos[Y] > l1->pos[Y])
+			pts = (Light_t *[]){l3, l2, l1};
 		else
-			pts = (Point_t *[]){p3, p1, p2};
+			pts = (Light_t *[]){l3, l1, l2};
 	}
 
-	double m1 = (pts[1][Y] - pts[2][Y] != 0)?
-			(pts[1][X] - pts[2][X]) / (pts[1][Y] - pts[2][Y]):0,
-		m2 = (pts[0][Y] - pts[1][Y] != 0)?
-			(pts[0][X] - pts[1][X]) / (pts[0][Y] - pts[1][Y]):0,
-		m3 = (pts[0][Y] - pts[2][Y] != 0)?
-			(pts[0][X] - pts[2][X]) / (pts[0][Y] - pts[2][Y]):0;
-	Point_t *guide = COPY_POINT(pts[2]);
+	double m1 = (pts[1]->pos[Y] - pts[2]->pos[Y] != 0)?
+			(pts[1]->pos[X] - pts[2]->pos[X]) / (pts[1]->pos[Y] - pts[2]->pos[Y]):0,
+		m2 = (pts[0]->pos[Y] - pts[1]->pos[Y] != 0)?
+			(pts[0]->pos[X] - pts[1]->pos[X]) / (pts[0]->pos[Y] - pts[1]->pos[Y]):0,
+		m3 = (pts[0]->pos[Y] - pts[2]->pos[Y] != 0)?
+			(pts[0]->pos[X] - pts[2]->pos[X]) / (pts[0]->pos[Y] - pts[2]->pos[Y]):0;
+	Point_t *shortGuide = COPY_POINT(pts[2]->pos),
+		*longGuide = COPY_POINT(pts[2]->pos);
 
-	while(pts[2][Y] < pts[1][Y]){
-		drawLine(pts[2], guide, color);
+	while(shortGuide[Y] < pts[1]->pos[Y]){
+		// drawLine(shortGuide, longGuide, color);
+		drawHorizontalGradientLine(
+			&(Light_t){
+				.pos = shortGuide,
+				.color = INTERPOLATE_COLOR(pts[2], pts[1], shortGuide, Y)
+			},
+			&(Light_t){
+				.pos = longGuide,
+				.color = INTERPOLATE_COLOR(pts[2], pts[0], longGuide, Y)
+			}
+		);
 
-		pts[2][X] += m1;
-		pts[2][Y]++;
+		shortGuide[X] += m1;
+		shortGuide[Y]++;
 
-		guide[X] += m3;
-		guide[Y]++;
+		longGuide[X] += m3;
+		longGuide[Y]++;
 	}
 
-	while(pts[1][Y] < pts[0][Y]){
-		drawLine(pts[1], guide, color);
-		pts[1][X] += m2;
-		pts[1][Y]++;
+	shortGuide = COPY_POINT(pts[1]->pos);
 
-		guide[X] += m3;
-		guide[Y]++;
+	while(shortGuide[Y] < pts[0]->pos[Y]){
+		// drawLine(shortGuide, longGuide, color);
+		drawHorizontalGradientLine(
+			&(Light_t){
+				.pos = shortGuide,
+				.color = INTERPOLATE_COLOR(pts[1], pts[0], shortGuide, Y)
+			},
+			&(Light_t){
+				.pos = longGuide,
+				.color = INTERPOLATE_COLOR(pts[2], pts[0], longGuide, Y)
+			}
+		);
+
+		shortGuide[X] += m2;
+		shortGuide[Y]++;
+
+		longGuide[X] += m3;
+		longGuide[Y]++;
 	}
 }
 

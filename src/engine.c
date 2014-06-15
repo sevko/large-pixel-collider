@@ -61,19 +61,35 @@ static void argumentHandler(int argc, char * argv[]);
 
 void test(){
 	configureScreen();
-	drawHorizontalGradientLine(
-		&(Light_t){
-			.color = RGB(0, 0xFF, 0),
-			.pos = POINT(-200, 0, 0)
-		},
+	// drawHorizontalGradientLine(
+		// &(Light_t){
+			// .color = RGB(0xFF, 0, 0),
+			// .pos = POINT(-100, 0)
+		// },
+		// &(Light_t){
+			// .color = RGB(0, 0xFF, 0),
+			// .pos = POINT(100, 0)
+		// }
+	// );
+	scanlineRender(
 		&(Light_t){
 			.color = RGB(0xFF, 0, 0),
-			.pos = POINT(200, 0, 0)
-		}
-	);
+			.pos = POINT(-300, -300)
+		},
+		&(Light_t){
+			.color = RGB(0, 0xFF, 0),
+			.pos = POINT(-300, 0)
+		},
+		&(Light_t){
+			.color = RGB(0, 0, 0xFF),
+			.pos = POINT(300, 300)
+		});
 	renderScreen();
-	usleep(5e6);
+	usleep(10e6);
 	quitScreen();
+
+
+
 	// configureScreen();
 	// Matrix_t *pts = createMatrix();
 	// // addSphere(pts, POINT(0, 0), 100);
