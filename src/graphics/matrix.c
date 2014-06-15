@@ -44,6 +44,17 @@
  */
 static int backfaceCull(Point_t *p1, Point_t *p2, Point_t *p3);
 
+/*
+ * @brief Wrapper for ::surfaceNormal() that acts on a triangle.
+ *
+ * @param pts A matrix containing a triangular mesh.
+ * @param vertex The first vertex of a triangle in @p pts.
+ *
+ * @return The surface normal of the triangle depicted by the ::Point_t * at
+ *      offset @a vertex in @a pts->points, and the two ::Point_t * after it.
+*/
+static Point_t *triangleNormal(const Matrix_t *pts, int vertex);
+
 Matrix_t * createMatrix(void){
 	Matrix_t * const matrix = malloc(sizeof(Matrix_t));
 	matrix->numPoints = 0;
@@ -81,14 +92,79 @@ void freeMatrixFromVoid(void * matrix){
 	freeMatrix((Matrix_t *)matrix);
 }
 
-void drawMatrix(const Matrix_t * const matrix){
-	int ptPair;
-	for(ptPair = 0; ptPair < matrix->numPoints - 2; ptPair += 3){
-		Point_t *p1 = matrix->points[ptPair],
-			*p2 = matrix->points[ptPair + 1],
-			*p3 = matrix->points[ptPair + 2];
+void drawMatrix(const Matrix_t *matrix){
+	Point_t *surfaceNorms[(matrix->numPoints) / 3];
+	int vertex;
+	for(vertex = 0; vertex < matrix->numPoints - 2; vertex += 3){
+		surfaceNorms[vertex / 3] = triangleNormal(matrix, vertex);
+		NORMALIZE(surfaceNorms[vertex / 3]);
+	}
+
+	Point_t *avgNorms[matrix->numPoints];
+	int circle = matrix->numPoints / (360 / CIRCLE_STEP_SIZE);
+	for(vertex = 2 * circle; vertex < matrix->numPoints - circle * 2; vertex += 3){
+		Point_t *adjacentNorms[12] = {
+			surfaceNorms[(vertex - 3) / 3],
+			surfaceNorms[(vertex - circle - 3 * 2) / 3],
+			surfaceNorms[(vertex - circle - 3) / 3],
+			surfaceNorms[(vertex - circle) / 3],
+			surfaceNorms[(vertex + 3) / 3],
+			surfaceNorms[(vertex + 3 * 2) / 3],
+			surfaceNorms[(vertex + circle + 3 * 3) / 3],
+			surfaceNorms[(vertex + circle + 3 * 2) / 3],
+			surfaceNorms[(vertex + circle + 3) / 3],
+			surfaceNorms[(vertex + circle) / 3],
+			surfaceNorms[(vertex + circle - 3) / 3],
+			surfaceNorms[(vertex - 3 * 2) / 3]
+		};
+
+		int adjacentNorm;
+		int adjIndexes[3][6] = {
+			{0, 1, 2, 3, 4},
+			{4, 5, 6, 7, 8},
+			{8, 9, 10, 11, 0}
+		};
+
+		int avgVertex;
+		for(avgVertex = 0; avgVertex < 3; avgVertex++){
+			avgNorms[vertex + avgVertex] = POINT(0, 0, 0, 0);
+			int adjVertex;
+			for(adjVertex = 0; adjVertex < 6; adjVertex++)
+				ADD_POINT_IN_PLACE(
+						avgNorms[vertex + avgVertex],
+						adjacentNorms[adjIndexes[avgVertex][adjVertex]]);
+
+			avgNorms[vertex + avgVertex][X] /= 6;
+			avgNorms[vertex + avgVertex][Y] /= 6;
+			avgNorms[vertex + avgVertex][Z] /= 6;
+		}
+	}
+
+	int norm;
+	for(norm = 0; norm < matrix->numPoints / 3; norm++)
+		free(surfaceNorms[norm]);
+
+	for(vertex = 2 * circle; vertex < matrix->numPoints - 2 * circle - 2; vertex += 3){
+		Point_t *p1 = matrix->points[vertex],
+			*p2 = matrix->points[vertex + 1],
+			*p3 = matrix->points[vertex + 2];
+		Point_t *norm = surfaceNormal(p1, p2, p3);
+		NORMALIZE(norm);
 		if(backfaceCull(p1, p2, p3))
-			scanlineRender(p1, p2, p3);
+			scanlineRender(
+				&(Light_t){
+					.color = flatShade(p1, norm),
+					.pos = p1
+				},
+				&(Light_t){
+					.color = flatShade(p1, norm),
+					.pos = p2
+				},
+				&(Light_t){
+					.color = flatShade(p1, norm),
+					.pos = p3
+				}
+			);
 	}
 }
 
@@ -294,14 +370,13 @@ double dotProduct(Point_t *p1, Point_t *p2){
 }
 
 Point_t *surfaceNormal(Point_t *p1, Point_t *p2, Point_t *p3){
-	Point_t *norm = malloc(sizeof(Point_t)),
-		*u = SUB_POINT(p2, p1),
+	Point_t *u = SUB_POINT(p2, p1),
 		*v = SUB_POINT(p3, p1);
 
-	norm[X] = (u[Y] * v[Z]) - (u[Z] * v[Y]);
-	norm[Y] = (u[Z] * v[X]) - (u[X] * v[Z]);
-	norm[Z] = (u[X] * v[Y]) - (u[Y] * v[X]);
-	return norm;
+	return createPoint(POINT(
+			(u[Y] * v[Z]) - (u[Z] * v[Y]),
+			(u[Z] * v[X]) - (u[X] * v[Z]),
+			(u[X] * v[Y]) - (u[Y] * v[X]), 0));
 }
 
 static int backfaceCull(Point_t *p1, Point_t *p2, Point_t *p3){
@@ -309,4 +384,9 @@ static int backfaceCull(Point_t *p1, Point_t *p2, Point_t *p3){
 	int culled = -(int)norm[Z] < 0;
 	free(norm);
 	return culled;
+}
+
+static Point_t *triangleNormal(const Matrix_t *pts, int vertex){
+	return surfaceNormal(pts->points[vertex], pts->points[vertex + 1],
+			pts->points[vertex + 2]);
 }

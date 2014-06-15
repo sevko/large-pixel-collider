@@ -15,18 +15,6 @@
 #define SPECULAR_FADE_CONSTANT 10
 
 /*
- * @brief Calculate the flat-shaded color of a triangle.
- *
- * @param p1 The first vertex of the triangle.
- * @param p2 The second vertex of the triangle.
- * @param p3 The third vertex of the triangle.
- *
- * @return The RGB color of the triangle with ambient, diffuse, and spectral
- *      lighting applied.
-*/
-static int flatShade(Point_t *p1, Point_t *p2, Point_t *p3);
-
-/*
  * @brief Convert an ::RGB_t to an int.
  *
  * @param color A color.
@@ -35,6 +23,15 @@ static int flatShade(Point_t *p1, Point_t *p2, Point_t *p3);
  *      0xRRGGBB.
 */
 static int rgbToInt(RGB_t *color);
+
+/*
+ * @brief Convert an int to an ::RGB_t.
+ *
+ * @param color An integer (0xRRGGBB) representation of a color.
+ *
+ * @return An ::RGB_t with its R, G, and B values corresponding to @p color.
+*/
+static RGB_t *intToRgb(int color);
 
 void (drawLine)(Point_t *p1, Point_t *p2, int color){
 	p1 = COPY_POINT(p1);
@@ -77,13 +74,13 @@ void (drawLine)(Point_t *p1, Point_t *p2, int color){
 	}
 }
 
-void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3){
+void scanlineRender(Light_t *light1, Light_t *light2, Light_t *light3){
 	Point_t **pts;
-	int color = flatShade(p1, p2, p3);
+	int color = rgbToInt(light3->color);
 
-	p1 = COPY_POINT(p1);
-	p2 = COPY_POINT(p2);
-	p3 = COPY_POINT(p3);
+	Point_t *p1 = COPY_POINT(light1->pos);
+	Point_t *p2 = COPY_POINT(light2->pos);
+	Point_t *p3 = COPY_POINT(light3->pos);
 
 	p1[Y] = (int)p1[Y];
 	p2[Y] = (int)p2[Y];
@@ -138,8 +135,8 @@ void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3){
 	}
 }
 
-static int flatShade(Point_t *p1, Point_t *p2, Point_t *p3){
-	int ambientLight = rgbToInt(RGB(
+RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
+	unsigned int ambientLight = rgbToInt(RGB(
 		0.2 * 0x00,
 		0.2 * 0x00,
 		0.2 * 0xFF
@@ -147,21 +144,18 @@ static int flatShade(Point_t *p1, Point_t *p2, Point_t *p3){
 
 	Light_t diffuseSource = {
 		.color = RGB(0xAA, 0xBB, 0x00),
-		.pos = POINT(0, 1000, 0)
+		.pos = POINT(0, 1000, 0, 0)
 	};
 
-	Point_t *norm = surfaceNormal(p1, p2, p3),
-		*dLightVector = SUB_POINT(p3, diffuseSource.pos);
-	NORMALIZE(norm);
+	Point_t *dLightVector = SUB_POINT(vertex, diffuseSource.pos);
 	NORMALIZE(dLightVector);
-	double diffuseDot = dotProduct(norm, dLightVector);
+	double diffuseDot = dotProduct(surfaceNorm, dLightVector);
 
-	int diffuseLight = (diffuseDot < 0)?0:rgbToInt(RGB(
+	unsigned int diffuseLight = (diffuseDot < 0)?0:rgbToInt(RGB(
 		diffuseSource.color[R] * diffuseDot,
 		diffuseSource.color[G] * diffuseDot,
 		diffuseSource.color[B] * diffuseDot
 	));
-	free(norm);
 
 	Light_t specularSource = {
 		.color = RGB(0xAA, 0xBB, 0x00),
@@ -169,21 +163,32 @@ static int flatShade(Point_t *p1, Point_t *p2, Point_t *p3){
 	};
 	Point_t *view = POINT(0, 0, 1, 0);
 
-	Point_t *sLightVector = SUB_POINT(p3, specularSource.pos);
+	Point_t *sLightVector = SUB_POINT(vertex, specularSource.pos);
 	NORMALIZE(view);
 	NORMALIZE(sLightVector);
 
 	double specularDot = pow(dotProduct(view, sLightVector), 10);
-	int specularLight = (specularDot < 0)?0:rgbToInt(RGB(
+	unsigned int specularLight = (specularDot < 0)?0:rgbToInt(RGB(
 		specularSource.color[R] * specularDot,
 		specularSource.color[G] * specularDot,
 		specularSource.color[B] * specularDot
 	));
 
-	int sum = ambientLight + diffuseLight + specularLight;
-	return (0xFFFFFF < sum)?0xFFFFFF:sum;
+	unsigned int sum = ambientLight + diffuseLight + specularLight;
+	return intToRgb((0xFFFFFF < sum)?0xFFFFFF:sum);
 }
 
 static int rgbToInt(RGB_t *color){
+	if(0xFFFFFF < ((color[R] << 4 * 4) & (color[G] << 4 * 2) & color[B]))
+		FATAL("Stop: %X, %X, %X", color[R], color[G], color[B]);
+
 	return (color[R] << 4 * 4) + (color[G] << 4 * 2) + color[B];
+}
+
+static RGB_t *intToRgb(int color){
+	RGB_t *rgb = malloc(3 * sizeof(RGB_t));
+	rgb[R] = color >> 4 * 4;
+	rgb[G] = (color & 0x00FF00) >> 4 * 2;
+	rgb[B] = color & 0x0000FF;
+	return rgb;
 }

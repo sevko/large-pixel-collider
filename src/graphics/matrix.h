@@ -84,6 +84,19 @@
 	} while(0)
 
 /*
+ * @brief Add point @p p2 point into @p p1 (in place).
+ *
+ * @param p1 (::Point_t *) A point.
+ * @param p2 (::Point_t *) A point.
+*/
+#define ADD_POINT_IN_PLACE(p1, p2) \
+	do {\
+		p1[X] += p2[X];\
+		p1[Y] += p2[Y];\
+		p1[Z] += p2[Z];\
+	} while(0)
+
+/*
  * @brief Create the ::Point_t * difference of two ::Point_t.
  *
  * @param p1 (::Point_t *) A point.
@@ -187,7 +200,7 @@ void freeMatrixFromVoid(void *matrix);
  *
  *  @param matrix The ::Matrix_t to be rendered.
  */
-void drawMatrix(const Matrix_t *const matrix);
+void drawMatrix(const Matrix_t *matrix);
 
 /*!
  *  @brief Multiply a ::Matrix_t by a scalar value.

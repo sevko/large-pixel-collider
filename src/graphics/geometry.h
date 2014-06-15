@@ -50,6 +50,9 @@
 #define addPolygon(points, origin, radius, numSides) \
 	addPolygonFull(points, origin, radius, numSides, 2 * M_PI / numSides)
 
+// The angle between the subsequent, rotated circles that compose a sphere.
+#define CIRCLE_STEP_SIZE 8
+
 /*!
  *  @brief Add a line's endpoints to a ::Matrix_t.
  *

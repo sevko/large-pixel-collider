@@ -93,8 +93,20 @@ void (drawLine)(Point_t *p1, Point_t *p2, int color);
 /*
  * @brief Fill a triangle using scanline-rendering.
  *
+ * @param light1 The position and color of the first vertex of the triangle.
+ * @param light2 The position and color of the second vertex of the triangle.
+ * @param light3 The position and color of the third vertex of the triangle.
+*/
+void scanlineRender(Light_t *light1, Light_t *light2, Light_t *light3);
+/*
+ * @brief Calculate the flat-shaded color of a triangle.
+ *
  * @param p1 The first vertex of the triangle.
  * @param p2 The second vertex of the triangle.
  * @param p3 The third vertex of the triangle.
+ * @param surfaceNorm The averaged surface normal of the triangle.
+ *
+ * @return The RGB color of the triangle with ambient, diffuse, and spectral
+ *      lighting applied.
 */
-void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3);
+RGB_t *flatShade(Point_t *p1, Point_t *surfaceNorm);
