@@ -22,6 +22,9 @@
 */
 // static void drawHorizontalGradientLine(Light_t *p1, Light_t *p2);
 
+static void drawHalfTriangle(Point_t *lower, Point_t *upper, Point_t *guide,
+		double mGuide, unsigned int color);
+
 /*
  * @brief Convert an ::RGB_t to an int.
  *
@@ -130,32 +133,12 @@ void scanlineRender(Light_t *light1, Light_t *light2, Light_t *light3){
 			pts = (Point_t *[]){p3, p1, p2};
 	}
 
-	double m1 = (pts[1][Y] - pts[2][Y] != 0)?
-			(pts[1][X] - pts[2][X]) / (pts[1][Y] - pts[2][Y]):0,
-		m2 = (pts[0][Y] - pts[1][Y] != 0)?
-			(pts[0][X] - pts[1][X]) / (pts[0][Y] - pts[1][Y]):0,
-		m3 = (pts[0][Y] - pts[2][Y] != 0)?
+	double mGuide = (pts[0][Y] - pts[2][Y] != 0)?
 			(pts[0][X] - pts[2][X]) / (pts[0][Y] - pts[2][Y]):0;
 	Point_t *guide = COPY_POINT(pts[2]);
 
-	while(pts[2][Y] < pts[1][Y]){
-		drawLine(pts[2], guide, color);
-
-		pts[2][X] += m1;
-		pts[2][Y]++;
-
-		guide[X] += m3;
-		guide[Y]++;
-	}
-
-	while(pts[1][Y] < pts[0][Y]){
-		drawLine(pts[1], guide, color);
-		pts[1][X] += m2;
-		pts[1][Y]++;
-
-		guide[X] += m3;
-		guide[Y]++;
-	}
+	drawHalfTriangle(pts[2], pts[1], guide, m3, color);
+	drawHalfTriangle(pts[1], pts[0], guide, m3, color);
 }
 
 RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
@@ -199,6 +182,21 @@ RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
 
 	unsigned int sum = ambientLight + diffuseLight + specularLight;
 	return intToRgb((0xFFFFFF < sum)?0xFFFFFF:sum);
+}
+
+static void drawHalfTriangle(Point_t *lower, Point_t *upper, Point_t *guide,
+		double mGuide, unsigned int color){
+	double m1 = (lower[Y] - upper[Y] != 0)?
+			(lower[X] - upper[X]) / (lower[Y] - upper[Y]):0;
+	while(lower[Y] < upper[Y]){
+		drawLine(lower, guide, color);
+
+		lower[X] += m1;
+		lower[Y]++;
+
+		guide[X] += mGuide;
+		guide[Y]++;
+	}
 }
 
 static unsigned int rgbToInt(RGB_t *color){
