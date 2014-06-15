@@ -78,6 +78,7 @@ typedef struct {
 	Point_t *pos; // The light's location.
 } Light_t;
 
+void drawHorizontalGradientLine(Light_t *p1, Light_t *p2);
 /*!
  *  @brief Rasterize a line.
  *

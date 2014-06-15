@@ -15,6 +15,14 @@
 #define SPECULAR_FADE_CONSTANT 10
 
 /*
+ * @brief Draw a horizontal line with a color gradient.
+ *
+ * @param p1 The first endpoint.
+ * @param p2 The second endpoint.
+*/
+// static void drawHorizontalGradientLine(Light_t *p1, Light_t *p2);
+
+/*
  * @brief Convert an ::RGB_t to an int.
  *
  * @param color A color.
@@ -22,7 +30,7 @@
  * @return An int representing the RGB values stored in @p color, in the form:
  *      0xRRGGBB.
 */
-static int rgbToInt(RGB_t *color);
+static unsigned int rgbToInt(RGB_t *color);
 
 /*
  * @brief Convert an int to an ::RGB_t.
@@ -71,6 +79,21 @@ void (drawLine)(Point_t *p1, Point_t *p2, int color){
 			p1[X] += dx2;
 			p1[Y] += dy2;
 		}
+	}
+}
+
+void drawHorizontalGradientLine(Light_t *p1, Light_t *p2){
+	Point_t *guide = COPY_POINT(p1->pos);
+
+	while(guide[X] < p2->pos[X]){
+		double divisor = 1.0 / (p2->pos[X] - p1->pos[X]),
+			colCoef1 = (p2->pos[X] - guide[X]),
+			colCoef2 = (guide[X] - p1->pos[X]);
+		plotPixel(guide, rgbToInt(RGB(
+			divisor * (colCoef1 * p1->color[R] + colCoef2 * p2->color[R]),
+			divisor * (colCoef1 * p1->color[G] + colCoef2 * p2->color[G]),
+			divisor * (colCoef1 * p1->color[B] + colCoef2 * p2->color[B]))));
+		guide[X]++;
 	}
 }
 
@@ -178,7 +201,7 @@ RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
 	return intToRgb((0xFFFFFF < sum)?0xFFFFFF:sum);
 }
 
-static int rgbToInt(RGB_t *color){
+static unsigned int rgbToInt(RGB_t *color){
 	if(0xFFFFFF < ((color[R] << 4 * 4) & (color[G] << 4 * 2) & color[B]))
 		FATAL("Stop: %X, %X, %X", color[R], color[G], color[B]);
 

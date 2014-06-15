@@ -150,21 +150,30 @@ void drawMatrix(const Matrix_t *matrix){
 			*p3 = matrix->points[vertex + 2];
 		Point_t *norm = surfaceNormal(p1, p2, p3);
 		NORMALIZE(norm);
+
+		RGB_t *color1 = flatShade(p1, norm),
+			*color2 = flatShade(p2, norm),
+			*color3 = flatShade(p3, norm);
+
 		if(backfaceCull(p1, p2, p3))
 			scanlineRender(
 				&(Light_t){
-					.color = flatShade(p1, norm),
+					.color = color1,
 					.pos = p1
 				},
 				&(Light_t){
-					.color = flatShade(p1, norm),
+					.color = color2,
 					.pos = p2
 				},
 				&(Light_t){
-					.color = flatShade(p1, norm),
+					.color = color3,
 					.pos = p3
 				}
 			);
+		free(norm);
+		free(color1);
+		free(color2);
+		free(color3);
 	}
 }
 
