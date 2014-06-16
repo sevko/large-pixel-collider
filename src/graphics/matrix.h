@@ -103,7 +103,7 @@
  * @param p2 (::Point_t *) A point.
 */
 #define SUB_POINT(p1, p2) \
-	POINT(p1[X] - p2[X], p1[Y] - p2[Y], p1[Z] - p2[Z], p1[Z] - p2[Z])
+	POINT(p1[X] - p2[X], p1[Y] - p2[Y], p1[Z] - p2[Z], 0)
 
 /*
  * @brief Create a copy of a ::Point_t.

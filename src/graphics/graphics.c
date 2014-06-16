@@ -206,8 +206,8 @@ RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
 	);
 
 	Light_t diffuseSource = {
-		.color = RGB(0xAA, 0xBB, 0x00),
-		.pos = POINT(0, 1000, 0, 0)
+		.color = RGB(0x22, 0x22, 0x00),
+		.pos = POINT(0, 0, -100, 1)
 	};
 
 	Point_t *dLightVector = SUB_POINT(vertex, diffuseSource.pos);
@@ -239,9 +239,9 @@ RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
 
 	// unsigned int sum = ambientLight + diffuseLight + specularLight;
 	RGB_t *sum = malloc(3 * sizeof(RGB_t));
-	sum[R] = ambientLight[R] + diffuseLight[R] + specularLight[R];
-	sum[G] = ambientLight[G] + diffuseLight[G] + specularLight[G];
-	sum[B] = ambientLight[B] + diffuseLight[B] + specularLight[B];
+	sum[R] = diffuseLight[R];
+	sum[G] = diffuseLight[G];
+	sum[B] = diffuseLight[B];
 
 	int col;
 	for(col = 0; col < 3; col++)
