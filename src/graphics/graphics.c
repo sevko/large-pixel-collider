@@ -39,7 +39,7 @@
 	})
 
 // The exponential rate at which specular light diffuses.
-#define SPECULAR_FADE_CONSTANT 10
+#define SPECULAR_FADE_CONSTANT 2
 
 /*
  * @brief Convert an ::RGB_t to an int.
@@ -50,16 +50,6 @@
  *      0xRRGGBB.
 */
 static unsigned int rgbToInt(RGB_t *color);
-
-/*
- * @brief Convert an int to an ::RGB_t.
- *
- * @param color An integer (0xRRGGBB) representation of a color.
- *
- * @return An ::RGB_t with its R, G, and B values corresponding to @p color.
-*/
-static RGB_t *intToRgb(int color);
-
 /*
  * @brief Return the inverse slope of a line.
  *
@@ -70,6 +60,7 @@ static RGB_t *intToRgb(int color);
  *      @p p1 and @p p2.
 */
 static double inverseSlope(Point_t *p1, Point_t *p2);
+
 void (drawLine)(Point_t *p1, Point_t *p2, int color){
 	p1 = COPY_POINT(p1);
 	int width = p2[X] - p1[X],
@@ -208,16 +199,15 @@ RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
 	RGB_t *ambientLight = RGB(
 		0.2 * 0x00,
 		0.2 * 0x00,
-		0.2 * 0xFF
+		0.2 * 0x22
 	);
 
 	Light_t diffuseSource = {
-		.color = RGB(0x22, 0x22, 0x00),
+		.color = RGB(0x00, 0x00, 0xAA),
 		.pos = POINT(0, 0, -100, 1)
 	};
 
-	Point_t *dLightVector = SUB_POINT(vertex, diffuseSource.pos);
-	NORMALIZE(dLightVector);
+	Point_t *dLightVector = NORMALIZE(SUB_POINT(vertex, diffuseSource.pos));
 	double diffuseDot = dotProduct(surfaceNorm, dLightVector);
 
 	RGB_t *diffuseLight = (diffuseDot < 0)?RGB(0, 0, 0):RGB(
@@ -227,15 +217,11 @@ RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
 	);
 
 	Light_t specularSource = {
-		.color = RGB(0xAA, 0xBB, 0x00),
+		.color = RGB(0xFF, 0xFF, 0xFF),
 		.pos = POINT(0, 0, 1, 0)
 	};
 	Point_t *view = POINT(0, 0, 1, 0);
-
-	Point_t *sLightVector = SUB_POINT(vertex, specularSource.pos);
-	NORMALIZE(view);
-	NORMALIZE(sLightVector);
-
+	Point_t *sLightVector = NORMALIZE(SUB_POINT(vertex, specularSource.pos));
 	double specularDot = pow(dotProduct(view, sLightVector), 10);
 	RGB_t *specularLight = (specularDot < 0)?RGB(0, 0, 0):RGB(
 		specularSource.color[R] * specularDot,
@@ -245,9 +231,9 @@ RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
 
 	// unsigned int sum = ambientLight + diffuseLight + specularLight;
 	RGB_t *sum = malloc(3 * sizeof(RGB_t));
-	sum[R] = diffuseLight[R];
-	sum[G] = diffuseLight[G];
-	sum[B] = diffuseLight[B];
+	sum[R] = ambientLight[R] + diffuseLight[R] + specularLight[R];
+	sum[G] = ambientLight[G] + diffuseLight[G] + specularLight[G];
+	sum[B] = ambientLight[B] + diffuseLight[B] + specularLight[B];
 
 	int col;
 	for(col = 0; col < 3; col++)
@@ -261,14 +247,6 @@ static unsigned int rgbToInt(RGB_t *color){
 		FATAL("Stop: %X, %X, %X", color[R], color[G], color[B]);
 
 	return (color[R] << 4 * 4) + (color[G] << 4 * 2) + color[B];
-}
-
-static RGB_t *intToRgb(int color){
-	RGB_t *rgb = malloc(3 * sizeof(RGB_t));
-	rgb[R] = color >> 4 * 4;
-	rgb[G] = (color & 0x00FF00) >> 4 * 2;
-	rgb[B] = color & 0x0000FF;
-	return rgb;
 }
 
 static double inverseSlope(Point_t *p1, Point_t *p2){

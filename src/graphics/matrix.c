@@ -93,14 +93,20 @@ void freeMatrixFromVoid(void * matrix){
 }
 
 void drawMatrix(const Matrix_t *matrix){
+	Point_t *surfaceNorms[matrix->numPoints / 3];
+	int triangle;
+	for(triangle = 0; triangle < matrix->numPoints / 3; triangle++){
+		surfaceNorms[triangle] = triangleNormal(matrix, triangle * 3);
+		NORMALIZE(surfaceNorms[triangle]);
+	}
+
 	int vertex;
 	for(vertex = 0; vertex < matrix->numPoints; vertex += 3){
 		Point_t *p1 = matrix->points[vertex],
 			*p2 = matrix->points[vertex + 1],
 			*p3 = matrix->points[vertex + 2];
 
-		Point_t *norm = triangleNormal(matrix, vertex);
-		NORMALIZE(norm);
+		Point_t *norm = NORMALIZE(triangleNormal(matrix, vertex));
 		RGB_t *color1 = flatShade(p1, norm),
 			*color2 = flatShade(p2, norm),
 			*color3 = flatShade(p3, norm);

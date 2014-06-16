@@ -75,13 +75,15 @@
  * @param vector (::Point_t *) A vector.
 */
 #define NORMALIZE(vector) \
-	do {\
-		double length = sqrt(vector[X] * vector[X] + vector[Y] * vector[Y] +\
-			vector[Z] * vector[Z]);\
-		vector[X] /= length;\
-		vector[Y] /= length;\
-		vector[Z] /= length;\
-	} while(0)
+	({\
+		Point_t *vec = vector;\
+		double length = sqrt(vec[X] * vec[X] + vec[Y] * vec[Y] +\
+			vec[Z] * vec[Z]);\
+		vec[X] /= length;\
+		vec[Y] /= length;\
+		vec[Z] /= length;\
+		vec;\
+	})
 
 /*
  * @brief Add point @p p2 point into @p p1 (in place).
