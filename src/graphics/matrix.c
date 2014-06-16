@@ -93,13 +93,6 @@ void freeMatrixFromVoid(void * matrix){
 }
 
 void drawMatrix(const Matrix_t *matrix){
-	Point_t *surfaceNorms[matrix->numPoints / 3];
-	int triangle;
-	for(triangle = 0; triangle < matrix->numPoints / 3; triangle++){
-		surfaceNorms[triangle] = triangleNormal(matrix, triangle * 3);
-		NORMALIZE(surfaceNorms[triangle]);
-	}
-
 	int vertex;
 	for(vertex = 0; vertex < matrix->numPoints; vertex += 3){
 		Point_t *p1 = matrix->points[vertex],
@@ -110,10 +103,6 @@ void drawMatrix(const Matrix_t *matrix){
 		RGB_t *color1 = flatShade(p1, norm),
 			*color2 = flatShade(p2, norm),
 			*color3 = flatShade(p3, norm);
-
-		// RGB_t *color1 = flatShade(p1, vertexNorms[vertex]),
-			// *color2 = flatShade(p2, vertexNorms[vertex + 1]),
-			// *color3 = flatShade(p3, vertexNorms[vertex + 2]);
 
 		if(backfaceCull(p1, p2, p3))
 			scanlineRender(
@@ -130,6 +119,8 @@ void drawMatrix(const Matrix_t *matrix){
 					.pos = p3
 				}
 			);
+
+		free(norm);
 		free(color1);
 		free(color2);
 		free(color3);

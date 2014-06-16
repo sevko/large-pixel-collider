@@ -92,7 +92,7 @@ void test(){
 
 	configureScreen();
 	Matrix_t *pts = createMatrix();
-	// addSphere(pts, POINT(0, 0), 300);
+	// addSphere(pts, POINT(0, 0), 150);
 	addTorus(pts, POINT(0, 0), 100, 200);
 	// addRectangularPrism(pts, POINT(0, 0), POINT(100, 200, 300));
 	Matrix_t *rX = createRotation(X_AXIS, 1),

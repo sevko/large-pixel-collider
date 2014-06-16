@@ -204,7 +204,7 @@ RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
 
 	Light_t diffuseSource = {
 		.color = RGB(0x00, 0x00, 0xAA),
-		.pos = POINT(0, 0, -100, 1)
+		.pos = POINT(0, 1000, 0, 0)
 	};
 
 	Point_t *dLightVector = NORMALIZE(SUB_POINT(vertex, diffuseSource.pos));
@@ -218,7 +218,7 @@ RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
 
 	Light_t specularSource = {
 		.color = RGB(0xFF, 0xFF, 0xFF),
-		.pos = POINT(0, 0, 1, 0)
+		.pos = POINT(10, -100, 50, 0)
 	};
 	Point_t *view = POINT(0, 0, 1, 0);
 	Point_t *sLightVector = NORMALIZE(SUB_POINT(vertex, specularSource.pos));

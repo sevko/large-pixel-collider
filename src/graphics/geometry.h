@@ -21,7 +21,7 @@
  *  @param radius (double) The radius of the circle.
  */
 #define addCircle(points, origin, radius) \
-	addPolygon(points, origin, radius, (radius / 2));
+	addPolygon(points, origin, radius, radius);
 
 /*
  *  @brief Add a half circle to a ::Matrix_t.
@@ -51,7 +51,7 @@
 	addPolygonFull(points, origin, radius, numSides, 2 * M_PI / numSides)
 
 // The angle between the subsequent, rotated circles that compose a sphere.
-#define CIRCLE_STEP_SIZE 8
+#define CIRCLE_STEP_SIZE 2
 
 /*!
  *  @brief Add a line's endpoints to a ::Matrix_t.
