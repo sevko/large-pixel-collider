@@ -39,7 +39,7 @@
 	})
 
 // The exponential rate at which specular light diffuses.
-#define SPECULAR_FADE_CONSTANT 10
+#define SPECULAR_FADE_CONSTANT 2
 
 /*
  * @brief Convert an ::RGB_t to an int.
@@ -50,15 +50,16 @@
  *      0xRRGGBB.
 */
 static unsigned int rgbToInt(RGB_t *color);
-
 /*
- * @brief Convert an int to an ::RGB_t.
+ * @brief Return the inverse slope of a line.
  *
- * @param color An integer (0xRRGGBB) representation of a color.
+ * @param p1 The first endpoint.
+ * @param p2 The second endpoint.
  *
- * @return An ::RGB_t with its R, G, and B values corresponding to @p color.
+ * @return The inverse slope (delta x)/(delta y) of the line formed by endpoints
+ *      @p p1 and @p p2.
 */
-static RGB_t *intToRgb(int color);
+static double inverseSlope(Point_t *p1, Point_t *p2);
 
 void (drawLine)(Point_t *p1, Point_t *p2, int color){
 	p1 = COPY_POINT(p1);
@@ -146,17 +147,14 @@ void scanlineRender(Light_t *l1, Light_t *l2, Light_t *l3){
 			pts = (Light_t *[]){l3, l1, l2};
 	}
 
-	double m1 = (pts[1]->pos[Y] - pts[2]->pos[Y] != 0)?
-			(pts[1]->pos[X] - pts[2]->pos[X]) / (pts[1]->pos[Y] - pts[2]->pos[Y]):0,
-		m2 = (pts[0]->pos[Y] - pts[1]->pos[Y] != 0)?
-			(pts[0]->pos[X] - pts[1]->pos[X]) / (pts[0]->pos[Y] - pts[1]->pos[Y]):0,
-		m3 = (pts[0]->pos[Y] - pts[2]->pos[Y] != 0)?
-			(pts[0]->pos[X] - pts[2]->pos[X]) / (pts[0]->pos[Y] - pts[2]->pos[Y]):0;
+	double m1 = inverseSlope(pts[1]->pos, pts[2]->pos),
+		m2 = inverseSlope(pts[0]->pos, pts[1]->pos),
+		m3 = inverseSlope(pts[0]->pos, pts[2]->pos);
+
 	Point_t *shortGuide = COPY_POINT(pts[2]->pos),
 		*longGuide = COPY_POINT(pts[2]->pos);
 
 	while(shortGuide[Y] < pts[1]->pos[Y]){
-		// drawLine(shortGuide, longGuide, color);
 		drawHorizontalGradientLine(
 			&(Light_t){
 				.pos = shortGuide,
@@ -178,7 +176,6 @@ void scanlineRender(Light_t *l1, Light_t *l2, Light_t *l3){
 	shortGuide = COPY_POINT(pts[1]->pos);
 
 	while(shortGuide[Y] < pts[0]->pos[Y]){
-		// drawLine(shortGuide, longGuide, color);
 		drawHorizontalGradientLine(
 			&(Light_t){
 				.pos = shortGuide,
@@ -199,46 +196,50 @@ void scanlineRender(Light_t *l1, Light_t *l2, Light_t *l3){
 }
 
 RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
-	unsigned int ambientLight = rgbToInt(RGB(
+	RGB_t *ambientLight = RGB(
 		0.2 * 0x00,
 		0.2 * 0x00,
-		0.2 * 0xFF
-	));
+		0.2 * 0x22
+	);
 
 	Light_t diffuseSource = {
-		.color = RGB(0xAA, 0xBB, 0x00),
+		.color = RGB(0x00, 0x00, 0xAA),
 		.pos = POINT(0, 1000, 0, 0)
 	};
 
-	Point_t *dLightVector = SUB_POINT(vertex, diffuseSource.pos);
-	NORMALIZE(dLightVector);
+	Point_t *dLightVector = NORMALIZE(SUB_POINT(vertex, diffuseSource.pos));
 	double diffuseDot = dotProduct(surfaceNorm, dLightVector);
 
-	unsigned int diffuseLight = (diffuseDot < 0)?0:rgbToInt(RGB(
+	RGB_t *diffuseLight = (diffuseDot < 0)?RGB(0, 0, 0):RGB(
 		diffuseSource.color[R] * diffuseDot,
 		diffuseSource.color[G] * diffuseDot,
 		diffuseSource.color[B] * diffuseDot
-	));
+	);
 
 	Light_t specularSource = {
-		.color = RGB(0xAA, 0xBB, 0x00),
-		.pos = POINT(0, 0, 1, 0)
+		.color = RGB(0xFF, 0xFF, 0xFF),
+		.pos = POINT(10, -100, 50, 0)
 	};
 	Point_t *view = POINT(0, 0, 1, 0);
-
-	Point_t *sLightVector = SUB_POINT(vertex, specularSource.pos);
-	NORMALIZE(view);
-	NORMALIZE(sLightVector);
-
+	Point_t *sLightVector = NORMALIZE(SUB_POINT(vertex, specularSource.pos));
 	double specularDot = pow(dotProduct(view, sLightVector), 10);
-	unsigned int specularLight = (specularDot < 0)?0:rgbToInt(RGB(
+	RGB_t *specularLight = (specularDot < 0)?RGB(0, 0, 0):RGB(
 		specularSource.color[R] * specularDot,
 		specularSource.color[G] * specularDot,
 		specularSource.color[B] * specularDot
-	));
+	);
 
-	unsigned int sum = ambientLight + diffuseLight + specularLight;
-	return intToRgb((0xFFFFFF < sum)?0xFFFFFF:sum);
+	// unsigned int sum = ambientLight + diffuseLight + specularLight;
+	RGB_t *sum = malloc(3 * sizeof(RGB_t));
+	sum[R] = ambientLight[R] + diffuseLight[R] + specularLight[R];
+	sum[G] = ambientLight[G] + diffuseLight[G] + specularLight[G];
+	sum[B] = ambientLight[B] + diffuseLight[B] + specularLight[B];
+
+	int col;
+	for(col = 0; col < 3; col++)
+		if(0xFF < sum[col])
+			sum[col] = 0xFF;
+	return sum;
 }
 
 static unsigned int rgbToInt(RGB_t *color){
@@ -248,10 +249,7 @@ static unsigned int rgbToInt(RGB_t *color){
 	return (color[R] << 4 * 4) + (color[G] << 4 * 2) + color[B];
 }
 
-static RGB_t *intToRgb(int color){
-	RGB_t *rgb = malloc(3 * sizeof(RGB_t));
-	rgb[R] = color >> 4 * 4;
-	rgb[G] = (color & 0x00FF00) >> 4 * 2;
-	rgb[B] = color & 0x0000FF;
-	return rgb;
+static double inverseSlope(Point_t *p1, Point_t *p2){
+	double deltaY = p1[Y] - p2[Y];
+	return (deltaY != 0)?(p1[X] - p2[X]) / (deltaY):0;
 }

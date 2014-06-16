@@ -93,67 +93,16 @@ void freeMatrixFromVoid(void * matrix){
 }
 
 void drawMatrix(const Matrix_t *matrix){
-	Point_t *surfaceNorms[(matrix->numPoints) / 3];
 	int vertex;
-	for(vertex = 0; vertex < matrix->numPoints - 2; vertex += 3){
-		surfaceNorms[vertex / 3] = triangleNormal(matrix, vertex);
-		NORMALIZE(surfaceNorms[vertex / 3]);
-	}
-
-	Point_t *avgNorms[matrix->numPoints];
-	int circle = matrix->numPoints / (360 / CIRCLE_STEP_SIZE);
-	for(vertex = 2 * circle; vertex < matrix->numPoints - circle * 2; vertex += 3){
-		Point_t *adjacentNorms[12] = {
-			surfaceNorms[(vertex - 3) / 3],
-			surfaceNorms[(vertex - circle - 3 * 2) / 3],
-			surfaceNorms[(vertex - circle - 3) / 3],
-			surfaceNorms[(vertex - circle) / 3],
-			surfaceNorms[(vertex + 3) / 3],
-			surfaceNorms[(vertex + 3 * 2) / 3],
-			surfaceNorms[(vertex + circle + 3 * 3) / 3],
-			surfaceNorms[(vertex + circle + 3 * 2) / 3],
-			surfaceNorms[(vertex + circle + 3) / 3],
-			surfaceNorms[(vertex + circle) / 3],
-			surfaceNorms[(vertex + circle - 3) / 3],
-			surfaceNorms[(vertex - 3 * 2) / 3]
-		};
-
-		int adjacentNorm;
-		int adjIndexes[3][6] = {
-			{0, 1, 2, 3, 4},
-			{4, 5, 6, 7, 8},
-			{8, 9, 10, 11, 0}
-		};
-
-		int avgVertex;
-		for(avgVertex = 0; avgVertex < 3; avgVertex++){
-			avgNorms[vertex + avgVertex] = POINT(0, 0, 0, 0);
-			int adjVertex;
-			for(adjVertex = 0; adjVertex < 6; adjVertex++)
-				ADD_POINT_IN_PLACE(
-						avgNorms[vertex + avgVertex],
-						adjacentNorms[adjIndexes[avgVertex][adjVertex]]);
-
-			avgNorms[vertex + avgVertex][X] /= 6;
-			avgNorms[vertex + avgVertex][Y] /= 6;
-			avgNorms[vertex + avgVertex][Z] /= 6;
-		}
-	}
-
-	int norm;
-	for(norm = 0; norm < matrix->numPoints / 3; norm++)
-		free(surfaceNorms[norm]);
-
-	for(vertex = 2 * circle; vertex < matrix->numPoints - 2 * circle - 2; vertex += 3){
+	for(vertex = 0; vertex < matrix->numPoints; vertex += 3){
 		Point_t *p1 = matrix->points[vertex],
 			*p2 = matrix->points[vertex + 1],
 			*p3 = matrix->points[vertex + 2];
-		Point_t *norm = surfaceNormal(p1, p2, p3);
-		NORMALIZE(norm);
 
-		RGB_t *color1 = flatShade(p1, avgNorms[vertex]),
-			*color2 = flatShade(p2, avgNorms[vertex + 1]),
-			*color3 = flatShade(p3, avgNorms[vertex + 2]);
+		Point_t *norm = NORMALIZE(triangleNormal(matrix, vertex));
+		RGB_t *color1 = flatShade(p1, norm),
+			*color2 = flatShade(p2, norm),
+			*color3 = flatShade(p3, norm);
 
 		if(backfaceCull(p1, p2, p3))
 			scanlineRender(
@@ -170,6 +119,7 @@ void drawMatrix(const Matrix_t *matrix){
 					.pos = p3
 				}
 			);
+
 		free(norm);
 		free(color1);
 		free(color2);

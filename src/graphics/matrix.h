@@ -75,13 +75,15 @@
  * @param vector (::Point_t *) A vector.
 */
 #define NORMALIZE(vector) \
-	do {\
-		double length = sqrt(vector[X] * vector[X] + vector[Y] * vector[Y] +\
-			vector[Z] * vector[Z]);\
-		vector[X] /= length;\
-		vector[Y] /= length;\
-		vector[Z] /= length;\
-	} while(0)
+	({\
+		Point_t *vec = vector;\
+		double length = sqrt(vec[X] * vec[X] + vec[Y] * vec[Y] +\
+			vec[Z] * vec[Z]);\
+		vec[X] /= length;\
+		vec[Y] /= length;\
+		vec[Z] /= length;\
+		vec;\
+	})
 
 /*
  * @brief Add point @p p2 point into @p p1 (in place).
@@ -103,7 +105,7 @@
  * @param p2 (::Point_t *) A point.
 */
 #define SUB_POINT(p1, p2) \
-	POINT(p1[X] - p2[X], p1[Y] - p2[Y], p1[Z] - p2[Z], p1[Z] - p2[Z])
+	POINT(p1[X] - p2[X], p1[Y] - p2[Y], p1[Z] - p2[Z], 0)
 
 /*
  * @brief Create a copy of a ::Point_t.
