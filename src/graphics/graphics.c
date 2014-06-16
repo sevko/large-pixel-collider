@@ -60,6 +60,16 @@ static unsigned int rgbToInt(RGB_t *color);
 */
 static RGB_t *intToRgb(int color);
 
+/*
+ * @brief Return the inverse slope of a line.
+ *
+ * @param p1 The first endpoint.
+ * @param p2 The second endpoint.
+ *
+ * @return The inverse slope (delta x)/(delta y) of the line formed by endpoints
+ *      @p p1 and @p p2.
+*/
+static double inverseSlope(Point_t *p1, Point_t *p2);
 void (drawLine)(Point_t *p1, Point_t *p2, int color){
 	p1 = COPY_POINT(p1);
 	int width = p2[X] - p1[X],
@@ -146,17 +156,14 @@ void scanlineRender(Light_t *l1, Light_t *l2, Light_t *l3){
 			pts = (Light_t *[]){l3, l1, l2};
 	}
 
-	double m1 = (pts[1]->pos[Y] - pts[2]->pos[Y] != 0)?
-			(pts[1]->pos[X] - pts[2]->pos[X]) / (pts[1]->pos[Y] - pts[2]->pos[Y]):0,
-		m2 = (pts[0]->pos[Y] - pts[1]->pos[Y] != 0)?
-			(pts[0]->pos[X] - pts[1]->pos[X]) / (pts[0]->pos[Y] - pts[1]->pos[Y]):0,
-		m3 = (pts[0]->pos[Y] - pts[2]->pos[Y] != 0)?
-			(pts[0]->pos[X] - pts[2]->pos[X]) / (pts[0]->pos[Y] - pts[2]->pos[Y]):0;
+	double m1 = inverseSlope(pts[1]->pos, pts[2]->pos),
+		m2 = inverseSlope(pts[0]->pos, pts[1]->pos),
+		m3 = inverseSlope(pts[0]->pos, pts[2]->pos);
+
 	Point_t *shortGuide = COPY_POINT(pts[2]->pos),
 		*longGuide = COPY_POINT(pts[2]->pos);
 
 	while(shortGuide[Y] < pts[1]->pos[Y]){
-		// drawLine(shortGuide, longGuide, color);
 		drawHorizontalGradientLine(
 			&(Light_t){
 				.pos = shortGuide,
@@ -178,7 +185,6 @@ void scanlineRender(Light_t *l1, Light_t *l2, Light_t *l3){
 	shortGuide = COPY_POINT(pts[1]->pos);
 
 	while(shortGuide[Y] < pts[0]->pos[Y]){
-		// drawLine(shortGuide, longGuide, color);
 		drawHorizontalGradientLine(
 			&(Light_t){
 				.pos = shortGuide,
@@ -263,4 +269,9 @@ static RGB_t *intToRgb(int color){
 	rgb[G] = (color & 0x00FF00) >> 4 * 2;
 	rgb[B] = color & 0x0000FF;
 	return rgb;
+}
+
+static double inverseSlope(Point_t *p1, Point_t *p2){
+	double deltaY = p1[Y] - p2[Y];
+	return (deltaY != 0)?(p1[X] - p2[X]) / (deltaY):0;
 }
