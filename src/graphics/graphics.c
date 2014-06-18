@@ -39,7 +39,7 @@
 	})
 
 // The exponential rate at which specular light diffuses.
-#define SPECULAR_FADE_CONSTANT 2
+#define SPECULAR_FADE_CONSTANT 200
 
 /*
  * @brief Convert an ::RGB_t to an int.
@@ -222,7 +222,7 @@ RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
 	};
 	Point_t *view = POINT(0, 0, 1, 0);
 	Point_t *sLightVector = NORMALIZE(SUB_POINT(vertex, specularSource.pos));
-	double specularDot = pow(dotProduct(view, sLightVector), 10);
+	double specularDot = pow(dotProduct(view, sLightVector), SPECULAR_FADE_CONSTANT);
 	RGB_t *specularLight = (specularDot < 0)?RGB(0, 0, 0):RGB(
 		specularSource.color[R] * specularDot,
 		specularSource.color[G] * specularDot,
