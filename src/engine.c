@@ -85,7 +85,7 @@ void test(){
 static void argumentHandler(int argc, char * argv[]){
 	if(1 < argc){
 		if(strcmp(TEST_CMD, argv[1]) == 0)
-			unitTests();
+			exit(unitTests());
 
 		else if(strcmp(SCRIPT_CMD, argv[1]) == 0){
 			if(argc == 3)
