@@ -236,6 +236,11 @@ static int testScanLineRender(void);
  */
 static int testZBuffering(void);
 
+/*
+ * @brief Test ::graphics::lightColor().
+*/
+static int testLighting(void);
+
 static int testAddPoint(void){
 	Matrix_t * points = createMatrix();
 
@@ -511,14 +516,15 @@ static int testZBuffering(void){
 }
 
 static int testLighting(void){
-	RGB_t *rgb = flatShade(POINT(10, 50, 30), NORMALIZE(POINT(3, -4, 9)));
+	RGB_t *rgb = lightColor(POINT(10, 50, 30), NORMALIZE(POINT(3, -4, 9)));
 	return rgb[R] == 0 && rgb[G] == 0 && rgb[B] == 77;
 }
 
 int unitTests(void){
-	initscr();
-	int hasColors = has_colors();
-	endwin();
+	int hasColors = 1;
+	// initscr();
+	// int hasColors = has_colors();
+	// endwin();
 
 	if(hasColors)
 		printf("%sBegin unit tests.%s\n\n", TERM_COLOR_HEADER,

@@ -195,7 +195,7 @@ void scanlineRender(Light_t *l1, Light_t *l2, Light_t *l3){
 	}
 }
 
-RGB_t *flatShade(Point_t *vertex, Point_t *surfaceNorm){
+RGB_t *lightColor(Point_t *vertex, Point_t *surfaceNorm){
 	RGB_t *ambientLight = RGB(
 		0.2 * 0x00,
 		0.2 * 0x00,

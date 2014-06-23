@@ -108,7 +108,7 @@ void (drawLine)(Point_t *p1, Point_t *p2, int color);
 */
 void scanlineRender(Light_t *light1, Light_t *light2, Light_t *light3);
 /*
- * @brief Calculate the flat-shaded color of a triangle.
+ * @brief Calculate the color of a triangle with lighting applied..
  *
  * @param p1 The first vertex of the triangle.
  * @param p2 The second vertex of the triangle.
@@ -118,4 +118,4 @@ void scanlineRender(Light_t *light1, Light_t *light2, Light_t *light3);
  * @return The RGB color of the triangle with ambient, diffuse, and spectral
  *      lighting applied.
 */
-RGB_t *flatShade(Point_t *p1, Point_t *surfaceNorm);
+RGB_t *lightColor(Point_t *p1, Point_t *surfaceNorm);
