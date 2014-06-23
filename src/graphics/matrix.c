@@ -9,26 +9,24 @@
 #include "src/graphics/graphics.h"
 #include "src/graphics/matrix.h"
 
+/*
+ * @brief Get a ::Point_t representation of a ::Matrix_t row.
+ *
+ * Values are taken from the first four columns of the matrix, because this
+ * macro is only useful in the context of ::multiplyMatrix().
+ *
+ * @param matrix (::Matrix_t *) A matrix.
+ * @param row (int) The row to retrieve values from.
+*/
+#define GET_HORIZONTAL_POINT(matrix, row) \
+	(POINT(matrix->points[0][row], matrix->points[1][row],\
+		matrix->points[2][row], matrix->points[3][row]))
+
 /*!
  *  The ratio between degrees and radians -- faciliates conversion from the
  *  former to the latter.
  */
 #define RAD (M_PI / 180)
-
-/*!
- *  @brief Return the dot-product of a row of one ::Matrix_t and a column of
- *      another ::Matrix_t.
- *
- *  @param m1 The first @a n*4 matrix (in practice, should always be @a 4*4).
- *  @param row The row of @p m1 to be multiplied.
- *  @param m2 The second @a 4*n ::Matrix_t.
- *  @param col The col of @p m2 to be multiplied.
- *
- *  @return The dot-product of row @p row of m1::points and column @p col of
- *      m2::points.
- */
-static double dotProduct(const Matrix_t * const m1, int row,
-	const Matrix_t * const m2, int col);
 
 /*
  *  @brief Indicate whether or not a given triangle is visible to the camera.
@@ -45,6 +43,17 @@ static double dotProduct(const Matrix_t * const m1, int row,
  *      the camera; 0 otherwise.
  */
 static int backfaceCull(Point_t *p1, Point_t *p2, Point_t *p3);
+
+/*
+ * @brief Wrapper for ::surfaceNormal() that acts on a triangle.
+ *
+ * @param pts A matrix containing a triangular mesh.
+ * @param vertex The first vertex of a triangle in @p pts.
+ *
+ * @return The surface normal of the triangle depicted by the ::Point_t * at
+ *      offset @a vertex in @a pts->points, and the two ::Point_t * after it.
+*/
+static Point_t *triangleNormal(const Matrix_t *pts, int vertex);
 
 Matrix_t * createMatrix(void){
 	Matrix_t * const matrix = malloc(sizeof(Matrix_t));
@@ -83,17 +92,38 @@ void freeMatrixFromVoid(void * matrix){
 	freeMatrix((Matrix_t *)matrix);
 }
 
-void drawMatrix(const Matrix_t * const matrix){
-	int color = 0;
-	int colors[] = {0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF};
-	int ptPair;
-	for(ptPair = 0; ptPair < matrix->numPoints - 2; ptPair += 3){
-		Point_t *p1 = matrix->points[ptPair],
-			*p2 = matrix->points[ptPair + 1],
-			*p3 = matrix->points[ptPair + 2];
-		color++;
+void drawMatrix(const Matrix_t *matrix){
+	int vertex;
+	for(vertex = 0; vertex < matrix->numPoints; vertex += 3){
+		Point_t *p1 = matrix->points[vertex],
+			*p2 = matrix->points[vertex + 1],
+			*p3 = matrix->points[vertex + 2];
+
+		Point_t *norm = NORMALIZE(triangleNormal(matrix, vertex));
+		RGB_t *color1 = lightColor(p1, norm),
+			*color2 = lightColor(p2, norm),
+			*color3 = lightColor(p3, norm);
+
 		if(backfaceCull(p1, p2, p3))
-			scanlineRender(p1, p2, p3, colors[color % 5]);
+			scanlineRender(
+				&(Light_t){
+					.color = color1,
+					.pos = p1
+				},
+				&(Light_t){
+					.color = color2,
+					.pos = p2
+				},
+				&(Light_t){
+					.color = color3,
+					.pos = p3
+				}
+			);
+
+		free(norm);
+		free(color1);
+		free(color2);
+		free(color3);
 	}
 }
 
@@ -126,10 +156,11 @@ void multiplyMatrices(int numMatrices, ...){
 void multiplyMatrix(Matrix_t * const m1, Matrix_t * const m2){
 	int col;
 	for(col = 0; col < m2->numPoints; col++){
-		double dot0 = dotProduct(m1, 0, m2, col);
-		double dot1 = dotProduct(m1, 1, m2, col);
-		double dot2 = dotProduct(m1, 2, m2, col);
-		double dot3 = dotProduct(m1, 3, m2, col);
+
+		double dot0 = dotProduct(GET_HORIZONTAL_POINT(m1, 0), m2->points[col]);
+		double dot1 = dotProduct(GET_HORIZONTAL_POINT(m1, 1), m2->points[col]);
+		double dot2 = dotProduct(GET_HORIZONTAL_POINT(m1, 2), m2->points[col]);
+		double dot3 = dotProduct(GET_HORIZONTAL_POINT(m1, 3), m2->points[col]);
 
 		m2->points[col][X] = dot0;
 		m2->points[col][Y] = dot1;
@@ -246,9 +277,8 @@ Matrix_t * readPointsFromFile(char * filename){
 	strcat(fullFilename, filename);
 
 	FILE * file;
-	if((file = fopen(fullFilename, "r")) == NULL){
+	if((file = fopen(fullFilename, "r")) == NULL)
 		FATAL("Cannot open file %s.", fullFilename);
-	}
 
 	free(fullFilename);
 	Matrix_t * points = createMatrix();
@@ -294,22 +324,28 @@ void writePointsToFile(Matrix_t * points, char * filename){
 	fclose(file);
 }
 
-static double dotProduct(const Matrix_t * const m1, int row,
-	const Matrix_t * const m2, int col){
-	return m1->points[0][row] * m2->points[col][X] +
-		m1->points[1][row] * m2->points[col][Y] +
-		m1->points[2][row] * m2->points[col][Z] +
-		m1->points[3][row] * m2->points[col][W];
+double dotProduct(Point_t *p1, Point_t *p2){
+	return p1[X] * p2[X] + p1[Y] * p2[Y] + p1[Z] * p2[Z] + p1[W] * p2[W];
+}
+
+Point_t *surfaceNormal(Point_t *p1, Point_t *p2, Point_t *p3){
+	Point_t *u = SUB_POINT(p2, p1),
+		*v = SUB_POINT(p3, p1);
+
+	return createPoint(POINT(
+			(u[Y] * v[Z]) - (u[Z] * v[Y]),
+			(u[Z] * v[X]) - (u[X] * v[Z]),
+			(u[X] * v[Y]) - (u[Y] * v[X]), 0));
 }
 
 static int backfaceCull(Point_t *p1, Point_t *p2, Point_t *p3){
-	Point_t * u = POINT(p2[X] - p1[X], p2[Y] - p1[Y], p2[Z] - p1[Z]);
-	Point_t * v = POINT(p3[X] - p1[X], p3[Y] - p1[Y], p3[Z] - p1[Z]);
+	Point_t *norm = surfaceNormal(p1, p2, p3);
+	int culled = -(int)norm[Z] < 0;
+	free(norm);
+	return culled;
+}
 
-	double normalX = (u[Y] * v[Z]) - (u[Z] * v[Y]);
-	double normalY = (u[Z] * v[X]) - (u[X] * v[Z]);
-	double normalZ = (u[X] * v[Y]) - (u[Y] * v[X]);
-
-	int dotProduct = normalX * 0 + normalY * 0 + normalZ * -1;
-	return dotProduct < 0;
+static Point_t *triangleNormal(const Matrix_t *pts, int vertex){
+	return surfaceNormal(pts->points[vertex], pts->points[vertex + 1],
+			pts->points[vertex + 2]);
 }

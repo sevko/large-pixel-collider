@@ -6,6 +6,8 @@
 #pragma once
 
 /*!
- *  @brief Execute all unit-tests functions; print results to the console.
+ * @brief Execute all unit-tests functions; print results to the console.
+ *
+ * @return 0 on successful completion of all unit-tests; 1 otherwise.
  */
-void unitTests(void);
+int unitTests(void);

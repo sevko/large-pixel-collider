@@ -6,9 +6,7 @@
 
 // The ms delay before the SDL screen quits after ::quitScreen() is called.
 #define QUIT_DELAY 400
-
-// The name of the SDL screen.
-#define SCREEN_NAME "Graphics Engine: Screen"
+#define SCREEN_NAME "Graphics Engine: Screen" // The name of the SDL screen.
 
 static SDL_Surface *g_screen; // The engine's SDL screen.
 ZBuffer_t *g_zbuffer = NULL; // The screen's z-buffer.
@@ -46,7 +44,8 @@ void renderScreen(void){
 	int y, x;
 	for(y = 0; y < IMAGE_HEIGHT; y++)
 		for(x = 0; x < IMAGE_WIDTH; x++)
-			drawPixel(x, y, g_zbuffer->buf[y][x][1]);
+			drawPixel(x, y,
+					g_zbuffer->buf[y][x][1] == -1?0x0:g_zbuffer->buf[y][x][1]);
 	SDL_Flip(g_screen);
 }
 
@@ -56,6 +55,7 @@ void clearScreen(void){
 }
 
 void quitScreen(void){
+	free(g_zbuffer);
 	SDL_Delay(QUIT_DELAY);
 	SDL_Quit();
 }
@@ -71,7 +71,12 @@ ZBuffer_t *createZBuffer(void){
 }
 
 void clearZBuffer(ZBuffer_t *zBuf){
-	memset(zBuf->buf, -1, sizeof(double) * IMAGE_HEIGHT * IMAGE_WIDTH * 2);
+	int y, x;
+	for(y = 0; y < IMAGE_HEIGHT; y++)
+		for(x = 0; x < IMAGE_WIDTH; x++){
+			zBuf->buf[y][x][0] = 0;
+			zBuf->buf[y][x][1] = -1;
+		}
 }
 
 ZBuffer_t *readZBufferFromFile(const char *filePath){
@@ -112,7 +117,9 @@ void writeZBufferToFile(ZBuffer_t *zBuf, const char *filePath){
 	int y, x;
 	for(y = 0; y < IMAGE_HEIGHT; y++)
 		for(x = 0; x < IMAGE_WIDTH; x++)
-			fprintf(file, "%lf,%lf,", zBuf->buf[y][x][0], zBuf->buf[y][x][1]);
+			fprintf(
+					file, "%d,%d,", (int)zBuf->buf[y][x][0],
+					(int)zBuf->buf[y][x][1]);
 
 	fclose(file);
 }

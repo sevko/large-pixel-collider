@@ -21,7 +21,8 @@
  *  Print a formatted message indicating whether the unit-test @p func executed
  *  successfully (a return value of 1), or failed (return value of 0). If
  *  possible, display the success/failure message with an appropriate color,
- *  using the TERM_COLOR_* macros.
+ *  using the TERM_COLOR_* macros. On failure, set the variable ::exitStatus
+ *  (defined in the using function's scope) to 0; otherwise, 1.
  *
  *  @param func A unit-test function to run: must have a return value of 1 on
  *      success, and 0 on failure.
@@ -30,12 +31,14 @@
 	do {\
 		int testResult = func;\
 		if(hasColors)\
-			printf("Testing %-30s %s%s\n", #func ":",\
+			printf("Testing %-50s %s%s\n", #func ":",\
 				testResult? TERM_COLOR_SUCCESS "Success.":\
 					TERM_COLOR_FAILURE "Failure.\tx", TERM_COLOR_NORMAL);\
 		else\
-			printf("Testing %-30s %s\n", #func ":",\
+			printf("Testing %-50s %s\n", #func ":",\
 				testResult?"Success.":"Failure.\tx");\
+		\
+		exitStatus = !testResult;\
 	} while(0)
 
 /*!
@@ -208,9 +211,20 @@ static int testCreateIdentity(void);
 static int testEqualMatrix(void);
 
 /*
+ * @brief Test ::matrix::writeZBufferToFile() and
+ *      ::matrix::readZBufferFromFile().
+*/
+static int testZBufferIO(void);
+
+/*
  * @brief Test ::graphics::drawLine().
 */
 static int testDrawLine(void);
+
+/*
+ * @brief Test ::graphics::drawHorizontalGradientLine().
+*/
+static int testDrawHorizontalGradientLine(void);
 
 /*
  * @brief Test ::screen::scanlineRender().
@@ -221,6 +235,11 @@ static int testScanLineRender(void);
  * @brief Test ::screen::ZBuffer_t functionality.
  */
 static int testZBuffering(void);
+
+/*
+ * @brief Test ::graphics::lightColor().
+*/
+static int testLighting(void);
 
 static int testAddPoint(void){
 	Matrix_t * points = createMatrix();
@@ -438,6 +457,15 @@ static int testEqualMatrix(void){
 	return result;
 }
 
+static int testZBufferIO(void){
+	Matrix_t *pts = createMatrix();
+	addRectangularPrism(pts, POINT(0, 0, 100), POINT(50, 60, 70));
+	drawMatrix(pts);
+	freeMatrix(pts);
+	writeZBufferToFile(g_zbuffer, "testZBufferIO.csv");
+	ASSERT_EQUAL_SCREEN("testZBufferIO.csv");
+}
+
 static int testDrawLine(void){
 	drawLine(POINT(0, 0), POINT(100, 200));
 	drawLine(POINT(100, 200), POINT(230, 190));
@@ -445,9 +473,35 @@ static int testDrawLine(void){
 	ASSERT_EQUAL_SCREEN("testDrawLine.csv");
 }
 
+static int testDrawHorizontalGradientLine(void){
+	drawHorizontalGradientLine(
+		&(Light_t){
+			.color = RGB(0xFF, 0x00, 0x00),
+			.pos = POINT(-100, 0, 0)
+		},
+		&(Light_t){
+			.color = RGB(0x00, 0x00, 0xFF),
+			.pos = POINT(100, 0, 0)
+		}
+	);
+	writeZBufferToFile(g_zbuffer, "testDrawHorizontalGradientLine.csv");
+	ASSERT_EQUAL_SCREEN("testDrawHorizontalGradientLine.csv");
+}
+
 static int testScanLineRender(void){
-	scanlineRender(POINT(0, 0, 5), POINT(100, 200, 10),
-		POINT(130, -30, 20), 0xFFFFFF);
+	scanlineRender(
+			&(Light_t){
+				.color = RGB(0xFF, 0x00, 0x00),
+				.pos = POINT(0, 0, 5)
+			},
+			&(Light_t){
+				.color = RGB(0x00, 0xFF, 0x00),
+				.pos = POINT(100, 200, 10)
+			},
+			&(Light_t){
+				.color = RGB(0x00, 0x00, 0xFF),
+				.pos = POINT(130, -30, 20)
+			});
 	ASSERT_EQUAL_SCREEN("testScanLineRender.csv");
 }
 
@@ -461,9 +515,14 @@ static int testZBuffering(void){
 	ASSERT_EQUAL_SCREEN("testZBuffering.csv");
 }
 
-void unitTests(void){
-	// initscr();
+static int testLighting(void){
+	RGB_t *rgb = lightColor(POINT(10, 50, 30), NORMALIZE(POINT(3, -4, 9)));
+	return rgb[R] == 0 && rgb[G] == 0 && rgb[B] == 77;
+}
+
+int unitTests(void){
 	int hasColors = 1;
+	// initscr();
 	// int hasColors = has_colors();
 	// endwin();
 
@@ -473,6 +532,7 @@ void unitTests(void){
 	else
 		puts("Begin unit tests.\n");
 
+	int exitStatus = 0;
 	g_zbuffer = createZBuffer();
 	TEST(testMultiplyScalar());
 	TEST(testMultiplyMatrices());
@@ -490,14 +550,23 @@ void unitTests(void){
 	TEST(testCreateRotation());
 	TEST(testAddEdge());
 	TEST(testCreateIdentity());
+	TEST(testZBufferIO());
 	TEST(testDrawLine());
+	TEST(testDrawHorizontalGradientLine());
 	TEST(testScanLineRender());
 	TEST(testZBuffering());
+	TEST(testLighting());
 	free(g_zbuffer);
 
 	if(hasColors)
-		printf("\n%sUnit tests completed successfully.%s\n", TERM_COLOR_HEADER,
-			TERM_COLOR_NORMAL);
+		printf(
+				"\n%sUnit tests %s.%s\n", TERM_COLOR_HEADER,
+				(exitStatus != 0)?"failed":"completed successfully",
+				TERM_COLOR_NORMAL);
 	else
-		puts("\nUnit tests completed successfully.");
+		printf(
+				"\nUnit tests %s.\n",
+				(exitStatus != 0)?"failed":"completed successfully");
+
+	return exitStatus;
 }

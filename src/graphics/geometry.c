@@ -12,9 +12,6 @@
  */
 #define INTERPOL(a, b) (a + (b - a) * t1)
 
-// The angle between the subsequent, rotated circles that compose a sphere.
-#define CIRCLE_STEP_SIZE 8
-
 //! The number of steps taken in plotting Bezier and Hermite curves.
 #define CURVE_STEP_NUMBER 1e3
 

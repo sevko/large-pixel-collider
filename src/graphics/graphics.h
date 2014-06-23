@@ -58,6 +58,35 @@
 #define drawLine(...) \
 	DRAW_LINE_VA_MACRO(__VA_ARGS__, drawLine2, drawLine1)(__VA_ARGS__)
 
+/*
+ * @brief Return an ::RGB_t representation of a color.
+ *
+ * @param r (int) The red color value.
+ * @param g (int) The green color value.
+ * @param b (int) The blue color value.
+*/
+#define RGB(r, g, b) ((int []){r, g, b})
+
+#define R 0 // The index of the red color value in a ::RGB_t *.
+#define G 1 // The index of the green color value in a ::RGB_t *.
+#define B 2 // The index of the blue color value in a ::RGB_t *.
+
+typedef int RGB_t; // Used to represent RGB color values.
+
+// Represents a light.
+typedef struct {
+	RGB_t *color; // The light's color
+	Point_t *pos; // The light's location.
+} Light_t;
+
+/*
+ * @brief Draw a horizontal line with an interpolated color gradient.
+ *
+ * @param p1 The first endpoint.
+ * @param p2 The second endpoint.
+*/
+void drawHorizontalGradientLine(Light_t *light1, Light_t *light2);
+
 /*!
  *  @brief Rasterize a line.
  *
@@ -73,9 +102,20 @@ void (drawLine)(Point_t *p1, Point_t *p2, int color);
 /*
  * @brief Fill a triangle using scanline-rendering.
  *
+ * @param light1 The position and color of the first vertex of the triangle.
+ * @param light2 The position and color of the second vertex of the triangle.
+ * @param light3 The position and color of the third vertex of the triangle.
+*/
+void scanlineRender(Light_t *light1, Light_t *light2, Light_t *light3);
+/*
+ * @brief Calculate the color of a triangle with lighting applied..
+ *
  * @param p1 The first vertex of the triangle.
  * @param p2 The second vertex of the triangle.
  * @param p3 The third vertex of the triangle.
- * @param color The color of the filled triangle.
+ * @param surfaceNorm The averaged surface normal of the triangle.
+ *
+ * @return The RGB color of the triangle with ambient, diffuse, and spectral
+ *      lighting applied.
 */
-void scanlineRender(Point_t *p1, Point_t *p2, Point_t *p3, int color);
+RGB_t *lightColor(Point_t *p1, Point_t *surfaceNorm);

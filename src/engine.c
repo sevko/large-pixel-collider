@@ -62,24 +62,21 @@ static void argumentHandler(int argc, char * argv[]);
 void test(){
 	configureScreen();
 	Matrix_t *pts = createMatrix();
-	// addSphere(pts, POINT(0, 0), 10);
-	// addRectangularPrism(pts, POINT(0, 0, 3), POINT(1, 2, 3));
-	// addRectangularPrism(pts, POINT(0, 0), POINT(2.5, 7.5, 12.5));
 	addTorus(pts, POINT(0, 0), 100, 200);
-	// multiplyMatrix(createScale(POINT(20, 20, 20)), pts);
 	Matrix_t *rX = createRotation(X_AXIS, 1),
 		*rY = createRotation(Y_AXIS, 1),
 		*rZ = createRotation(Z_AXIS, 1);
 
 	int tick;
-	for(tick = 0; tick < 1000; tick++){
+	for(tick = 0; tick < 207; tick++){
 		clearScreen();
 		multiplyMatrices(4, rX, rY, rZ, pts);
 		drawMatrix(pts);
 		renderScreen();
-		usleep(1e6 / 140);
+		// usleep(1e6 / 60);
 	}
 
+	freeMatrices(4, rX, rY, rZ, pts);
 	renderScreen();
 	usleep(4e6);
 	quitScreen();
@@ -88,7 +85,7 @@ void test(){
 static void argumentHandler(int argc, char * argv[]){
 	if(1 < argc){
 		if(strcmp(TEST_CMD, argv[1]) == 0)
-			unitTests();
+			exit(unitTests());
 
 		else if(strcmp(SCRIPT_CMD, argv[1]) == 0){
 			if(argc == 3)
@@ -102,7 +99,6 @@ static void argumentHandler(int argc, char * argv[]){
 			FATAL("Argument not recognized.");
 	}
 	else
-		// puts("No arguments given. Exiting.");
 		test();
 }
 
