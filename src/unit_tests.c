@@ -30,11 +30,11 @@
 	do {\
 		int testResult = func;\
 		if(hasColors)\
-			printf("Testing %-30s %s%s\n", #func ":",\
+			printf("Testing %-50s %s%s\n", #func ":",\
 				testResult? TERM_COLOR_SUCCESS "Success.":\
 					TERM_COLOR_FAILURE "Failure.\tx", TERM_COLOR_NORMAL);\
 		else\
-			printf("Testing %-30s %s\n", #func ":",\
+			printf("Testing %-50s %s\n", #func ":",\
 				testResult?"Success.":"Failure.\tx");\
 	} while(0)
 
@@ -208,9 +208,20 @@ static int testCreateIdentity(void);
 static int testEqualMatrix(void);
 
 /*
+ * @brief Test ::matrix::writeZBufferToFile() and
+ *      ::matrix::readZBufferFromFile().
+*/
+static int testZBufferIO(void);
+
+/*
  * @brief Test ::graphics::drawLine().
 */
 static int testDrawLine(void);
+
+/*
+ * @brief Test ::graphics::drawHorizontalGradientLine().
+*/
+static int testDrawHorizontalGradientLine(void);
 
 /*
  * @brief Test ::screen::scanlineRender().
@@ -438,11 +449,35 @@ static int testEqualMatrix(void){
 	return result;
 }
 
+static int testZBufferIO(void){
+	Matrix_t *pts = createMatrix();
+	addRectangularPrism(pts, POINT(0, 0, 100), POINT(50, 60, 70));
+	drawMatrix(pts);
+	freeMatrix(pts);
+	writeZBufferToFile(g_zbuffer, "testZBufferIO.csv");
+	ASSERT_EQUAL_SCREEN("testZBufferIO.csv");
+}
+
 static int testDrawLine(void){
 	drawLine(POINT(0, 0), POINT(100, 200));
 	drawLine(POINT(100, 200), POINT(230, 190));
 	drawLine(POINT(230, 190), POINT(0, 0));
 	ASSERT_EQUAL_SCREEN("testDrawLine.csv");
+}
+
+static int testDrawHorizontalGradientLine(void){
+	drawHorizontalGradientLine(
+		&(Light_t){
+			.color = RGB(0xFF, 0x00, 0x00),
+			.pos = POINT(-100, 0, 0)
+		},
+		&(Light_t){
+			.color = RGB(0x00, 0x00, 0xFF),
+			.pos = POINT(100, 0, 0)
+		}
+	);
+	writeZBufferToFile(g_zbuffer, "testDrawHorizontalGradientLine.csv");
+	ASSERT_EQUAL_SCREEN("testDrawHorizontalGradientLine.csv");
 }
 
 static int testScanLineRender(void){
@@ -501,7 +536,9 @@ void unitTests(void){
 	TEST(testCreateRotation());
 	TEST(testAddEdge());
 	TEST(testCreateIdentity());
+	TEST(testZBufferIO());
 	TEST(testDrawLine());
+	TEST(testDrawHorizontalGradientLine());
 	TEST(testScanLineRender());
 	TEST(testZBuffering());
 	free(g_zbuffer);
