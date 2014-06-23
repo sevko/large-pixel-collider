@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "src/globals.h"
 #include "src/unit_tests.h"
@@ -241,6 +242,14 @@ static int testZBuffering(void);
  * @brief Test ::graphics::lightColor().
 */
 static int testLighting(void);
+
+/*
+ * @brief Setup the environment for ::unitTests().
+ *
+ * Initialize global variables (eg ::g_zbuffer, ::g_screenWidth) to appropriate
+ * values for ::unitTests() to use.
+*/
+static void configureTestingEnvironment();
 
 static int testAddPoint(void){
 	Matrix_t * points = createMatrix();
@@ -521,8 +530,23 @@ static int testLighting(void){
 	return rgb[R] == 0 && rgb[G] == 0 && rgb[B] == 77;
 }
 
+static void configureTestingEnvironment(){
+	FILE *testConfig = fopen("test/testConfiguration.csv", "r");
+	if(fscanf(testConfig, "%d,%d", &g_screenWidth, &g_screenHeight) != 2)
+		FATAL(
+				"Failed to read screen dimensions "
+				"from 'test/testConfiguration.csv'.");
+	printf("%d,%d\n", g_screenWidth, g_screenHeight);
+	fclose(testConfig);
+
+	g_zbuffer = createZBuffer();
+}
+
 int unitTests(void){
-	int hasColors = 1;
+	configureTestingEnvironment();
+
+	int exitStatus = 0,
+		hasColors = true;
 	// initscr();
 	// int hasColors = has_colors();
 	// endwin();
@@ -532,11 +556,6 @@ int unitTests(void){
 			TERM_COLOR_NORMAL);
 	else
 		puts("Begin unit tests.\n");
-
-	int exitStatus = 0;
-	g_zbuffer = createZBuffer();
-	g_screenWidth = 800;
-	g_screenHeight = 700;
 
 	TEST(testMultiplyScalar());
 	TEST(testMultiplyMatrices());
