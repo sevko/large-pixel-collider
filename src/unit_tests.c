@@ -128,6 +128,7 @@
 //! The terminal escape code to reset the terminal's foreground color.
 #define TERM_COLOR_NORMAL "\033[0;00m"
 
+extern int g_screenWidth, g_screenHeight;
 extern ZBuffer_t *g_zbuffer;
 
 /*!
@@ -534,6 +535,9 @@ int unitTests(void){
 
 	int exitStatus = 0;
 	g_zbuffer = createZBuffer();
+	g_screenWidth = 800;
+	g_screenHeight = 700;
+
 	TEST(testMultiplyScalar());
 	TEST(testMultiplyMatrices());
 	TEST(testEqualMatrix());

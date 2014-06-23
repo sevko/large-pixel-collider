@@ -1,4 +1,5 @@
 #include <SDL.h>
+#include <X11/Xlib.h>
 
 #include "src/globals.h"
 #include "src/graphics/screen.h"
@@ -8,6 +9,8 @@
 #define QUIT_DELAY 400
 #define SCREEN_NAME "Graphics Engine: Screen" // The name of the SDL screen.
 
+int g_screenWidth, // the width of ::g_screen
+	g_screenHeight; // the height of ::g_screen
 static SDL_Surface *g_screen; // The engine's SDL screen.
 ZBuffer_t *g_zbuffer = NULL; // The screen's z-buffer.
 
@@ -21,19 +24,25 @@ ZBuffer_t *g_zbuffer = NULL; // The screen's z-buffer.
 static void drawPixel(int x, int y, int color);
 
 void configureScreen(void){
+	Display *display = XOpenDisplay(NULL);
+	Screen *screen = DefaultScreenOfDisplay(display);
+	g_screenWidth = screen->width;
+	g_screenHeight = screen->height;
+	XCloseDisplay(display);
+
 	if((SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) == -1))
 		FATAL("Could not initialize SDL: %s.\n", SDL_GetError());
-	g_screen = SDL_SetVideoMode(IMAGE_WIDTH, IMAGE_HEIGHT, 32, SDL_SWSURFACE);
+	g_screen = SDL_SetVideoMode(g_screenWidth, g_screenHeight, 32, SDL_SWSURFACE);
 	SDL_WM_SetCaption(SCREEN_NAME, NULL);
 
 	g_zbuffer = createZBuffer();
 }
 
 void (plotPixel)(Point_t *pt, int color){
-	int x = pt[X] + IMAGE_WIDTH / 2,
-		y = pt[Y] + IMAGE_HEIGHT / 2;
+	int x = pt[X] + g_screenWidth / 2,
+		y = pt[Y] + g_screenHeight / 2;
 
-	if(!(x < 0 || IMAGE_WIDTH - 1 < x || y < 0 || IMAGE_HEIGHT - 1 < y) &&
+	if(!(x < 0 || g_screenWidth - 1 < x || y < 0 || g_screenHeight - 1 < y) &&
 		(g_zbuffer->buf[y][x][1] == -1 || g_zbuffer->buf[y][x][0] < pt[Z])){
 		g_zbuffer->buf[y][x][0] = pt[Z];
 		g_zbuffer->buf[y][x][1] = color;
@@ -42,8 +51,8 @@ void (plotPixel)(Point_t *pt, int color){
 
 void renderScreen(void){
 	int y, x;
-	for(y = 0; y < IMAGE_HEIGHT; y++)
-		for(x = 0; x < IMAGE_WIDTH; x++)
+	for(y = 0; y < g_screenHeight; y++)
+		for(x = 0; x < g_screenWidth; x++)
 			drawPixel(x, y,
 					g_zbuffer->buf[y][x][1] == -1?0x0:g_zbuffer->buf[y][x][1]);
 	SDL_Flip(g_screen);
@@ -72,8 +81,8 @@ ZBuffer_t *createZBuffer(void){
 
 void clearZBuffer(ZBuffer_t *zBuf){
 	int y, x;
-	for(y = 0; y < IMAGE_HEIGHT; y++)
-		for(x = 0; x < IMAGE_WIDTH; x++){
+	for(y = 0; y < g_screenHeight; y++)
+		for(x = 0; x < g_screenWidth; x++){
 			zBuf->buf[y][x][0] = 0;
 			zBuf->buf[y][x][1] = -1;
 		}
@@ -89,14 +98,14 @@ ZBuffer_t *readZBufferFromFile(const char *filePath){
 	if(fscanf(file, "%d, %d:", &width, &height) < 1)
 		FATAL("Reading '%s'. Failed to read width and height.", fullFilePath);
 
-	if(width != IMAGE_WIDTH || height != IMAGE_HEIGHT)
+	if(width != g_screenWidth || height != g_screenHeight)
 		return NULL;
 
 	ZBuffer_t *zBuf = malloc(sizeof(ZBuffer_t));
 
 	int y, x;
-	for(y = 0; y < IMAGE_HEIGHT; y++)
-		for(x = 0; x < IMAGE_WIDTH; x++)
+	for(y = 0; y < g_screenHeight; y++)
+		for(x = 0; x < g_screenWidth; x++)
 			if(fscanf(file, "%lf,%lf,", &zBuf->buf[y][x][0],
 				&zBuf->buf[y][x][1]) < 2)
 				FATAL("Reading '%s'. Failed to read pixel (%d, %d).",
@@ -113,10 +122,10 @@ void writeZBufferToFile(ZBuffer_t *zBuf, const char *filePath){
 	strcat(fullFilePath, filePath);
 	FILE *file = fopen(fullFilePath, "w");
 
-	fprintf(file, "%d, %d:", IMAGE_WIDTH, IMAGE_HEIGHT);
+	fprintf(file, "%d, %d:", g_screenWidth, g_screenHeight);
 	int y, x;
-	for(y = 0; y < IMAGE_HEIGHT; y++)
-		for(x = 0; x < IMAGE_WIDTH; x++)
+	for(y = 0; y < g_screenHeight; y++)
+		for(x = 0; x < g_screenWidth; x++)
 			fprintf(
 					file, "%d,%d,", (int)zBuf->buf[y][x][0],
 					(int)zBuf->buf[y][x][1]);
@@ -126,8 +135,8 @@ void writeZBufferToFile(ZBuffer_t *zBuf, const char *filePath){
 
 int equalZBuffers(ZBuffer_t *zBuf1, ZBuffer_t *zBuf2){
 	int y, x;
-	for(y = 0; y < IMAGE_HEIGHT; y++)
-		for(x = 0; x < IMAGE_WIDTH; x++)
+	for(y = 0; y < g_screenHeight; y++)
+		for(x = 0; x < g_screenWidth; x++)
 			if((int)zBuf1->buf[y][x][0] != (int)zBuf2->buf[y][x][0] ||
 				(int)zBuf1->buf[y][x][1] != (int)zBuf2->buf[y][x][1])
 				return 0;

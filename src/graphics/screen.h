@@ -54,7 +54,7 @@
 
 typedef struct {
 	// 3D representation of each pixel's current height/color.
-	double buf[IMAGE_HEIGHT][IMAGE_WIDTH][2];
+	double buf[768][1366][2];
 } ZBuffer_t;
 
 /*!
@@ -146,7 +146,7 @@ void writeZBufferToFile(ZBuffer_t *zBuf, const char *filePath);
  * @brief Determine whether two ::ZBuffer_t are identical.
  *
  * The contents of ::ZBuffer_t::buf are inspected for equality. Note that both
- * ::ZBuffer_t::buf are expected to contain ::IMAGE_HEIGHT * ::IMAGE_WIDTH
+ * ::ZBuffer_t::buf are expected to contain ::g_screenHeight * ::g_screenWidth
  * points; if one does not, undefined behavior ensues.
  *
  * @param zBuf1 The first ::ZBuffer_t.
