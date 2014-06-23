@@ -117,7 +117,9 @@ void writeZBufferToFile(ZBuffer_t *zBuf, const char *filePath){
 	int y, x;
 	for(y = 0; y < IMAGE_HEIGHT; y++)
 		for(x = 0; x < IMAGE_WIDTH; x++)
-			fprintf(file, "%lf,%lf,", zBuf->buf[y][x][0], zBuf->buf[y][x][1]);
+			fprintf(
+					file, "%d,%d,", (int)zBuf->buf[y][x][0],
+					(int)zBuf->buf[y][x][1]);
 
 	fclose(file);
 }

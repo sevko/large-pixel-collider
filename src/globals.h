@@ -14,7 +14,7 @@
 
 #include "src/graphics/matrix.h"
 
-#define IMAGE_WIDTH 800 //! The width of the engine's screen. The what.
+#define IMAGE_WIDTH 800 //! The width of the engine's screen.
 #define IMAGE_HEIGHT 700 //! The height of the engine's screen.
 #define TEST_COLOR 0xFF0000 //! The default color for pixels.
 
