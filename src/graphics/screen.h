@@ -53,8 +53,7 @@
 	DRAW_PIXEL_VA_MACRO(__VA_ARGS__, plotPixel2, plotPixel1)(__VA_ARGS__)
 
 typedef struct {
-	// 3D representation of each pixel's current height/color.
-	double buf[IMAGE_HEIGHT][IMAGE_WIDTH][2];
+	double ***buf; // 3D representation of each pixel's current height/color.
 } ZBuffer_t;
 
 /*!
@@ -109,6 +108,13 @@ int writeScreen(const char * const filename);
 ZBuffer_t *createZBuffer(void);
 
 /*
+ * @brief Deallocate a ::ZBuffer_t.
+ *
+ * @param zBuf A buffer.
+*/
+void freeZBuffer(ZBuffer_t *zBuf);
+
+/*
  * @brief Zero out a ::ZBuffer_t::buf.
  *
  * @param zBuf The ::ZBuffer_t to clear.
@@ -146,7 +152,7 @@ void writeZBufferToFile(ZBuffer_t *zBuf, const char *filePath);
  * @brief Determine whether two ::ZBuffer_t are identical.
  *
  * The contents of ::ZBuffer_t::buf are inspected for equality. Note that both
- * ::ZBuffer_t::buf are expected to contain ::IMAGE_HEIGHT * ::IMAGE_WIDTH
+ * ::ZBuffer_t::buf are expected to contain ::g_screenHeight * ::g_screenWidth
  * points; if one does not, undefined behavior ensues.
  *
  * @param zBuf1 The first ::ZBuffer_t.

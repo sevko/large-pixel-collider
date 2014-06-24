@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "src/globals.h"
 #include "src/unit_tests.h"
@@ -111,7 +112,7 @@
 			return 0;\
 	\
 		int equalZBufs = equalZBuffers(g_zbuffer, fileZBuf);\
-		free(fileZBuf);\
+		freeZBuffer(fileZBuf);\
 		clearZBuffer(g_zbuffer);\
 		return equalZBufs;\
 	} while(0);\
@@ -128,6 +129,7 @@
 //! The terminal escape code to reset the terminal's foreground color.
 #define TERM_COLOR_NORMAL "\033[0;00m"
 
+extern int g_screenWidth, g_screenHeight;
 extern ZBuffer_t *g_zbuffer;
 
 /*!
@@ -240,6 +242,14 @@ static int testZBuffering(void);
  * @brief Test ::graphics::lightColor().
 */
 static int testLighting(void);
+
+/*
+ * @brief Setup the environment for ::unitTests().
+ *
+ * Initialize global variables (eg ::g_zbuffer, ::g_screenWidth) to appropriate
+ * values for ::unitTests() to use.
+*/
+static void configureTestingEnvironment();
 
 static int testAddPoint(void){
 	Matrix_t * points = createMatrix();
@@ -517,11 +527,27 @@ static int testZBuffering(void){
 
 static int testLighting(void){
 	RGB_t *rgb = lightColor(POINT(10, 50, 30), NORMALIZE(POINT(3, -4, 9)));
-	return rgb[R] == 0 && rgb[G] == 0 && rgb[B] == 77;
+	int equal = rgb[R] == 0 && rgb[G] == 0 && rgb[B] == 77;
+	free(rgb);
+	return equal;
+}
+
+static void configureTestingEnvironment(){
+	FILE *testConfig = fopen("test/testConfiguration.csv", "r");
+	if(fscanf(testConfig, "%d,%d", &g_screenWidth, &g_screenHeight) != 2)
+		FATAL(
+				"Failed to read screen dimensions "
+				"from 'test/testConfiguration.csv'.");
+	fclose(testConfig);
+
+	g_zbuffer = createZBuffer();
 }
 
 int unitTests(void){
-	int hasColors = 1;
+	configureTestingEnvironment();
+
+	int exitStatus = 0,
+		hasColors = true;
 	// initscr();
 	// int hasColors = has_colors();
 	// endwin();
@@ -532,8 +558,6 @@ int unitTests(void){
 	else
 		puts("Begin unit tests.\n");
 
-	int exitStatus = 0;
-	g_zbuffer = createZBuffer();
 	TEST(testMultiplyScalar());
 	TEST(testMultiplyMatrices());
 	TEST(testEqualMatrix());
@@ -556,7 +580,7 @@ int unitTests(void){
 	TEST(testScanLineRender());
 	TEST(testZBuffering());
 	TEST(testLighting());
-	free(g_zbuffer);
+	freeZBuffer(g_zbuffer);
 
 	if(hasColors)
 		printf(

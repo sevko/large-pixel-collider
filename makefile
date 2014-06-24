@@ -1,7 +1,7 @@
 SCRIPT_FILE =
 PROJECT_NAME = engine
 FLAGS = -Wall -Wextra -Wunreachable-code -I ./
-LIBS = -lm $(shell sdl-config --libs) -lncurses
+LIBS = -lm $(shell sdl-config --libs) -lncurses -lX11
 C_COMPILER = gcc $(FLAGS)
 
 CC = @echo "\tCC $@" && $(C_COMPILER)
