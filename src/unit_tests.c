@@ -112,7 +112,7 @@
 			return 0;\
 	\
 		int equalZBufs = equalZBuffers(g_zbuffer, fileZBuf);\
-		free(fileZBuf);\
+		freeZBuffer(fileZBuf);\
 		clearZBuffer(g_zbuffer);\
 		return equalZBufs;\
 	} while(0);\
@@ -527,7 +527,9 @@ static int testZBuffering(void){
 
 static int testLighting(void){
 	RGB_t *rgb = lightColor(POINT(10, 50, 30), NORMALIZE(POINT(3, -4, 9)));
-	return rgb[R] == 0 && rgb[G] == 0 && rgb[B] == 77;
+	int equal = rgb[R] == 0 && rgb[G] == 0 && rgb[B] == 77;
+	free(rgb);
+	return equal;
 }
 
 static void configureTestingEnvironment(){
@@ -536,7 +538,6 @@ static void configureTestingEnvironment(){
 		FATAL(
 				"Failed to read screen dimensions "
 				"from 'test/testConfiguration.csv'.");
-	printf("%d,%d\n", g_screenWidth, g_screenHeight);
 	fclose(testConfig);
 
 	g_zbuffer = createZBuffer();
@@ -579,7 +580,7 @@ int unitTests(void){
 	TEST(testScanLineRender());
 	TEST(testZBuffering());
 	TEST(testLighting());
-	free(g_zbuffer);
+	freeZBuffer(g_zbuffer);
 
 	if(hasColors)
 		printf(

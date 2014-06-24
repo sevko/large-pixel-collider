@@ -64,7 +64,7 @@ void clearScreen(void){
 }
 
 void quitScreen(void){
-	free(g_zbuffer);
+	freeZBuffer(g_zbuffer);
 	SDL_Delay(QUIT_DELAY);
 	SDL_Quit();
 }
@@ -75,8 +75,33 @@ int writeScreen(const char * const filename){
 
 ZBuffer_t *createZBuffer(void){
 	ZBuffer_t *zBuf = malloc(sizeof(ZBuffer_t));
-	clearZBuffer(zBuf);
+	zBuf->buf = malloc(g_screenHeight * sizeof(double *));
+
+	int y;
+	for(y = 0; y < g_screenHeight; y++){
+		zBuf->buf[y] = malloc(g_screenWidth * sizeof(double *));
+		int x;
+		for(x = 0; x < g_screenWidth; x++){
+			zBuf->buf[y][x] = malloc(2 * sizeof(double));
+			zBuf->buf[y][x][0] = 0;
+			zBuf->buf[y][x][1] = -1;
+		}
+	}
+
 	return zBuf;
+}
+
+void freeZBuffer(ZBuffer_t *zBuf){
+	int y;
+	for(y = 0; y < g_screenHeight; y++){
+		int x;
+		for(x = 0; x < g_screenWidth; x++)
+			free(zBuf->buf[y][x]);
+		free(zBuf->buf[y]);
+	}
+
+	free(zBuf->buf);
+	free(zBuf);
 }
 
 void clearZBuffer(ZBuffer_t *zBuf){
@@ -101,7 +126,7 @@ ZBuffer_t *readZBufferFromFile(const char *filePath){
 	if(width != g_screenWidth || height != g_screenHeight)
 		return NULL;
 
-	ZBuffer_t *zBuf = malloc(sizeof(ZBuffer_t));
+	ZBuffer_t *zBuf = createZBuffer();
 
 	int y, x;
 	for(y = 0; y < g_screenHeight; y++)
@@ -121,6 +146,7 @@ void writeZBufferToFile(ZBuffer_t *zBuf, const char *filePath){
 	strcpy(fullFilePath, TEST_FILE_DIR);
 	strcat(fullFilePath, filePath);
 	FILE *file = fopen(fullFilePath, "w");
+	free(fullFilePath);
 
 	fprintf(file, "%d, %d:", g_screenWidth, g_screenHeight);
 	int y, x;
@@ -147,4 +173,4 @@ static void drawPixel(int x, int y, int color){
 	Uint8 * pixelAddress = (Uint8 *)g_screen->pixels + y * g_screen->pitch +
 		x * g_screen->format->BytesPerPixel;
 	*(Uint32 *)pixelAddress = color;
-}
+};

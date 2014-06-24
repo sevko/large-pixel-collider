@@ -53,8 +53,7 @@
 	DRAW_PIXEL_VA_MACRO(__VA_ARGS__, plotPixel2, plotPixel1)(__VA_ARGS__)
 
 typedef struct {
-	// 3D representation of each pixel's current height/color.
-	double buf[768][1366][2];
+	double ***buf; // 3D representation of each pixel's current height/color.
 } ZBuffer_t;
 
 /*!
@@ -107,6 +106,13 @@ int writeScreen(const char * const filename);
  * @return The new ::ZBuffer_t.
 */
 ZBuffer_t *createZBuffer(void);
+
+/*
+ * @brief Deallocate a ::ZBuffer_t.
+ *
+ * @param zBuf A buffer.
+*/
+void freeZBuffer(ZBuffer_t *zBuf);
 
 /*
  * @brief Zero out a ::ZBuffer_t::buf.
