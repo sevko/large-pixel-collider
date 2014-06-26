@@ -29,7 +29,6 @@ void configureScreen(void){
 	g_screenWidth = (int)(screen->width * 0.6);
 	g_screenHeight = (int)(screen->height * 0.8);
 	XCloseDisplay(display);
-	printf("%d,%d\n", g_screenWidth, g_screenHeight);
 
 	if((SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) == -1))
 		FATAL("Could not initialize SDL: %s.\n", SDL_GetError());

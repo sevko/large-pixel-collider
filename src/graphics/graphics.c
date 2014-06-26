@@ -39,7 +39,7 @@
 	})
 
 // The exponential rate at which specular light diffuses.
-#define SPECULAR_FADE_CONSTANT 120
+#define SPECULAR_FADE_CONSTANT 100
 
 /*
  * @brief Convert an ::RGB_t to an int.
@@ -50,6 +50,7 @@
  *      0xRRGGBB.
 */
 static inline unsigned int rgbToInt(RGB_t *color);
+
 /*
  * @brief Return the inverse slope of a line.
  *
@@ -232,16 +233,21 @@ RGB_t *lightColor(Point_t *vertex, Point_t *surfaceNorm){
 	);
 
 	// unsigned int sum = ambientLight + diffuseLight + specularLight;
-	RGB_t *sum = malloc(3 * sizeof(RGB_t));
-	sum[R] = ambientLight[R] + diffuseLight[R] + specularLight[R];
-	sum[G] = ambientLight[G] + diffuseLight[G] + specularLight[G];
-	sum[B] = ambientLight[B] + diffuseLight[B] + specularLight[B];
+	int sum[3] = {
+		ambientLight[R] + diffuseLight[R] + specularLight[R],
+		ambientLight[G] + diffuseLight[G] + specularLight[G],
+		ambientLight[B] + diffuseLight[B] + specularLight[B]
+	};
 
-	int col;
-	for(col = 0; col < 3; col++)
-		if(0xFF < sum[col])
-			sum[col] = 0xFF;
-	return sum;
+	RGB_t *resultColor = malloc(3 * sizeof(RGB_t));
+	int colorThird;
+	for(colorThird = 0; colorThird < 3; colorThird++){
+		if(0xFF < sum[colorThird])
+			sum[colorThird] = 0xFF;
+		resultColor[colorThird] = sum[colorThird];
+	}
+
+	return resultColor;
 }
 
 static inline unsigned int rgbToInt(RGB_t *color){

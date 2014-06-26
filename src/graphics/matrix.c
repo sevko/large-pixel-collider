@@ -138,7 +138,7 @@ void multiplyMatrices(int numMatrices, ...){
 	va_list matrices;
 	va_start(matrices, numMatrices);
 
-	Matrix_t ** multiplicands = malloc((numMatrices - 1) * sizeof(Matrix_t *));
+	Matrix_t **multiplicands = malloc((numMatrices - 1) * sizeof(Matrix_t *));
 
 	int arg;
 	for(arg = 0; arg < numMatrices - 1; arg++)

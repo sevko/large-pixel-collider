@@ -96,7 +96,7 @@ static void argumentHandler(int argc, char * argv[]){
 		}
 
 		else
-			FATAL("Argument not recognized.");
+			FATAL("Argument `%s` not recognized.", argv[1]);
 	}
 	else
 		test();

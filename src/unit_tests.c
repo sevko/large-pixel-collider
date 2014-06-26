@@ -525,8 +525,8 @@ static int testZBuffering(void){
 }
 
 static int testLighting(void){
-	RGB_t *rgb = lightColor(POINT(10, 50, 30), NORMALIZE(POINT(3, -4, 9)));
-	int equal = rgb[R] == 0 && rgb[G] == 0 && rgb[B] == 77;
+	RGB_t *rgb = lightColor(POINT(4.829418, -99.829080, 173.387531), POINT(0.007227, -0.955292, -0.295575, 0.000000));
+	int equal = rgb[R] == 233 && rgb[G] == 233 && rgb[B] == 255;
 	free(rgb);
 	return equal;
 }
@@ -555,7 +555,7 @@ int unitTests(void){
 		printf("%sBegin unit tests.%s\n\n", TERM_COLOR_HEADER,
 			TERM_COLOR_NORMAL);
 	else
-		puts("Begin unit tests.\n");
+		puts("Begin unit tests. Use a color-terminal for colorized output.\n");
 
 	TEST(testMultiplyScalar());
 	TEST(testMultiplyMatrices());

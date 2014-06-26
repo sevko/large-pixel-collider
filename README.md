@@ -27,6 +27,7 @@ and features are included:
  * z-buffering
  * a custom scripting language, `MDL`, with a `Lex`/`Yacc`parser and
     interpreter
+ * Goraud shading
  * a unit-testing suite
 
 [SDL]: http://www.libsdl.org/

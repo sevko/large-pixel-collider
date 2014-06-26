@@ -65,13 +65,13 @@
  * @param g (int) The green color value.
  * @param b (int) The blue color value.
 */
-#define RGB(r, g, b) ((int []){r, g, b})
+#define RGB(r, g, b) ((RGB_t []){r, g, b})
 
 #define R 0 // The index of the red color value in a ::RGB_t *.
 #define G 1 // The index of the green color value in a ::RGB_t *.
 #define B 2 // The index of the blue color value in a ::RGB_t *.
 
-typedef int RGB_t; // Used to represent RGB color values.
+typedef unsigned char RGB_t; // Used to represent RGB color values.
 
 // Represents a light.
 typedef struct {
