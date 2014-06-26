@@ -21,14 +21,15 @@ ZBuffer_t *g_zbuffer = NULL; // The screen's z-buffer.
  * @param y The y-coordinate of the pixel.
  * @param color The color of the pixel.
 */
-static void drawPixel(int x, int y, int color);
+static inline void drawPixel(int x, int y, int color);
 
 void configureScreen(void){
 	Display *display = XOpenDisplay(NULL);
 	Screen *screen = DefaultScreenOfDisplay(display);
-	g_screenWidth = screen->width;
-	g_screenHeight = screen->height;
+	g_screenWidth = (int)(screen->width * 0.6);
+	g_screenHeight = (int)(screen->height * 0.8);
 	XCloseDisplay(display);
+	printf("%d,%d\n", g_screenWidth, g_screenHeight);
 
 	if((SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) == -1))
 		FATAL("Could not initialize SDL: %s.\n", SDL_GetError());
@@ -60,7 +61,7 @@ void renderScreen(void){
 
 void clearScreen(void){
 	clearZBuffer(g_zbuffer);
-	SDL_FillRect(g_screen, NULL, 0x000000);
+	// SDL_FillRect(g_screen, NULL, 0x000000);
 }
 
 void quitScreen(void){
@@ -169,7 +170,7 @@ int equalZBuffers(ZBuffer_t *zBuf1, ZBuffer_t *zBuf2){
 	return 1;
 }
 
-static void drawPixel(int x, int y, int color){
+static inline void drawPixel(int x, int y, int color){
 	Uint8 * pixelAddress = (Uint8 *)g_screen->pixels + y * g_screen->pitch +
 		x * g_screen->format->BytesPerPixel;
 	*(Uint32 *)pixelAddress = color;

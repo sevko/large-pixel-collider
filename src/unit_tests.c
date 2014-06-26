@@ -494,7 +494,6 @@ static int testDrawHorizontalGradientLine(void){
 			.pos = POINT(100, 0, 0)
 		}
 	);
-	writeZBufferToFile(g_zbuffer, "testDrawHorizontalGradientLine.csv");
 	ASSERT_EQUAL_SCREEN("testDrawHorizontalGradientLine.csv");
 }
 
@@ -546,11 +545,11 @@ static void configureTestingEnvironment(){
 int unitTests(void){
 	configureTestingEnvironment();
 
-	int exitStatus = 0,
-		hasColors = true;
-	// initscr();
-	// int hasColors = has_colors();
-	// endwin();
+	int exitStatus = 0;
+	initscr();
+	int hasColors = has_colors();
+	endwin();
+	setvbuf(stdout, NULL, _IONBF, 0);
 
 	if(hasColors)
 		printf("%sBegin unit tests.%s\n\n", TERM_COLOR_HEADER,

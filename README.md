@@ -11,6 +11,7 @@ A proof-of-concept graphics engine, implemented in `C`.
  * `make install` : install all of the engine's dependencies, which are:
 	* [SDL][SDL]
 	* [ncurses][ncurses]
+	* [Xlib][Xlib]
 
 ### features
 This project implements a rudimentary graphics engine from the ground up, using
@@ -30,5 +31,6 @@ and features are included:
 
 [SDL]: http://www.libsdl.org/
 [ncurses]: http://www.gnu.org/software/ncurses/
+[Xlib]:http://en.wikipedia.org/wiki/Xlib
 [travis_status]: (https://travis-ci.org/sevko/graphics-engine)
 [travis_image]: https://travis-ci.org/sevko/graphics-engine.svg?branch=master

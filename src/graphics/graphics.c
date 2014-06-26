@@ -29,17 +29,17 @@
 		}\
 		\
 		double divisor = 1.0 / (l2->pos[axis] - l1->pos[axis]),\
-			colCoef1 = l2->pos[axis] - guide[axis],\
-			colCoef2 = guide[axis] - l1->pos[axis];\
+			colCoef1 = divisor * (l2->pos[axis] - guide[axis]),\
+			colCoef2 = divisor * (guide[axis] - l1->pos[axis]);\
 		RGB(\
-			divisor * (colCoef1 * l1->color[R] + colCoef2 * l2->color[R]),\
-			divisor * (colCoef1 * l1->color[G] + colCoef2 * l2->color[G]),\
-			divisor * (colCoef1 * l1->color[B] + colCoef2 * l2->color[B])\
+			colCoef1 * l1->color[R] + colCoef2 * l2->color[R],\
+			colCoef1 * l1->color[G] + colCoef2 * l2->color[G],\
+			colCoef1 * l1->color[B] + colCoef2 * l2->color[B]\
 		);\
 	})
 
 // The exponential rate at which specular light diffuses.
-#define SPECULAR_FADE_CONSTANT 200
+#define SPECULAR_FADE_CONSTANT 120
 
 /*
  * @brief Convert an ::RGB_t to an int.
@@ -49,7 +49,7 @@
  * @return An int representing the RGB values stored in @p color, in the form:
  *      0xRRGGBB.
 */
-static unsigned int rgbToInt(RGB_t *color);
+static inline unsigned int rgbToInt(RGB_t *color);
 /*
  * @brief Return the inverse slope of a line.
  *
@@ -59,7 +59,7 @@ static unsigned int rgbToInt(RGB_t *color);
  * @return The inverse slope (delta x)/(delta y) of the line formed by endpoints
  *      @p p1 and @p p2.
 */
-static double inverseSlope(Point_t *p1, Point_t *p2);
+static inline double inverseSlope(Point_t *p1, Point_t *p2);
 
 void (drawLine)(Point_t *p1, Point_t *p2, int color){
 	p1 = COPY_POINT(p1);
@@ -111,7 +111,8 @@ void drawHorizontalGradientLine(Light_t *light1, Light_t *light2){
 	Point_t *guide = COPY_POINT(light1->pos);
 
 	while(guide[X] < light2->pos[X]){
-		plotPixel(guide, rgbToInt(INTERPOLATE_COLOR(light1, light2, guide, X)));
+		plotPixel(
+				guide, rgbToInt(INTERPOLATE_COLOR(light1, light2, guide, X)));
 		guide[X]++;
 	}
 }
@@ -222,7 +223,8 @@ RGB_t *lightColor(Point_t *vertex, Point_t *surfaceNorm){
 	};
 	Point_t *view = POINT(0, 0, 1, 0);
 	Point_t *sLightVector = NORMALIZE(SUB_POINT(vertex, specularSource.pos));
-	double specularDot = pow(dotProduct(view, sLightVector), SPECULAR_FADE_CONSTANT);
+	double specularDot = pow(
+			dotProduct(view, sLightVector), SPECULAR_FADE_CONSTANT);
 	RGB_t *specularLight = (specularDot < 0)?RGB(0, 0, 0):RGB(
 		specularSource.color[R] * specularDot,
 		specularSource.color[G] * specularDot,
@@ -242,14 +244,14 @@ RGB_t *lightColor(Point_t *vertex, Point_t *surfaceNorm){
 	return sum;
 }
 
-static unsigned int rgbToInt(RGB_t *color){
+static inline unsigned int rgbToInt(RGB_t *color){
 	if(0xFFFFFF < ((color[R] << 4 * 4) & (color[G] << 4 * 2) & color[B]))
 		FATAL("Stop: %X, %X, %X", color[R], color[G], color[B]);
 
 	return (color[R] << 4 * 4) + (color[G] << 4 * 2) + color[B];
 }
 
-static double inverseSlope(Point_t *p1, Point_t *p2){
+static inline double inverseSlope(Point_t *p1, Point_t *p2){
 	double deltaY = p1[Y] - p2[Y];
 	return (deltaY != 0)?(p1[X] - p2[X]) / (deltaY):0;
 }
