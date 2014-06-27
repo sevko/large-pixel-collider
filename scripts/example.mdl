@@ -1,0 +1,9 @@
+// display a torus spinning 360 degrees through the z-axis.
+frames 360
+vary angle 0 359 0 1
+
+rotate x 60
+rotate y 60
+rotate z 360 angle
+torus 0 0 0 100 200
+display

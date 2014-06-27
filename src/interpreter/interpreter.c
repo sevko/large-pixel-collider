@@ -207,7 +207,6 @@ void evaluateMDLScript(){
 			}
 		}
 
-		usleep(1e6 / 20);
 		clearScreen();
 		freeMatrix(points);
 		freeStack(coordStack, &freeMatrixFromVoid);
@@ -235,7 +234,7 @@ static VariableGradient_t * createGradient(int startFrame, int endFrame,
 		FATAL("The ending frame must be less than the number of frames.");
 	else if(endFrame < startFrame)
 		FATAL("The ending frame must be greater than or equal to the starting"
-				"frame.");
+				" frame.");
 
 	VariableGradient_t * gradient = malloc(sizeof(VariableGradient_t));
 	gradient->name = varName;
