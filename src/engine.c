@@ -27,20 +27,9 @@
 #define SCRIPT_CMD "--script"
 
 /*
- *  @brief Establish a signal handler for the argument signal.
- *
- *  Establish a signal handler, or custom response to, a given signal. The only
- *  current handler exits the engine successfully (with an error code of 0) on
- *  a SIGINT.
- *
- *  @param sig The integer value of the signal.
- */
-static void sigHandler(int sig);
-
-/*
- *  @brief Establish signal handlers and perform setup before the engine starts.
- */
-static void setup(void);
+ * @brief Display a sample animation.
+*/
+static void sampleAnimation();
 
 /*
  *  @brief Handle command-line arguments.
@@ -59,7 +48,23 @@ static void setup(void);
  */
 static void argumentHandler(int argc, char * argv[]);
 
-void test(){
+/*
+ *  @brief Establish a signal handler for the argument signal.
+ *
+ *  Establish a signal handler, or custom response to, a given signal. The only
+ *  current handler exits the engine successfully (with an error code of 0) on
+ *  a SIGINT.
+ *
+ *  @param sig The integer value of the signal.
+ */
+static void sigHandler(int sig);
+
+/*
+ *  @brief Establish signal handlers and perform setup before the engine starts.
+ */
+static void setup(void);
+
+static void sampleAnimation(){
 	configureScreen();
 	Matrix_t *pts = createMatrix();
 	addTorus(pts, POINT(0, 0), 100, 200);
@@ -99,7 +104,7 @@ static void argumentHandler(int argc, char * argv[]){
 			FATAL("Argument `%s` not recognized.", argv[1]);
 	}
 	else
-		test();
+		sampleAnimation();
 }
 
 static void sigHandler(int sig){

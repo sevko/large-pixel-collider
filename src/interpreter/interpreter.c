@@ -207,7 +207,6 @@ void evaluateMDLScript(){
 			}
 		}
 
-		usleep(1e6 / 20);
 		clearScreen();
 		freeMatrix(points);
 		freeStack(coordStack, &freeMatrixFromVoid);
