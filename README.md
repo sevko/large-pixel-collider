@@ -1,8 +1,16 @@
-# graphics engine
+# the large pixel collider
 
 [![Build Status][travis_image]][travis_status]
 
-A proof-of-concept graphics engine, implemented in `C`.
+The **large pixel collider** is a proof-of-concept graphics engine, implemented in `C`. The following sample animations
+display some of its functionality:
+
+---
+
+[![Sample animation](animations/200x200/1.gif)](animations/600x600/1.gif)
+[![Sample animation](animations/200x200/2.gif)](animations/600x600/2.gif)
+[![Sample animation](animations/200x200/3.gif)](animations/600x600/3.gif)
+[![Sample animation](animations/200x200/4.gif)](animations/600x600/4.gif)
 
 ### compilation/installation
  * `make all` : compile the engine.
