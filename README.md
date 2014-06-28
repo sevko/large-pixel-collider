@@ -7,10 +7,10 @@ display some of its functionality:
 
 ---
 
-[![Sample animation](animations/200x200/1.gif)](animations/600x600/1.gif)
-[![Sample animation](animations/200x200/2.gif)](animations/600x600/2.gif)
-[![Sample animation](animations/200x200/3.gif)](animations/600x600/3.gif)
-[![Sample animation](animations/200x200/4.gif)](animations/600x600/4.gif)
+[![Sample animation](animations/170x170/1.gif)](animations/600x600/1.gif)
+[![Sample animation](animations/170x170/2.gif)](animations/600x600/2.gif)
+[![Sample animation](animations/170x170/3.gif)](animations/600x600/3.gif)
+[![Sample animation](animations/170x170/4.gif)](animations/600x600/4.gif)
 
 ### compilation/installation
  * `make all` : compile the engine.
