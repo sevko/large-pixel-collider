@@ -63,7 +63,7 @@ run: all kill
 	fi
 
 test: all
-	@bin/engine --test
+	@./$(PROJECT_NAME) --test
 
 kill:
 	@if [ "$(shell pgrep $(PROJECT_NAME))" != "" ]; then \
