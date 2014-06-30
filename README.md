@@ -13,15 +13,21 @@ display some of its functionality:
 [![Sample animation](animations/170x170/4.gif)](animations/600x600/4.gif)
 
 ### compilation/installation
- * `make all` : compile the engine.
- * `make test` : run unit tests
+ * `make all`, or `./large_pixel_collider` : compile the engine.
+ * `make test`, or `./large_pixel_collider --test` : run unit tests
  * `make run` : render a sample animation.
- * `make run SCRIPT_FILE=path/to/script` : execute the contents of a script file.
+ * `make run SCRIPT_FILE=path/to/script`, or `./large_pixel_collider --script /path/to/script` :
+    execute the contents of a script file.
  * `make clean` : delete compiled binaries
  * `make install` : install all of the engine's dependencies, which are:
 	* [SDL][SDL]
 	* [ncurses][ncurses]
 	* [Xlib][Xlib]
+
+You can also invoke the executable directly, with:
+ *  : run a sample animation.
+ * : run unit-tests
+ * : run unit-tests
 
 ### features
 This project implements a rudimentary graphics engine from the ground up, using
