@@ -1,10 +1,10 @@
 SCRIPT_FILE =
-PROJECT_NAME = engine
+PROJECT_NAME = large_pixel_collider
 FLAGS = -Wall -Wextra -Wunreachable-code -I ./
 LIBS = -lm $(shell sdl-config --libs) -lncurses -lX11
 C_COMPILER = gcc $(FLAGS)
 
-CC = @echo "\tCC $@" && $(C_COMPILER)
+CC = @echo "\tcc $@" && $(C_COMPILER)
 SHELL_TERMINAL = gnome-terminal --title="Graphics Engine: Shell" \
 	--geometry=78x49+1000 --profile=Default -e
 
@@ -18,14 +18,14 @@ all: FLAGS += -Ofast
 
 .PHONY: all debug run test kill clean install
 
-all: bin bin/$(PROJECT_NAME)
+all: bin $(PROJECT_NAME)
 
-debug: bin bin/$(PROJECT_NAME)
+debug: bin $(PROJECT_NAME)
 
 bin:
 	@mkdir $@
 
-bin/$(PROJECT_NAME): $(PARSER_DEP) $(OBJ)
+$(PROJECT_NAME): $(PARSER_DEP) $(OBJ)
 	$(CC) -o $@ $^ $(LIBS)
 
 bin/%.o: src/%.c
@@ -57,13 +57,13 @@ bin/screen.o: src/graphics/screen.c
 
 run: all kill
 	@if [ "$(SCRIPT_FILE)" != "" ]; then \
-		bin/$(PROJECT_NAME) --script $(SCRIPT_FILE); \
+		./$(PROJECT_NAME) --script $(SCRIPT_FILE); \
 	else \
-		bin/$(PROJECT_NAME); \
+		./$(PROJECT_NAME); \
 	fi
 
 test: all
-	@bin/engine --test
+	@./$(PROJECT_NAME) --test
 
 kill:
 	@if [ "$(shell pgrep $(PROJECT_NAME))" != "" ]; then \
@@ -72,6 +72,7 @@ kill:
 
 clean:
 	@rm -rf bin
+	rm $(PROJECT_NAME)
 
 install:
 	@sh install.sh
