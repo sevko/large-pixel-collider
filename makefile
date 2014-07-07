@@ -71,8 +71,7 @@ kill:
 	fi
 
 clean:
-	@rm -rf bin
-	rm $(PROJECT_NAME)
+	@rm -rf bin $(PROJECT_NAME)
 
 install:
 	@sh install.sh

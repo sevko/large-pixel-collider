@@ -24,11 +24,6 @@ display some of its functionality:
 	* [ncurses][ncurses]
 	* [Xlib][Xlib]
 
-You can also invoke the executable directly, with:
- *  : run a sample animation.
- * : run unit-tests
- * : run unit-tests
-
 ### features
 This project implements a rudimentary graphics engine from the ground up, using
 the `SDL` graphics library only for per-pixel access. The following algorithms
