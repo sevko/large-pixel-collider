@@ -7,6 +7,8 @@ C_COMPILER = gcc $(FLAGS)
 CC = @echo "\tcc $@" && $(C_COMPILER)
 SHELL_TERMINAL = gnome-terminal --title="Graphics Engine: Shell" \
 	--geometry=78x49+1000 --profile=Default -e
+EXT_DEP = libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev \
+	libsdl-ttf2.0-dev libncurses5-dev bison flex
 
 PARSER_DEP = bin/y.tab.o bin/lex.yy.o
 SRC = $(shell find src lib -name "*.c" -printf "%p ")
@@ -74,4 +76,4 @@ clean:
 	@rm -rf bin $(PROJECT_NAME)
 
 install:
-	@sh install.sh
+	@echo "y" | sudo apt-get install $(EXT_DEP)
