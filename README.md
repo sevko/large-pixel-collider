@@ -23,6 +23,8 @@ display some of its functionality:
 	* [SDL][SDL]
 	* [ncurses][ncurses]
 	* [Xlib][Xlib]
+	* [flex][flex]
+	* [bison][bison]
 
 ### features
 This project implements a rudimentary graphics engine from the ground up, using
@@ -36,7 +38,7 @@ and features are included:
  * backface culling
  * scanline fills
  * z-buffering
- * a custom scripting language, `MDL`, with a `Lex`/`Yacc`parser and
+ * a custom scripting language, `MDL`, with a `flex`/`bison` parser and
     interpreter
  * Goraud shading
  * a unit-testing suite
@@ -133,5 +135,7 @@ different modifier values that change the resultant image.
 [SDL]: http://www.libsdl.org/
 [ncurses]: http://www.gnu.org/software/ncurses/
 [Xlib]:http://en.wikipedia.org/wiki/Xlib
+[flex]: http://flex.sourceforge.net/
+[bison]: http://www.gnu.org/software/bison/
 [travis_status]: (https://travis-ci.org/sevko/graphics-engine)
 [travis_image]: https://travis-ci.org/sevko/large-pixel-collider.svg
